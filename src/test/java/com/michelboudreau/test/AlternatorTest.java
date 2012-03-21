@@ -1,19 +1,17 @@
 package com.michelboudreau.test;
 
 
-import com.michelboudreau.alternator.AlternatorDB;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.apache.commons.logging.LogFactory;
 
 public class AlternatorTest {
 
     private RedisTemplate<String, String> template;
-    private AlternatorDB dao;
+    private AlternatorDBClient dao;
 
     @Before
     public void setUp() throws Exception {
@@ -26,7 +24,7 @@ public class AlternatorTest {
         redtemp.setConnectionFactory(factory);
         this.template = redtemp;
         this.template.afterPropertiesSet();
-        dao = new AlternatorDB(template);
+        dao = new AlternatorDBClient(template);
     }
 
     @After
