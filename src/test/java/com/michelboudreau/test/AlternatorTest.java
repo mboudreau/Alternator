@@ -1,6 +1,7 @@
 package com.michelboudreau.test;
 
 
+
 import com.michelboudreau.alternator.AlternatorDB;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.junit.After;
@@ -14,6 +15,7 @@ public class AlternatorTest {
 
     private RedisTemplate<String, String> template;
     private AlternatorDB dao;
+
 
     @Before
     public void setUp() throws Exception {
