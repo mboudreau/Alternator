@@ -16,6 +16,7 @@ public class Element {
     private String rangeKey;
     private HashMap<String,String> attributes;
     
+    
     public Element(Table table,String hashKey,String rangeKey,HashMap<String,String> map){
         this.hashKey = hashKey;
         this.rangeKey = rangeKey;
