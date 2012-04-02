@@ -10,14 +10,15 @@ import java.util.HashMap;
  *
  * @author thomasbredillet
  */
-public class Element {
+public class Item {
     private Table table;
     private String hashKey;
     private String rangeKey;
+    boolean hasRangeKey;
     private HashMap<String,String> attributes;
     
     
-    public Element(Table table,String hashKey,String rangeKey,HashMap<String,String> map){
+    public Item(Table table,String hashKey,String rangeKey,HashMap<String,String> map){
         this.hashKey = hashKey;
         this.rangeKey = rangeKey;
         this.table = table;

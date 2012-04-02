@@ -4,8 +4,6 @@
  */
 package com.michelboudreau.db;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -13,31 +11,92 @@ import java.util.List;
  * @author thomasbredillet
  */
 public class Table {
+
+    private String hashKey;
+    private String rangeKey;
+    private boolean hasRangeKey;
+    private List<String> attributes;
+    private List<Item> items;
     private String name;
-    private String hashKeyName;
-    private String rangeKeyName;
-    private String[] attributesNames;
-    private List<Element> elements;
-    
-  public Table(String name,String hashKeyName,String rangeKeyName,String[] attributesNames) {
-      this.rangeKeyName = rangeKeyName;
-      this.hashKeyName = hashKeyName;
-      this.attributesNames = attributesNames;
-      this.name = name;
-      elements = new ArrayList<Element>();
-  } 
-  
-   public Table(String name,String hashKeyName,String[] attributesNames) {
-      rangeKeyName = null;
-      this.hashKeyName = hashKeyName;
-      this.attributesNames = attributesNames;
-      this.name = name;
-  }
-   
-  public void addElement(String hashKey, String rangeKey,HashMap<String,String> map) {
-      Element element = new Element(this,hashKey,rangeKey,map);
-        getElements().add(element);
-  }
+
+    public Table(String hashKey, String rangeKey, String name){
+        this.hashKey = hashKey;
+        this.rangeKey = rangeKey;
+        this.name = name;
+    }
+    public void removeItem(Item item) {
+        items.remove(item);
+    }
+
+    /**
+     * @return the hashKey
+     */
+    public String getHashKey() {
+        return hashKey;
+    }
+
+    /**
+     * @param hashKey the hashKey to set
+     */
+    public void setHashKey(String hashKey) {
+        this.hashKey = hashKey;
+    }
+
+    /**
+     * @return the rangeKey
+     */
+    public String getRangeKey() {
+        return rangeKey;
+    }
+
+    /**
+     * @param rangeKey the rangeKey to set
+     */
+    public void setRangeKey(String rangeKey) {
+        this.rangeKey = rangeKey;
+    }
+
+    /**
+     * @return the hasRangeKey
+     */
+    public boolean isHasRangeKey() {
+        return hasRangeKey;
+    }
+
+    /**
+     * @param hasRangeKey the hasRangeKey to set
+     */
+    public void setHasRangeKey(boolean hasRangeKey) {
+        this.hasRangeKey = hasRangeKey;
+    }
+
+    /**
+     * @return the attributes
+     */
+    public List<String> getAttributes() {
+        return attributes;
+    }
+
+    /**
+     * @param attributes the attributes to set
+     */
+    public void setAttributes(List<String> attributes) {
+        this.attributes = attributes;
+    }
+
+    /**
+     * @return the items
+     */
+    public List<Item> getItems() {
+        return items;
+    }
+
+    /**
+     * @param items the items to set
+     */
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
 
     /**
      * @return the name
@@ -52,61 +111,4 @@ public class Table {
     public void setName(String name) {
         this.name = name;
     }
-
-    /**
-     * @return the hashKeyName
-     */
-    public String getHashKeyName() {
-        return hashKeyName;
-    }
-
-    /**
-     * @param hashKeyName the hashKeyName to set
-     */
-    public void setHashKeyName(String hashKeyName) {
-        this.hashKeyName = hashKeyName;
-    }
-
-    /**
-     * @return the rangeKeyName
-     */
-    public String getRangeKeyName() {
-        return rangeKeyName;
-    }
-
-    /**
-     * @param rangeKeyName the rangeKeyName to set
-     */
-    public void setRangeKeyName(String rangeKeyName) {
-        this.rangeKeyName = rangeKeyName;
-    }
-
-    /**
-     * @return the attributesNames
-     */
-    public String[] getAttributesNames() {
-        return attributesNames;
-    }
-
-    /**
-     * @param attributesNames the attributesNames to set
-     */
-    public void setAttributesNames(String[] attributesNames) {
-        this.attributesNames = attributesNames;
-    }
-
-    /**
-     * @return the elements
-     */
-    public List<Element> getElements() {
-        return elements;
-    }
-
-    /**
-     * @param elements the elements to set
-     */
-    public void setElements(List<Element> elements) {
-        this.elements = elements;
-    }
-          
 }
