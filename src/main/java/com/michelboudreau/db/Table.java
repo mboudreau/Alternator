@@ -4,6 +4,7 @@
  */
 package com.michelboudreau.db;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,10 +20,17 @@ public class Table {
     private List<Item> items;
     private String name;
 
+    public Table(){
+        
+    }
     public Table(String hashKey, String rangeKey, String name){
         this.hashKey = hashKey;
         this.rangeKey = rangeKey;
         this.name = name;
+        this.items = new ArrayList<Item>();
+    }
+    public void addItem(Item item){
+        items.add(item);
     }
     public void removeItem(Item item) {
         items.remove(item);

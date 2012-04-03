@@ -1,0 +1,1 @@
+{"tables":[],"oldRequest":"{\"TableName\":\"Activity\",\"Item\":{\"id\":{\"S\":\"sefsef\"},\"de\":{\"S\":\"afaf\"},\"ty\":{\"S\":\"ad\"},\"etr\":{\"S\":\"adad\"},\"n\":{\"S\":\"faadadaddadafa\"}},\"Expected\":{}}{\"TableName\":\"Activity\",\"Key\":{\"HashKeyElement\":{\"S\":\"sefsef\"}},\"ConsistentRead\":false}\nnull\n"}

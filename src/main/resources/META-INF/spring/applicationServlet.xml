@@ -23,4 +23,6 @@
         <context:include-filter expression="org.springframework.stereotype.Controller" type="annotation"/>
     </context:component-scan>
 
+    <mvc:annotation-driven conversion-service="conversionService"/>
+    <bean id="conversionService" class="com.michelboudreau.utils.ConversionServiceFactory"/>
 </beans>
