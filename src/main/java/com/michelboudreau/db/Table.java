@@ -33,6 +33,16 @@ public class Table {
         this.rangeKeyType = rangeKeyType;
         this.hashKeyType = hashKeyType;
     }
+    
+    public List<Item>  getItemsWithKey(String hashKey){
+        List<Item> res = new ArrayList<Item>();
+        for(Item item : this.items){
+            if(hashKey.equals(item.getAttributes().get(item.getHashKey()))){
+                res.add(item);
+            }
+        }
+        return res;
+    }
     public void addItem(Item item){
         items.add(item);
     }
