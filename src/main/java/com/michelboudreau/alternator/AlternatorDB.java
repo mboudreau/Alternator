@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +29,6 @@ public class AlternatorDB {
     private List<Table> tables = new ArrayList<Table>();
     Logger logger = LoggerFactory.getLogger(AlternatorDB.class);
 
-    private String oldRequest="";
-    
     public AlternatorDB() {
     }
 
@@ -40,17 +39,23 @@ public class AlternatorDB {
             ObjectMapper mapper = new ObjectMapper();
             JsonFactory factory = mapper.getJsonFactory();
             JsonParser jp = factory.createJsonParser(data);
-            JsonNode actualObj = mapper.readTree(jp);
-            if ("put_item".equals(type)) {
-                putItem(actualObj);
-            } else if ("get_item".equals(type)) {
-                return getItem(actualObj);
-            } else if ("query".equals(type)) {
-            } else if ("scan".equals(type)) {
-                return scan(actualObj);
-            } else if ("create_table".equals(type)) {
-                createTable(actualObj);
+            JsonNode actualObj = null;
+            while (jp.nextToken() != null) {
+                actualObj = mapper.readTree(jp);
             }
+                System.out.println("Request treated : " + actualObj.toString());
+                if ("put_item".equals(type)) {
+                    putItem(actualObj);
+                } else if ("get_item".equals(type)) {
+                    return getItem(actualObj);
+                } else if ("query".equals(type)) {
+                } else if ("scan".equals(type)) {
+                    return scan(actualObj);
+                } else if ("create_table".equals(type)) {
+                    createTable(actualObj);
+                }
+
+
             return null;
         } catch (IOException e) {
             logger.debug("request wasn't handled correctly : " + e);
@@ -59,32 +64,47 @@ public class AlternatorDB {
     }
 
     public Map<String, Object> scan(JsonNode data) {
-        List<Item> result = new ArrayList<Item>();
+        List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
+        Map<String, Object> map = new HashMap<String, Object>();
         try {
             String tableName = data.path("TableName").getTextValue();
             String limit = null;
             if (!data.path("limit").isNull()) {
                 limit = "" + data.path("limit").getIntValue();
             }
-            if (!data.path("ScanFilter").isNull()) {
-                if (!data.path("ScanFilter").isNull()) {
+            if (data.path("ScanFilter").getTextValue() != null) {
+                if (getTable(tableName).isHasRangeKey()) {
                     String comparator = data.path("ScanFilter").path("ComparisonOperator").getTextValue();
                     String rangeKey = tableGetRangeKey(tableName);
+                    String rangeKeyType = getTable(tableName).getRangeKeyType();
                     if ("BETWEEN".equals(comparator)) {
                         String lowerBound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
                         String upperBound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(1).getTextValue();
                         for (Item itm : getTable(tableName).getItems()) {
-//                           if ((lowerBound.compareTo(itm.getAttributes().get(itm.getRangeKey())) < 0) && (upperBound.compareTo(itm.getAttributes().get(itm.getRangeKey())) > 0)) {
-//                                result.add(itm);
-//                            }
+                            if ((lowerBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0) && (upperBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
+                                result.add(itm.getAttributes());
+                            }
                         }
                     }
+                } else {
+                    throw new RuntimeException("RangeKeyCondition with no rangekey on the table");
                 }
+            } else {
+                for (Item itm : getTable(tableName).getItems()) {
+                    result.add(itm.getAttributes());
+                }
+
             }
+            map.put("ConsumedCapacityUnits", 1);
+            map.put("Count", 0);
+            map.put("ScannedCount", 1);
+            map.put("Items", result);
+
         } catch (RuntimeException e) {
             logger.debug("table wasn't created correctly : " + e);
         }
-        return null;
+        System.out.println(map.toString());
+        return map;
     }
 
     public void createTable(JsonNode data) {
@@ -93,13 +113,15 @@ public class AlternatorDB {
         String tableName = actualObj.path("TableName").getTextValue();
         String hashKey = null;
         String rangeKey = null;
-
+        String rangeKeyType = null;
         hashKey = actualObj.path("KeySchema").path("HashKeyElement").path("AttributeName").getTextValue();
+        String hashKeyType = actualObj.path("KeySchema").path("HashKeyElement").path("AttributeType").getTextValue();
         if (!actualObj.path("KeySchema").path("RangeKeyElement").path("AttributeName").isNull()) {
             rangeKey = actualObj.path("KeySchema").path("RangeKeyElement").path("AttributeName").getTextValue();
+            rangeKeyType = actualObj.path("KeySchema").path("RangeKeyElement").path("AttributeType").getTextValue();
         }
         if (getTable(tableName) == null) {
-            Table table = new Table(hashKey, rangeKey, tableName);
+            Table table = new Table(hashKey, rangeKey, tableName, hashKeyType, rangeKeyType);
             getTables().add(table);
         }
     }
@@ -113,10 +135,10 @@ public class AlternatorDB {
             while (itr.hasNext()) {
                 String attrName = itr.next().toString();
                 Map<String, String> schema = new HashMap<String, String>();
-                if (!actualObj.path("Item").path(attrName).path("S").isNull()) {
+                if (actualObj.path("Item").path(attrName).path("S").getTextValue() != null) {
                     schema.put("S", actualObj.path("Item").path(attrName).path("S").getTextValue());
                     attributes.put(attrName, schema);
-                } else if (!actualObj.path("Item").path(attrName).path("N").isNull()) {
+                } else if (actualObj.path("Item").path(attrName).path("N").getTextValue() != null) {
                     schema.put("N", actualObj.path("Item").path(attrName).path("N").getTextValue());
                     attributes.put(attrName, schema);
                 }
@@ -292,11 +314,8 @@ public class AlternatorDB {
         } catch (IOException e) {
             logger.debug("getPostData couldn't.. get the post data");  // This has happened if the request's reader is closed    
         }
-        System.out.println("Old Request : " + this.getOldRequest().substring(0, this.getOldRequest().indexOf("\n")));
-//        sb.toString().substring(, this.getOldRequest().indexOf(this.getOldRequest());
-        this.setOldRequest(sb.toString().replace(this.getOldRequest(), ""));
-        System.out.println(this.getOldRequest());
-        return this.getOldRequest();
+        System.out.println(sb.toString().substring(0, sb.toString().indexOf("\n")));
+        return sb.toString().substring(0, sb.toString().indexOf("\n"));
     }
 
     /**
@@ -320,27 +339,13 @@ public class AlternatorDB {
         return result;
     }
 
-    public HashSet<String> valuesFromAttributes(HashMap<String,Map<String,String>> map){
+    public HashSet<String> valuesFromAttributes(HashMap<String, Map<String, String>> map) {
         HashSet<String> result = new HashSet<String>();
-        for(Map<String,String> mp : map.values()){
-            for(String attr : mp.values()){
+        for (Map<String, String> mp : map.values()) {
+            for (String attr : mp.values()) {
                 result.add(attr);
             }
         }
         return result;
-    }
-
-    /**
-     * @return the oldRequest
-     */
-    public String getOldRequest() {
-        return oldRequest;
-    }
-
-    /**
-     * @param oldRequest the oldRequest to set
-     */
-    public void setOldRequest(String oldRequest) {
-        this.oldRequest = oldRequest;
     }
 }

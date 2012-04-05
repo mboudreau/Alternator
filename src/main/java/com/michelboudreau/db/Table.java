@@ -19,15 +19,19 @@ public class Table {
     private List<String> attributes;
     private List<Item> items;
     private String name;
-
+    private String rangeKeyType;
+    private String hashKeyType;
+    
     public Table(){
         
     }
-    public Table(String hashKey, String rangeKey, String name){
+    public Table(String hashKey, String rangeKey, String name, String hashKeyType, String rangeKeyType){
         this.hashKey = hashKey;
         this.rangeKey = rangeKey;
         this.name = name;
         this.items = new ArrayList<Item>();
+        this.rangeKeyType = rangeKeyType;
+        this.hashKeyType = hashKeyType;
     }
     public void addItem(Item item){
         items.add(item);
@@ -118,5 +122,33 @@ public class Table {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * @return the rangeKeyType
+     */
+    public String getRangeKeyType() {
+        return rangeKeyType;
+    }
+
+    /**
+     * @param rangeKeyType the rangeKeyType to set
+     */
+    public void setRangeKeyType(String rangeKeyType) {
+        this.rangeKeyType = rangeKeyType;
+    }
+
+    /**
+     * @return the hashKeyType
+     */
+    public String getHashKeyType() {
+        return hashKeyType;
+    }
+
+    /**
+     * @param hashKeyType the hashKeyType to set
+     */
+    public void setHashKeyType(String hashKeyType) {
+        this.hashKeyType = hashKeyType;
     }
 }
