@@ -2,7 +2,6 @@ package com.michelboudreau.test;
 
 
 
-import com.michelboudreau.alternator.AlternatorDBClient;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

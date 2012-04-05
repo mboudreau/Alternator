@@ -5,7 +5,6 @@
 package com.michelboudreau.db;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -13,31 +12,103 @@ import java.util.List;
  * @author thomasbredillet
  */
 public class Table {
+
+    private String hashKey;
+    private String rangeKey;
+    private boolean hasRangeKey;
+    private List<String> attributes;
+    private List<Item> items;
     private String name;
-    private String hashKeyName;
-    private String rangeKeyName;
-    private String[] attributesNames;
-    private List<Element> elements;
+    private String rangeKeyType;
+    private String hashKeyType;
     
-  public Table(String name,String hashKeyName,String rangeKeyName,String[] attributesNames) {
-      this.rangeKeyName = rangeKeyName;
-      this.hashKeyName = hashKeyName;
-      this.attributesNames = attributesNames;
-      this.name = name;
-      elements = new ArrayList<Element>();
-  } 
-  
-   public Table(String name,String hashKeyName,String[] attributesNames) {
-      rangeKeyName = null;
-      this.hashKeyName = hashKeyName;
-      this.attributesNames = attributesNames;
-      this.name = name;
-  }
-   
-  public void addElement(String hashKey, String rangeKey,HashMap<String,String> map) {
-      Element element = new Element(this,hashKey,rangeKey,map);
-        getElements().add(element);
-  }
+    public Table(){
+        
+    }
+    public Table(String hashKey, String rangeKey, String name, String hashKeyType, String rangeKeyType){
+        this.hashKey = hashKey;
+        this.rangeKey = rangeKey;
+        this.name = name;
+        this.items = new ArrayList<Item>();
+        this.rangeKeyType = rangeKeyType;
+        this.hashKeyType = hashKeyType;
+    }
+    public void addItem(Item item){
+        items.add(item);
+    }
+    public void removeItem(Item item) {
+        items.remove(item);
+    }
+
+    /**
+     * @return the hashKey
+     */
+    public String getHashKey() {
+        return hashKey;
+    }
+
+    /**
+     * @param hashKey the hashKey to set
+     */
+    public void setHashKey(String hashKey) {
+        this.hashKey = hashKey;
+    }
+
+    /**
+     * @return the rangeKey
+     */
+    public String getRangeKey() {
+        return rangeKey;
+    }
+
+    /**
+     * @param rangeKey the rangeKey to set
+     */
+    public void setRangeKey(String rangeKey) {
+        this.rangeKey = rangeKey;
+    }
+
+    /**
+     * @return the hasRangeKey
+     */
+    public boolean isHasRangeKey() {
+        return hasRangeKey;
+    }
+
+    /**
+     * @param hasRangeKey the hasRangeKey to set
+     */
+    public void setHasRangeKey(boolean hasRangeKey) {
+        this.hasRangeKey = hasRangeKey;
+    }
+
+    /**
+     * @return the attributes
+     */
+    public List<String> getAttributes() {
+        return attributes;
+    }
+
+    /**
+     * @param attributes the attributes to set
+     */
+    public void setAttributes(List<String> attributes) {
+        this.attributes = attributes;
+    }
+
+    /**
+     * @return the items
+     */
+    public List<Item> getItems() {
+        return items;
+    }
+
+    /**
+     * @param items the items to set
+     */
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
 
     /**
      * @return the name
@@ -54,59 +125,30 @@ public class Table {
     }
 
     /**
-     * @return the hashKeyName
+     * @return the rangeKeyType
      */
-    public String getHashKeyName() {
-        return hashKeyName;
+    public String getRangeKeyType() {
+        return rangeKeyType;
     }
 
     /**
-     * @param hashKeyName the hashKeyName to set
+     * @param rangeKeyType the rangeKeyType to set
      */
-    public void setHashKeyName(String hashKeyName) {
-        this.hashKeyName = hashKeyName;
+    public void setRangeKeyType(String rangeKeyType) {
+        this.rangeKeyType = rangeKeyType;
     }
 
     /**
-     * @return the rangeKeyName
+     * @return the hashKeyType
      */
-    public String getRangeKeyName() {
-        return rangeKeyName;
+    public String getHashKeyType() {
+        return hashKeyType;
     }
 
     /**
-     * @param rangeKeyName the rangeKeyName to set
+     * @param hashKeyType the hashKeyType to set
      */
-    public void setRangeKeyName(String rangeKeyName) {
-        this.rangeKeyName = rangeKeyName;
+    public void setHashKeyType(String hashKeyType) {
+        this.hashKeyType = hashKeyType;
     }
-
-    /**
-     * @return the attributesNames
-     */
-    public String[] getAttributesNames() {
-        return attributesNames;
-    }
-
-    /**
-     * @param attributesNames the attributesNames to set
-     */
-    public void setAttributesNames(String[] attributesNames) {
-        this.attributesNames = attributesNames;
-    }
-
-    /**
-     * @return the elements
-     */
-    public List<Element> getElements() {
-        return elements;
-    }
-
-    /**
-     * @param elements the elements to set
-     */
-    public void setElements(List<Element> elements) {
-        this.elements = elements;
-    }
-          
 }
