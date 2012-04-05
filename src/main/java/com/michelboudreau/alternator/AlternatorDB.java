@@ -49,6 +49,7 @@ public class AlternatorDB {
                 } else if ("get_item".equals(type)) {
                     return getItem(actualObj);
                 } else if ("query".equals(type)) {
+                    return query(actualObj);
                 } else if ("scan".equals(type)) {
                     return scan(actualObj);
                 } else if ("create_table".equals(type)) {
@@ -82,6 +83,110 @@ public class AlternatorDB {
                         String upperBound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(1).getTextValue();
                         for (Item itm : getTable(tableName).getItems()) {
                             if ((lowerBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0) && (upperBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                    if ("LT".equals(comparator)) {
+                        String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        for (Item itm : getTable(tableName).getItems()) {
+                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                    if ("LE".equals(comparator)) {
+                        String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        for (Item itm : getTable(tableName).getItems()) {
+                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) >= 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                    if ("GT".equals(comparator)) {
+                        String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        for (Item itm : getTable(tableName).getItems()) {
+                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                    if ("GE".equals(comparator)) {
+                        String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        for (Item itm : getTable(tableName).getItems()) {
+                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) <= 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                } else {
+                    throw new RuntimeException("RangeKeyCondition with no rangekey on the table");
+                }
+            } else {
+                for (Item itm : getTable(tableName).getItems()) {
+                    result.add(itm.getAttributes());
+                }
+
+            }
+            map.put("ConsumedCapacityUnits", 1);
+            map.put("Count", 0);
+            map.put("ScannedCount", 1);
+            map.put("Items", result);
+
+        } catch (RuntimeException e) {
+            logger.debug("table wasn't created correctly : " + e);
+        }
+        System.out.println(map.toString());
+        return map;
+    }
+        public Map<String, Object> query(JsonNode data) {
+        List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            String tableName = data.path("TableName").getTextValue();
+            if (data.path("RangeKeyCondition").getTextValue() != null) {
+                if (getTable(tableName).isHasRangeKey()) {
+                    String comparator = data.path("RangeKeyCondition").path("ComparisonOperator").getTextValue();
+                    String rangeKey = tableGetRangeKey(tableName);
+                    String rangeKeyType = getTable(tableName).getRangeKeyType();
+                    String hashKey = data.path("HashKeyValue").path(getTable(tableName).getHashKeyType()).getTextValue();
+                    if ("BETWEEN".equals(comparator)) {
+                        String lowerBound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        String upperBound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(1).getTextValue();
+                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
+                            if ((lowerBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0) && (upperBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                    if ("LT".equals(comparator)) {
+                        String bound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
+                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                    if ("LE".equals(comparator)) {
+                        String bound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
+                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) >= 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                    if ("GT".equals(comparator)) {
+                        String bound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
+                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0)) {
+                                result.add(itm.getAttributes());
+                            }
+                        }
+                    }
+                    if ("GE".equals(comparator)) {
+                        String bound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
+                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
+                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) <= 0)) {
                                 result.add(itm.getAttributes());
                             }
                         }
