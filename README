@@ -1,5 +1,0 @@
-THIS IS A WORK IN PROGRESS
-
-After weeks of doing testing on a remote DynamoDB database, I got fed up with how long it took and sometimes how it would fail outright because it would surpass the throughput limit.  There had to be a better way, which is where Alternator comes from. 
-
-Simply put, it's a local DynamoDB instance used for testing purposes.  Our goal is to make something quick and simple that immitates all of DynamoDB's functions which can then be used within test cases.
