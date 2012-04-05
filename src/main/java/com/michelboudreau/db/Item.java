@@ -5,49 +5,54 @@
 package com.michelboudreau.db;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  * @author thomasbredillet
  */
-public class Element {
-    private Table table;
+public class Item {
+    private String tableName;
     private String hashKey;
     private String rangeKey;
-    private HashMap<String,String> attributes;
+    boolean hasRangeKey;
+    private HashMap<String,Map<String,String>> attributes;
     
-    public Element(Table table,String hashKey,String rangeKey,HashMap<String,String> map){
+    public Item(){
+        
+    }
+    public Item(String tableName,String hashKey,String rangeKey,HashMap<String,Map<String,String>> map){
         this.hashKey = hashKey;
         this.rangeKey = rangeKey;
-        this.table = table;
+        this.tableName = tableName;
         this.attributes = map;
     }
 
     /**
      * @return the table
      */
-    public Table getTable() {
-        return table;
+    public String getTableName() {
+        return tableName;
     }
 
     /**
      * @param table the table to set
      */
-    public void setTable(Table table) {
-        this.table = table;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     /**
      * @return the attributes
      */
-    public HashMap<String,String> getAttributes() {
+    public HashMap<String,Map<String,String>> getAttributes() {
         return attributes;
     }
 
     /**
      * @param attributes the attributes to set
      */
-    public void setAttributes(HashMap<String,String> attributes) {
+    public void setAttributes(HashMap<String,Map<String,String>> attributes) {
         this.attributes = attributes;
     }
 
