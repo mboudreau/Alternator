@@ -123,7 +123,20 @@
             <artifactId>logback-classic</artifactId>
             <version>1.0.0</version>
         </dependency>
-        
+     	<!-- Grizzly -->
+
+		<dependency>
+			<groupId>com.sun.grizzly</groupId>
+			<artifactId>grizzly-servlet-webserver</artifactId>
+			<version>1.9.46</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sun.grizzly</groupId>
+			<artifactId>grizzly-servlet-deployer</artifactId>
+			<version>1.9.46</version>
+		</dependency>
+     
         <!-- Other -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
