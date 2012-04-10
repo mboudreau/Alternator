@@ -24,5 +24,6 @@
     </context:component-scan>
 
     <mvc:annotation-driven conversion-service="conversionService"/>
-    <bean id="conversionService" class="com.michelboudreau.utils.ConversionServiceFactory"/>
+    <bean id="conversionService" class="org.springframework.format.support.DefaultFormattingConversionService"/>
+    
 </beans>
