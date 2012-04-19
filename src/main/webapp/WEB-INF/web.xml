@@ -17,7 +17,7 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:META-INF/spring/applicationContext.xml
+            classpath:com/michelboudreau/alternator/spring/applicationContext.xml
         </param-value>     
     </context-param>
     <listener>
@@ -31,7 +31,7 @@
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>classpath:META-INF/spring/applicationServlet.xml</param-value>
+            <param-value>classpath:com/michelboudreau/alternator/spring/applicationServlet.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
