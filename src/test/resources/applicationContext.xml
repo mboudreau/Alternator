@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -12,12 +11,11 @@
             http://www.springframework.org/schema/task/spring-task-3.1.xsd
             http://www.springframework.org/schema/util 
             http://www.springframework.org/schema/util/spring-util-3.1.xsd">
-     
+	<!-- Turn on post-processing (Exception translation, etc) -->
+	<context:annotation-config/>
 
-        
-
-    <!-- Turn on post-processing (Exception translation, etc) -->
-    <context:annotation-config/>
-
-
+    <bean id="dynamoDBClient" class="com.michelboudreau.alternator.AlternatorDBClient" />
+    <bean id="dynamoDBMapper" class="com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper">
+        <constructor-arg index="0" ref="dynamoDBClient"/>
+    </bean>
 </beans>

@@ -1,456 +1,63 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.michelboudreau.alternator;
 
-import com.michelboudreau.db.Item;
-import com.michelboudreau.db.Table;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.servlet.http.HttpServletRequest;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
-/**
- *
- * @author thomasbredillet
- */
 public class AlternatorDB {
 
-    private List<Table> tables = new ArrayList<Table>();
-    Logger logger = LoggerFactory.getLogger(AlternatorDB.class);
+	private final Logger logger = LoggerFactory.getLogger(AlternatorDB.class);
+	private Server server;
+	private ServletContextHandler context;
 
-    public AlternatorDB() {
-    }
+	public AlternatorDB() {
+		this(9090);
+	}
 
-    public Map<String, Object> handleRequest(HttpServletRequest request) {
-        try {
-            String type = getTypeFromRequest(request);
-            String data = getDataFromPost(request);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonFactory factory = mapper.getJsonFactory();
-            JsonParser jp = factory.createJsonParser(data);
-            JsonNode actualObj = null;
-            while (jp.nextToken() != null) {
-                actualObj = mapper.readTree(jp);
-            }
-                System.out.println("Request treated : " + actualObj.toString());
-                if ("put_item".equals(type)) {
-                    putItem(actualObj);
-                } else if ("get_item".equals(type)) {
-                    return getItem(actualObj);
-                } else if ("query".equals(type)) {
-                    return query(actualObj);
-                } else if ("scan".equals(type)) {
-                    return scan(actualObj);
-                } else if ("create_table".equals(type)) {
-                    createTable(actualObj);
-                }
+	public AlternatorDB(int port) {
+		if (port == 0) {
+			port = 9090;
+		}
 
+		// Create server
+		this.server = new Server();
+		SelectChannelConnector connector = new SelectChannelConnector();
+		connector.setHost("localhost");
+		connector.setPort(port);
+		this.server.addConnector(connector);
 
-            return null;
-        } catch (IOException e) {
-            logger.debug("request wasn't handled correctly : " + e);
-            return null;
-        }
-    }
+		// Create context
+		this.context = new ServletContextHandler(this.server, "/", ServletContextHandler.SESSIONS);
+		this.context.setContextPath("/");
+		this.context.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
+		this.context.setInitParameter("contextConfigLocation", AlternatorDBConfig.class.getName());
 
-    public Map<String, Object> scan(JsonNode data) {
-        List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            String tableName = data.path("TableName").getTextValue();
-            String limit = null;
-            if (!data.path("limit").isNull()) {
-                limit = "" + data.path("limit").getIntValue();
-            }
-            if (data.path("ScanFilter").getTextValue() != null) {
-                if (getTable(tableName).isHasRangeKey()) {
-                    String comparator = data.path("ScanFilter").path("ComparisonOperator").getTextValue();
-                    String rangeKey = tableGetRangeKey(tableName);
-                    String rangeKeyType = getTable(tableName).getRangeKeyType();
-                    if ("BETWEEN".equals(comparator)) {
-                        String lowerBound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        String upperBound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(1).getTextValue();
-                        for (Item itm : getTable(tableName).getItems()) {
-                            if ((lowerBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0) && (upperBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                    if ("LT".equals(comparator)) {
-                        String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        for (Item itm : getTable(tableName).getItems()) {
-                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                    if ("LE".equals(comparator)) {
-                        String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        for (Item itm : getTable(tableName).getItems()) {
-                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) >= 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                    if ("GT".equals(comparator)) {
-                        String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        for (Item itm : getTable(tableName).getItems()) {
-                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                    if ("GE".equals(comparator)) {
-                        String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        for (Item itm : getTable(tableName).getItems()) {
-                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) <= 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                } else {
-                    throw new RuntimeException("RangeKeyCondition with no rangekey on the table");
-                }
-            } else {
-                for (Item itm : getTable(tableName).getItems()) {
-                    result.add(itm.getAttributes());
-                }
+		// Add listener
+		ContextLoaderListener listener = new ContextLoaderListener();
+		this.context.addEventListener(listener);
 
-            }
-            map.put("ConsumedCapacityUnits", 1);
-            map.put("Count", 0);
-            map.put("ScannedCount", 1);
-            map.put("Items", result);
+		// Create servlet
+		DispatcherServlet servlet = new DispatcherServlet();
+		ServletHolder holder = new ServletHolder(servlet);
+		holder.setInitOrder(1);
+		holder.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
+		holder.setInitParameter("contextConfigLocation", AlternatorDBConfig.class.getName());
+		this.context.addServlet(holder, "/");
+	}
 
-        } catch (RuntimeException e) {
-            logger.debug("table wasn't created correctly : " + e);
-        }
-        System.out.println(map.toString());
-        return map;
-    }
-        public Map<String, Object> query(JsonNode data) {
-        List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
-        Map<String, Object> map = new HashMap<String, Object>();
-        try {
-            String tableName = data.path("TableName").getTextValue();
-            if (data.path("RangeKeyCondition").getTextValue() != null) {
-                if (getTable(tableName).isHasRangeKey()) {
-                    String comparator = data.path("RangeKeyCondition").path("ComparisonOperator").getTextValue();
-                    String rangeKey = tableGetRangeKey(tableName);
-                    String rangeKeyType = getTable(tableName).getRangeKeyType();
-                    String hashKey = data.path("HashKeyValue").path(getTable(tableName).getHashKeyType()).getTextValue();
-                    if ("BETWEEN".equals(comparator)) {
-                        String lowerBound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        String upperBound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(1).getTextValue();
-                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
-                            if ((lowerBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0) && (upperBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                    if ("LT".equals(comparator)) {
-                        String bound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
-                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                    if ("LE".equals(comparator)) {
-                        String bound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
-                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) >= 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                    if ("GT".equals(comparator)) {
-                        String bound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
-                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                    if ("GE".equals(comparator)) {
-                        String bound = data.path("RangeKeyCondition").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-                        for (Item itm : getTable(tableName).getItemsWithKey(hashKey)) {
-                            if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) <= 0)) {
-                                result.add(itm.getAttributes());
-                            }
-                        }
-                    }
-                } else {
-                    throw new RuntimeException("RangeKeyCondition with no rangekey on the table");
-                }
-            } else {
-                for (Item itm : getTable(tableName).getItems()) {
-                    result.add(itm.getAttributes());
-                }
+	public AlternatorDB start() throws Exception {
+		this.server.start();
+		return this;
+	}
 
-            }
-            map.put("ConsumedCapacityUnits", 1);
-            map.put("Count", 0);
-            map.put("ScannedCount", 1);
-            map.put("Items", result);
-
-        } catch (RuntimeException e) {
-            logger.debug("table wasn't created correctly : " + e);
-        }
-        System.out.println(map.toString());
-        return map;
-    }
-
-    public void createTable(JsonNode data) {
-//
-        JsonNode actualObj = data;
-        String tableName = actualObj.path("TableName").getTextValue();
-        String hashKey = null;
-        String rangeKey = null;
-        String rangeKeyType = null;
-        hashKey = actualObj.path("KeySchema").path("HashKeyElement").path("AttributeName").getTextValue();
-        String hashKeyType = actualObj.path("KeySchema").path("HashKeyElement").path("AttributeType").getTextValue();
-        if (!actualObj.path("KeySchema").path("RangeKeyElement").path("AttributeName").isNull()) {
-            rangeKey = actualObj.path("KeySchema").path("RangeKeyElement").path("AttributeName").getTextValue();
-            rangeKeyType = actualObj.path("KeySchema").path("RangeKeyElement").path("AttributeType").getTextValue();
-        }
-        if (getTable(tableName) == null) {
-            Table table = new Table(hashKey, rangeKey, tableName, hashKeyType, rangeKeyType);
-            getTables().add(table);
-        }
-    }
-
-    public void putItem(JsonNode data) {
-        try {
-            JsonNode actualObj = data;
-            String tableName = actualObj.path("TableName").getTextValue();
-            Iterator itr = actualObj.path("Item").getFieldNames();
-            HashMap<String, Map<String, String>> attributes = new HashMap<String, Map<String, String>>();
-            while (itr.hasNext()) {
-                String attrName = itr.next().toString();
-                Map<String, String> schema = new HashMap<String, String>();
-                if (actualObj.path("Item").path(attrName).path("S").getTextValue() != null) {
-                    schema.put("S", actualObj.path("Item").path(attrName).path("S").getTextValue());
-                    attributes.put(attrName, schema);
-                } else if (actualObj.path("Item").path(attrName).path("N").getTextValue() != null) {
-                    schema.put("N", actualObj.path("Item").path(attrName).path("N").getTextValue());
-                    attributes.put(attrName, schema);
-                }
-            }
-            if (getTable(tableName) == null) {
-                throw new IOException("table doesn't exist");
-            }
-            if (findItemByAttributes(attributes, tableName) != null) {
-                getTable(tableName).removeItem(findItemByAttributes(attributes, tableName));
-            }
-            if (attributes != null && !attributes.isEmpty()) {
-                Item item = new Item(tableName, tableGetHashKey(tableName), tableGetRangeKey(tableName), attributes);
-                getTable(tableName).addItem(item);
-            } else {
-                throw new IOException("item empty");
-            }
-        } catch (IOException e) {
-            logger.debug("item wasn't put correctly : " + e);
-        }
-    }
-
-    public Map<String, Object> getItem(JsonNode data) {
-        String key = null;
-        String tableName = null;
-        Map<String, Object> response = new HashMap<String, Object>();
-
-        try {
-            JsonNode actualObj = data;
-            tableName = actualObj.path("TableName").getTextValue();
-            if (!actualObj.path("Key").path("HashKeyElement").path("S").isNull()) {
-                key = actualObj.path("Key").path("HashKeyElement").path("S").getTextValue();
-            } else if (!actualObj.path("Key").path("HashKeyElement").path("N").isNull()) {
-                key = actualObj.path("Key").path("HashKeyElement").path("N").getTextValue();
-            }
-
-            if (key == null) {
-                throw new IOException("Bad request in getItem");
-            }
-
-
-            if (getTable(tableName) == null) {
-                throw new IOException("table doesn't exist");
-            }
-
-            response.put("ConsumedCapacityUnits", 1);
-            List<Item> items = findItemByKey(key, tableName);
-            if (items != null) {
-                for (Item itm : items) {
-                    response.put("Item", itm.getAttributes());
-                }
-            }
-        } catch (IOException e) {
-            logger.debug("item wasn't put correctly : " + e);
-        }
-        System.out.println(response);
-        return response;
-    }
-
-    public Table getTable(String tableName) {
-        Table result = null;
-        int count = 0;
-        for (Table table : getTables()) {
-            if (tableName.equals(table.getName())) {
-                result = table;
-                count++;
-            }
-        }
-        if (count > 1) {
-            logger.debug("Error several tables with the same name");
-        }
-        return result;
-    }
-
-    public String tableGetHashKey(String tableName) {
-        String result = null;
-        for (Table table : getTables()) {
-            if (tableName.equals(table.getName())) {
-                result = table.getHashKey();
-            }
-        }
-        return result;
-    }
-
-    public String tableGetRangeKey(String tableName) {
-        String result = null;
-        for (Table table : getTables()) {
-            if (tableName.equals(table.getName())) {
-                result = table.getRangeKey();
-            }
-        }
-        return result;
-    }
-
-    public Item findItemByAttributes(HashMap<String, Map<String, String>> attr, String tableName) {
-        Item result = null;
-        for (Table table : getTables()) {
-            if (tableName.equals(table.getName())) {
-                if (table.getItems() != null) {
-                    for (Item itm : table.getItems()) {
-                        if (valuesFromAttributes(attr).equals(valuesFromAttributes(itm.getAttributes()))) {
-                            result = itm;
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    public List<Item> findItemByKey(String key, String tableName) throws IOException {
-        List<Item> result = new ArrayList<Item>();
-        for (Table table : getTables()) {
-            if (tableName.equals(table.getName())) {
-                if (table.getItems() != null) {
-                    for (Item itm : table.getItems()) {
-                        if (key != null) {
-                            if (!itm.getAttributes().get(table.getHashKey()).get("S").isEmpty()) {
-                                if (key.equals(itm.getAttributes().get(table.getHashKey()).get("S"))) {
-                                    result.add(itm);
-                                }
-                            } else if (!itm.getAttributes().get(table.getHashKey()).get("N").isEmpty()) {
-                                if (key.equals(itm.getAttributes().get(table.getHashKey()).get("N"))) {
-                                    result.add(itm);
-                                }
-                            }
-                        } else {
-                            throw new IOException("bad requests in findItemByKey");
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    public String getTypeFromRequest(HttpServletRequest req) {
-        String type = null;
-        if (req.getHeader("X-Amz-Target") != null) {
-            Pattern p = Pattern.compile(".([A-Za-z]+)");
-            Matcher m = p.matcher(req.getHeader("X-Amz-Target"));
-            while (m.find()) {
-                type = m.group(1);
-            }
-        }
-        if ("PutItem".equals(type)) {
-            type = "put_item";
-        } else if ("Query".equals(type)) {
-            type = "query";
-        } else if ("Scan".equals(type)) {
-            type = "scan";
-        } else if ("GetItem".equals(type)) {
-            type = "get_item";
-        } else if ("CreateTable".equals(type)) {
-            type = "create_table";
-        }
-
-        return type;
-    }
-
-    public String getDataFromPost(HttpServletRequest req) {
-        StringBuilder sb = new StringBuilder();
-        try {
-            BufferedReader reader = req.getReader();
-            reader.mark(10000);
-
-            String line;
-            do {
-                line = reader.readLine();
-                sb.append(line).append("\n");
-            } while (line != null);
-            reader.reset();
-            // do NOT close the reader here, or you won't be able to get the post data twice
-        } catch (IOException e) {
-            logger.debug("getPostData couldn't.. get the post data");  // This has happened if the request's reader is closed    
-        }
-        System.out.println(sb.toString().substring(0, sb.toString().indexOf("\n")));
-        return sb.toString().substring(0, sb.toString().indexOf("\n"));
-    }
-
-    /**
-     * @return the tables
-     */
-    public List<Table> getTables() {
-        return tables;
-    }
-
-    /**
-     * @param tables the tables to set
-     */
-    public void setTables(List<Table> tables) {
-        this.tables = tables;
-    }
-
-    public String convertor(List<Item> items) {
-        String result = "[{";
-        for (Item itm : items) {
-        }
-        return result;
-    }
-
-    public HashSet<String> valuesFromAttributes(HashMap<String, Map<String, String>> map) {
-        HashSet<String> result = new HashSet<String>();
-        for (Map<String, String> mp : map.values()) {
-            for (String attr : mp.values()) {
-                result.add(attr);
-            }
-        }
-        return result;
-    }
+	public AlternatorDB stop() throws Exception {
+		this.server.stop();
+		return this;
+	}
 }
