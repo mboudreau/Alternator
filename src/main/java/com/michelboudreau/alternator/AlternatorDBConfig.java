@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-final class AlternatorDBConfig {
+class AlternatorDBConfig {
 
 	@Bean
 	public AlternatorDBClient client() {

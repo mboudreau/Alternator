@@ -20,12 +20,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
 public class AlternatorTest {
-	private AlternatorDB db;
 
 	@Autowired
 	private AlternatorDBClient client;
 	@Autowired
 	private DynamoDBMapper mapper;
+	
+	private AlternatorDB db;
 
 	@Before
 	public void setUp() throws Exception {
