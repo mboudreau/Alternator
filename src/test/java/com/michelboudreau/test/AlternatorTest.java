@@ -25,7 +25,6 @@ public class AlternatorTest {
 	private AlternatorDBClient client;
 	@Autowired
 	private DynamoDBMapper mapper;
-	
 	private AlternatorDB db;
 
 	@Before

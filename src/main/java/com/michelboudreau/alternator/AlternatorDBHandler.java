@@ -1,5 +1,6 @@
 package com.michelboudreau.alternator;
 
+import com.michelboudreau.alternator.enums.RequestType;
 import com.michelboudreau.alternator.models.Item;
 import com.michelboudreau.alternator.models.Table;
 import org.codehaus.jackson.JsonFactory;
@@ -17,12 +18,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AlternatorDBHandler {
+class AlternatorDBHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(AlternatorDBHandler.class);
 	private List<Table> tables = new ArrayList<Table>();
 
 	public AlternatorDBHandler() {
+		// Should we save the results
 		/*ObjectMapper mapper = new ObjectMapper();
 		if (new File(dbName).exists()) {
 			this.models = mapper.readValue(new File(dbName), AlternatorDB.class);
@@ -32,29 +34,42 @@ public class AlternatorDBHandler {
 
 	public Map<String, Object> handle(HttpServletRequest request) throws IOException, ServletException {
 		try {
-			String type = getTypeFromRequest(request);
+			// TODO: get method
+			RequestType type = getTypeFromRequest(request);
 			String data = getDataFromPost(request);
 			ObjectMapper mapper = new ObjectMapper();
 			JsonFactory factory = mapper.getJsonFactory();
 			JsonParser jp = factory.createJsonParser(data);
 			JsonNode actualObj = null;
+
 			while (jp.nextToken() != null) {
 				actualObj = mapper.readTree(jp);
 			}
-			System.out.println("Request treated : " + actualObj.toString());
-			if ("put_item".equals(type)) {
-				putItem(actualObj);
-			} else if ("get_item".equals(type)) {
-				return getItem(actualObj);
-			} else if ("query".equals(type)) {
-				return query(actualObj);
-			} else if ("scan".equals(type)) {
-				return scan(actualObj);
-			} else if ("create_table".equals(type)) {
-				createTable(actualObj);
+
+			switch (type) {
+				case PUT:
+					putItem(actualObj);
+					break;
+				case GET:
+					getItem(actualObj);
+					break;
+				case QUERY:
+					query(actualObj);
+					break;
+				case SCAN:
+					scan(actualObj);
+					break;
+				case CREATE_TABLE:
+					createTable(actualObj);
+					break;
+				case DELETE_TABLE:
+					break;
+				default:
+					logger.warn("The Request Type '" + type + "' does not exist.");
+					break;
 			}
 		} catch (IOException e) {
-			logger.debug("request wasn't handled correctly : " + e);
+			logger.warn("request wasn't handled correctly : " + e);
 		}
 		return null;
 	}
@@ -295,7 +310,6 @@ public class AlternatorDBHandler {
 		} catch (IOException e) {
 			logger.debug("item wasn't put correctly : " + e);
 		}
-		System.out.println(response);
 		return response;
 	}
 
@@ -376,31 +390,19 @@ public class AlternatorDBHandler {
 		return result;
 	}
 
-	public String getTypeFromRequest(HttpServletRequest req) {
+	protected RequestType getTypeFromRequest(HttpServletRequest req) {
 		String type = null;
-		if (req.getHeader("X-Amz-Target") != null) {
-			Pattern p = Pattern.compile(".([A-Za-z]+)");
-			Matcher m = p.matcher(req.getHeader("X-Amz-Target"));
-			while (m.find()) {
-				type = m.group(1);
+		String header = req.getHeader("x-amz-target");
+		if (header != null) {
+			String[] array = header.split("[.]"); //  header comes back as DynamoDB_20111205.<request string>
+			if(array.length > 1) {
+				type = array[1];
 			}
 		}
-		if ("PutItem".equals(type)) {
-			type = "put_item";
-		} else if ("Query".equals(type)) {
-			type = "query";
-		} else if ("Scan".equals(type)) {
-			type = "scan";
-		} else if ("GetItem".equals(type)) {
-			type = "get_item";
-		} else if ("CreateTable".equals(type)) {
-			type = "create_table";
-		}
-
-		return type;
+		return RequestType.fromString(type);
 	}
 
-	public String getDataFromPost(HttpServletRequest req) {
+	protected String getDataFromPost(HttpServletRequest req) {
 		StringBuilder sb = new StringBuilder();
 		try {
 			BufferedReader reader = req.getReader();

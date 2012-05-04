@@ -69,7 +69,7 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		exceptionUnmarshallers.add(new ResourceNotFoundExceptionUnmarshaller());
 
 		exceptionUnmarshallers.add(new JsonErrorUnmarshaller());
-		setEndpoint("localhost:8080/");
+		setEndpoint("localhost:9090/");
 
 		/*signer = new AWS3Signer();*/
 

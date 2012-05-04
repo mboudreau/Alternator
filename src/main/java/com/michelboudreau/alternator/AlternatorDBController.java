@@ -1,4 +1,4 @@
-package com.michelboudreau.alternator.controller;
+package com.michelboudreau.alternator;
 
 import com.michelboudreau.alternator.AlternatorDBHandler;
 import com.michelboudreau.alternator.models.Table;
@@ -17,10 +17,12 @@ import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/", produces = "application/json")
-public class WebController {
+class AlternatorDBController {
 
-	@Autowired
-	private AlternatorDBHandler handler;
+	private AlternatorDBHandler handler = new AlternatorDBHandler();
+
+	public AlternatorDBController() {
+	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.POST, consumes = "application/x-amz-json-1.0")

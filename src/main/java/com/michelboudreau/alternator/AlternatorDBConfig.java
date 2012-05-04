@@ -1,7 +1,6 @@
 package com.michelboudreau.alternator;
 
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
-import com.michelboudreau.alternator.controller.WebController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,12 +18,7 @@ class AlternatorDBConfig {
 	}
 
 	@Bean
-	public WebController webController() {
-		return new WebController();
-	}
-
-	@Bean
-	public AlternatorDBHandler alternatorDBHandler() {
-		return new AlternatorDBHandler();
+	public AlternatorDBController webController() {
+		return new AlternatorDBController();
 	}
 }
