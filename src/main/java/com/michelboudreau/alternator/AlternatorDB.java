@@ -60,4 +60,8 @@ public class AlternatorDB {
 		this.server.stop();
 		return this;
 	}
+
+	public boolean reset() {
+		return true;
+	}
 }

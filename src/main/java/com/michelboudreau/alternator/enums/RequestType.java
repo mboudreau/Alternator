@@ -1,12 +1,24 @@
 package com.michelboudreau.alternator.enums;
 
 public enum RequestType {
+	// Item Actions
 	PUT("PutItem"),
 	GET("GetItem"),
+	BATCH_GET_ITEM("BatchGetItem"),
+	BATCH_WRITE_ITEM("BatchWriteItem"),
+
+	// Operations
 	QUERY("Query"),
 	SCAN("Scan"),
+
+	// Table Actions
 	CREATE_TABLE("CreateTable"),
+	DESCRIBE_TABLE("DescribeTable"),
+	LIST_TABLES("ListTables"),
+	UPDATE_TABLE("UpdateTable"),
 	DELETE_TABLE("DeleteTable"),
+
+	// Unknowns
 	UNKNOWN("");
 
 	private String type;
