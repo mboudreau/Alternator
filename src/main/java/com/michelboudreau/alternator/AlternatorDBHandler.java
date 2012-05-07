@@ -1,22 +1,16 @@
 package com.michelboudreau.alternator;
 
-import com.michelboudreau.alternator.enums.RequestType;
 import com.michelboudreau.alternator.models.Item;
+import com.michelboudreau.alternator.parsers.DynamoDBRequestParser;
 import com.michelboudreau.alternator.models.Table;
-import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 class AlternatorDBHandler {
 
@@ -33,50 +27,37 @@ class AlternatorDBHandler {
 	}
 
 	public Map<String, Object> handle(HttpServletRequest request) throws IOException, ServletException {
-		try {
-			// TODO: get method
-			RequestType type = getTypeFromRequest(request);
-			String data = getDataFromPost(request);
-			ObjectMapper mapper = new ObjectMapper();
-			JsonFactory factory = mapper.getJsonFactory();
-			JsonParser jp = factory.createJsonParser(data);
-			JsonNode actualObj = null;
+		DynamoDBRequestParser object = new DynamoDBRequestParser(request);
 
-			while (jp.nextToken() != null) {
-				actualObj = mapper.readTree(jp);
-			}
-
-			switch (type) {
-				case PUT:
-					putItem(actualObj);
-					break;
-				case GET:
-					getItem(actualObj);
-					break;
-				case QUERY:
-					query(actualObj);
-					break;
-				case SCAN:
-					scan(actualObj);
-					break;
-				case CREATE_TABLE:
-					createTable(actualObj);
-					break;
-				case DELETE_TABLE:
-					break;
-				default:
-					logger.warn("The Request Type '" + type + "' does not exist.");
-					break;
-			}
-		} catch (IOException e) {
-			logger.warn("request wasn't handled correctly : " + e);
+		switch (object.getType()) {
+			case PUT:
+				putItem(object);
+				break;
+			case GET:
+				getItem(object);
+				break;
+			case QUERY:
+				query(object);
+				break;
+			case SCAN:
+				scan(object);
+				break;
+			case CREATE_TABLE:
+				createTable(object);
+				break;
+			case DELETE_TABLE:
+				break;
+			default:
+				logger.warn("The Request Type '" + object.getType() + "' does not exist.");
+				break;
 		}
 		return null;
 	}
 
-	public Map<String, Object> scan(JsonNode data) {
-		List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
+	protected Map<String, Object> scan(DynamoDBRequestParser obj) {
+		/*List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
 		Map<String, Object> map = new HashMap<String, Object>();
+		JsonNode data = obj.getData();
 		try {
 			String tableName = data.path("TableName").getTextValue();
 			String limit = null;
@@ -147,12 +128,14 @@ class AlternatorDBHandler {
 			logger.debug("table wasn't created correctly : " + e);
 		}
 		System.out.println(map.toString());
-		return map;
+		return map;*/
+		return null;
 	}
 
-	public Map<String, Object> query(JsonNode data) {
-		List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
+	public Map<String, Object> query(DynamoDBRequestParser obj) {
+		/*List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
 		Map<String, Object> map = new HashMap<String, Object>();
+		JsonNode data = obj.getData();
 		try {
 			String tableName = data.path("TableName").getTextValue();
 			if (data.path("RangeKeyCondition").getTextValue() != null) {
@@ -220,17 +203,16 @@ class AlternatorDBHandler {
 			logger.debug("table wasn't created correctly : " + e);
 		}
 		System.out.println(map.toString());
-		return map;
+		return map;*/
+		return null;
 	}
 
-	public void createTable(JsonNode data) {
-//
-		JsonNode actualObj = data;
-		;
-		String tableName = actualObj.path("TableName").getTextValue();
+	public Boolean createTable(DynamoDBRequestParser data) {
 		String hashKey = null;
 		String rangeKey = null;
 		String rangeKeyType = null;
+
+/*
 		hashKey = actualObj.path("KeySchema").path("HashKeyElement").path("AttributeName").getTextValue();
 		String hashKeyType = actualObj.path("KeySchema").path("HashKeyElement").path("AttributeType").getTextValue();
 		if (!actualObj.path("KeySchema").path("RangeKeyElement").path("AttributeName").isNull()) {
@@ -240,12 +222,14 @@ class AlternatorDBHandler {
 		if (getTable(tableName) == null) {
 			Table table = new Table(hashKey, rangeKey, tableName, hashKeyType, rangeKeyType);
 			getTables().add(table);
-		}
+		}*/
+
+		return true;
 	}
 
-	public void putItem(JsonNode data) {
-		try {
-			JsonNode actualObj = data;
+	public void putItem(DynamoDBRequestParser data) {
+		/*try {
+			JsonNode actualObj = data.getData();
 			String tableName = actualObj.path("TableName").getTextValue();
 			Iterator itr = actualObj.path("Item").getFieldNames();
 			HashMap<String, Map<String, String>> attributes = new HashMap<String, Map<String, String>>();
@@ -274,16 +258,16 @@ class AlternatorDBHandler {
 			}
 		} catch (IOException e) {
 			logger.debug("item wasn't put correctly : " + e);
-		}
+		}*/
 	}
 
-	public Map<String, Object> getItem(JsonNode data) {
+	public Map<String, Object> getItem(DynamoDBRequestParser data) {
 		String key = null;
 		String tableName = null;
 		Map<String, Object> response = new HashMap<String, Object>();
-
+/*
 		try {
-			JsonNode actualObj = data;
+			JsonNode actualObj = data.getData();
 			tableName = actualObj.path("TableName").getTextValue();
 			if (!actualObj.path("Key").path("HashKeyElement").path("S").isNull()) {
 				key = actualObj.path("Key").path("HashKeyElement").path("S").getTextValue();
@@ -309,7 +293,7 @@ class AlternatorDBHandler {
 			}
 		} catch (IOException e) {
 			logger.debug("item wasn't put correctly : " + e);
-		}
+		}*/
 		return response;
 	}
 
@@ -390,37 +374,6 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected RequestType getTypeFromRequest(HttpServletRequest req) {
-		String type = null;
-		String header = req.getHeader("x-amz-target");
-		if (header != null) {
-			String[] array = header.split("[.]"); //  header comes back as DynamoDB_20111205.<request string>
-			if(array.length > 1) {
-				type = array[1];
-			}
-		}
-		return RequestType.fromString(type);
-	}
-
-	protected String getDataFromPost(HttpServletRequest req) {
-		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader reader = req.getReader();
-			reader.mark(10000);
-
-			String line;
-			do {
-				line = reader.readLine();
-				sb.append(line).append("\n");
-			} while (line != null);
-			reader.reset();
-			// do NOT close the reader here, or you won't be able to get the post data twice
-		} catch (IOException e) {
-			logger.debug("getPostData couldn't.. get the post data");  // This has happened if the request's reader is closed
-		}
-		System.out.println(sb.toString().substring(0, sb.toString().indexOf("\n")));
-		return sb.toString().substring(0, sb.toString().indexOf("\n"));
-	}
 
 	public List<Table> getTables() {
 		return tables;
