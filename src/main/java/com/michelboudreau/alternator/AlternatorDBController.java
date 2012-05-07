@@ -31,12 +31,12 @@ class AlternatorDBController {
 		return handler.handle(request);
 	}
 
-	@ResponseStatus(HttpStatus.OK)
+	/*@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = "/tables", method = RequestMethod.GET)
 	@ResponseBody
 	public Iterable<Table> getTables() {
 		return handler.getTables();
-	}
+	}*/
 
 	/*@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = "/models", method = RequestMethod.GET)
