@@ -1,6 +1,7 @@
 package com.michelboudreau.alternator;
 
 import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.transform.*;
 import com.michelboudreau.alternator.models.Item;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
@@ -29,33 +30,37 @@ class AlternatorDBHandler {
 		AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
 
 		switch (parser.getType()) {
-			// Items
-			case PUT:
-				return putItem(parser.getData(PutItemRequest.class));
-			case GET:
-				return getItem(parser.getData(GetItemRequest.class));
-			case BATCH_GET_ITEM:
-				return batchGetItem(parser.getData(BatchGetItemRequest.class));
-			case BATCH_WRITE_ITEM:
-				return batchWriteItem(parser.getData(BatchWriteItemRequest.class));
-
 			// Tables
 			case CREATE_TABLE:
-				return createTable(parser.getData(CreateTableRequest.class));
+				return createTable(parser.getData(CreateTableRequest.class, CreateTableRequestJsonUnmarshaller.getInstance()));
 			case DESCRIBE_TABLE:
-				return describeTable(parser.getData(DescribeTableRequest.class));
+				return describeTable(parser.getData(DescribeTableRequest.class, DescribeTableRequestJsonUnmarshaller.getInstance()));
 			case LIST_TABLES:
-				return listTables(parser.getData(ListTablesRequest.class));
+				return listTables(parser.getData(ListTablesRequest.class, ListTablesRequestJsonUnmarshaller.getInstance()));
 			case UPDATE_TABLE:
-				return updateTable(parser.getData(UpdateTableRequest.class));
+				return updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance()));
 			case DELETE_TABLE:
-				return deleteTable(parser.getData(DeleteTableRequest.class));
+				return deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance()));
+			
+			// Items
+			case PUT:
+				return putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance()));
+			case GET:
+				return getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance()));
+			case UPDATE:
+				return updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance()));
+			case DELETE:
+				return deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance()));
+			case BATCH_GET_ITEM:
+				return batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()));
+			case BATCH_WRITE_ITEM:
+				return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
 
 			// Operations
 			case QUERY:
-				return query(parser.getData(QueryRequest.class));
+				return query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance()));
 			case SCAN:
-				return scan(parser.getData(ScanRequest.class));
+				return scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance()));
 			default:
 				logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
 				break;
@@ -163,6 +168,14 @@ class AlternatorDBHandler {
 			logger.debug("item wasn't put correctly : " + e);
 		}*/
 		return new GetItemResult();
+	}
+
+	protected UpdateItemResult updateItem(UpdateItemRequest request) {
+		return null;
+	}
+
+	protected DeleteItemResult deleteItem(DeleteItemRequest request) {
+		return null;
 	}
 
 	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {

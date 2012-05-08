@@ -4,6 +4,8 @@ public enum RequestType {
 	// Item Actions
 	PUT("PutItem"),
 	GET("GetItem"),
+	UPDATE("UpdateItem"),
+	DELETE("DeleteItem"),
 	BATCH_GET_ITEM("BatchGetItem"),
 	BATCH_WRITE_ITEM("BatchWriteItem"),
 
