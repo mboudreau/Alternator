@@ -1,6 +1,8 @@
 package com.michelboudreau.alternator.parsers;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.AmazonWebServiceRequest;
+import com.amazonaws.services.dynamodb.model.*;
 import com.michelboudreau.alternator.enums.RequestType;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -38,13 +40,13 @@ public class AmazonWebServiceRequestParser {
 	public <T extends AmazonWebServiceRequest> T getData(Class<T> clazz) {
 		ObjectMapper mapper = new ObjectMapper();
 		String json = getPostString();
-		if (json != null) {
-			try {
+		if(json != null) {
+			try{
 				return mapper.readValue(json, clazz);
-			} catch (Exception e) {
-				logger.error("Could not read JSON into class: " + e);
+			}catch (Exception e) {
+				logger.error("Could not read JSON into class: "+e);
 			}
-		} else {
+		}else{
 			logger.warn("Not POST data could be retrieved");
 		}
 		return null;

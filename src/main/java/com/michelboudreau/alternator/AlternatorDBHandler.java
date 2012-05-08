@@ -25,48 +25,37 @@ class AlternatorDBHandler {
 		mapper.writeValue(new File(dbName), models);*/
 	}
 
-	public Map<String, Object> handle(HttpServletRequest request) throws ConditionalCheckFailedException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException {
+	public Object handle(HttpServletRequest request) throws ConditionalCheckFailedException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException {
 		AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
 
 		switch (parser.getType()) {
 			// Items
 			case PUT:
-				putItem(parser.getData(PutItemRequest.class));
-				break;
+				return putItem(parser.getData(PutItemRequest.class));
 			case GET:
-				getItem(parser.getData(GetItemRequest.class));
-				break;
+				return getItem(parser.getData(GetItemRequest.class));
 			case BATCH_GET_ITEM:
-				batchGetItem(parser.getData(BatchGetItemRequest.class));
-				break;
+				return batchGetItem(parser.getData(BatchGetItemRequest.class));
 			case BATCH_WRITE_ITEM:
-				batchWriteItem(parser.getData(BatchWriteItemRequest.class));
-				break;
+				return batchWriteItem(parser.getData(BatchWriteItemRequest.class));
 
 			// Tables
 			case CREATE_TABLE:
-				createTable(parser.getData(CreateTableRequest.class));
-				break;
+				return createTable(parser.getData(CreateTableRequest.class));
 			case DESCRIBE_TABLE:
-				describeTable(parser.getData(DescribeTableRequest.class));
-				break;
+				return describeTable(parser.getData(DescribeTableRequest.class));
 			case LIST_TABLES:
-				listTables(parser.getData(ListTablesRequest.class));
-				break;
+				return listTables(parser.getData(ListTablesRequest.class));
 			case UPDATE_TABLE:
-				updateTable(parser.getData(UpdateTableRequest.class));
-				break;
+				return updateTable(parser.getData(UpdateTableRequest.class));
 			case DELETE_TABLE:
-				deleteTable(parser.getData(DeleteTableRequest.class));
-				break;
+				return deleteTable(parser.getData(DeleteTableRequest.class));
 
 			// Operations
 			case QUERY:
-				query(parser.getData(QueryRequest.class));
-				break;
+				return query(parser.getData(QueryRequest.class));
 			case SCAN:
-				scan(parser.getData(ScanRequest.class));
-				break;
+				return scan(parser.getData(ScanRequest.class));
 			default:
 				logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
 				break;

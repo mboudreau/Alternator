@@ -56,12 +56,18 @@ public class AlternatorDB {
 		return this;
 	}
 
+	public AlternatorDB join() throws Exception {
+		this.server.join();
+		return this;
+	}
+
 	public AlternatorDB stop() throws Exception {
 		this.server.stop();
 		return this;
 	}
 
-	public boolean reset() {
-		return true;
+	public AlternatorDB restart() throws Exception {
+		stop().start();
+		return this;
 	}
 }
