@@ -1,6 +1,8 @@
 package com.michelboudreau.alternator.validation;
 
+import java.util.List;
+
 public interface Validator {
 	boolean supports(Class<?> clazz);
-	Error[] validate(Object target);
+    List<Error> validate(Object target);
 }

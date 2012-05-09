@@ -56,3 +56,7 @@ Of course, it's not always possible to just create the client, mapper and servic
 	</beans>
 
 Then you only need to create the AlternatorDB service in your test and you're ready to test out your code.  Hope this helps out.  Please feel free to contribute or suggest ways to make the project better.
+
+DOCUMENTATION
+==========
+Creat
