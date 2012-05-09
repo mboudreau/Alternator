@@ -5,8 +5,10 @@ import com.amazonaws.services.dynamodb.model.transform.*;
 import com.michelboudreau.alternator.models.Item;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
+import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -26,7 +28,7 @@ class AlternatorDBHandler {
 		mapper.writeValue(new File(dbName), models);*/
 	}
 
-	public Object handle(HttpServletRequest request) throws ConditionalCheckFailedException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException {
+	public Object handle(HttpServletRequest request) {
 		AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
 
 		switch (parser.getType()) {
@@ -41,7 +43,7 @@ class AlternatorDBHandler {
 				return updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance()));
 			case DELETE_TABLE:
 				return deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance()));
-			
+
 			// Items
 			case PUT:
 				return putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance()));
@@ -68,13 +70,21 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	protected CreateTableResult createTable(CreateTableRequest request) throws InternalServerErrorException {
+	protected CreateTableResult createTable(CreateTableRequest request) {
+		CreateTableRequestValidator validator = new CreateTableRequestValidator();
+		// make sure request is filled properly
 		String tableName = request.getTableName();
 		KeySchemaElement hashKey = request.getKeySchema().getHashKeyElement();
 		KeySchemaElement rangeKey = request.getKeySchema().getRangeKeyElement();
-		// TODO: make sure request is filled properly
+		String rangeKeyName = null;
+		String rangeKeyType = null;
+		if (rangeKey != null) {
+			rangeKeyName = rangeKey.getAttributeName();
+			rangeKeyType = rangeKey.getAttributeType();
+		}
+
 		if (getTable(tableName) == null) {
-			Table table = new Table(hashKey.getAttributeName(), rangeKey.getAttributeName(), tableName, hashKey.getAttributeType(), rangeKey.getAttributeType());
+			Table table = new Table(hashKey.getAttributeName(), rangeKeyName, tableName, hashKey.getAttributeType(), rangeKey.getAttributeType());
 			this.tables.add(table);
 		} else {
 			// TODO: create error
@@ -171,11 +181,11 @@ class AlternatorDBHandler {
 	}
 
 	protected UpdateItemResult updateItem(UpdateItemRequest request) {
-		return null;
+		return new UpdateItemResult();
 	}
 
 	protected DeleteItemResult deleteItem(DeleteItemRequest request) {
-		return null;
+		return new DeleteItemResult();
 	}
 
 	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {

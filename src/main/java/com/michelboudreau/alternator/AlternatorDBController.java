@@ -27,7 +27,7 @@ class AlternatorDBController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.POST, consumes = "application/x-amz-json-1.0")
 	@ResponseBody
-	public Object alternatorDBController(HttpServletRequest request) throws IOException, ServletException {
+	public Object alternatorDBController(HttpServletRequest request) {
 		return handler.handle(request);
 	}
 
