@@ -105,6 +105,9 @@ public class ValidatorUtils {
 		if (property instanceof String) {
 			String string = (String) property;
 			outOfBounds = (string.length() < min || string.length() > max);
+		} else if (property instanceof Number) {
+			Double num = (Double) property;
+			outOfBounds = (num < min || num > max);
 		} else if (property.getClass().isArray()) {
 			T[] array = (T[]) property;
 			outOfBounds = (array.length < min || array.length > max);

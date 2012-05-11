@@ -2,7 +2,7 @@ package com.michelboudreau.alternator;
 
 import com.amazonaws.services.dynamodb.model.*;
 import com.amazonaws.services.dynamodb.model.transform.*;
-import com.michelboudreau.alternator.models.Item;
+import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
 import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
@@ -10,8 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 class AlternatorDBHandler {
 
@@ -70,30 +72,48 @@ class AlternatorDBHandler {
 	}
 
 	protected Object createTable(CreateTableRequest request) {
+		// table limit of 256
+		if (this.tables.size() >= Limits.TABLE_MAX) {
+			return new LimitExceededException("Cannot exceed 256 tables per account.");
+		}
+
+		// Validate data coming in
 		CreateTableRequestValidator validator = new CreateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
-		if (errors.size() == 0) {
-			// make sure request is filled properly
-			String tableName = request.getTableName();
-			KeySchemaElement hashKey = request.getKeySchema().getHashKeyElement();
-			KeySchemaElement rangeKey = request.getKeySchema().getRangeKeyElement();
-			String rangeKeyName = null;
-			String rangeKeyType = null;
-			if (rangeKey != null) {
-				rangeKeyName = rangeKey.getAttributeName();
-				rangeKeyType = rangeKey.getAttributeType();
-			}
-
-			if (!this.tables.containsKey(tableName)) {
-				Table table = new Table(hashKey.getAttributeName(), rangeKeyName, tableName, hashKey.getAttributeType(), rangeKeyType);
-				this.tables.put(tableName, table);
-			} else {
-				// TODO: create error
-			}
-			return new CreateTableResult();
-		} else {
+		if (errors.size() != 0) {
 			return createInternalServerEception(errors);
 		}
+
+		// get information
+		String tableName = request.getTableName();
+		KeySchemaElement hashKey = request.getKeySchema().getHashKeyElement();
+		KeySchemaElement rangeKey = request.getKeySchema().getRangeKeyElement();
+		String rangeKeyName = null;
+		String rangeKeyType = null;
+		if (rangeKey != null) {
+			rangeKeyName = rangeKey.getAttributeName();
+			rangeKeyType = rangeKey.getAttributeType();
+		}
+
+		// Check to make sure table with same name doesn't exist
+		if (this.tables.containsKey(tableName)) {
+			return new ResourceInUseException("The table you're currently trying to create (" + tableName + ") is already available.");
+		}
+
+		// Add table to map
+		this.tables.put(tableName, new Table(hashKey.getAttributeName(), rangeKeyName, tableName, hashKey.getAttributeType(), rangeKeyType));
+		CreateTableResult result = new CreateTableResult();
+		TableDescription desc = new TableDescription();
+		desc.setCreationDateTime(new Date());
+		desc.setKeySchema(request.getKeySchema());
+		desc.setTableName(tableName);
+		desc.setTableStatus(TableStatus.ACTIVE); // Set active right away since we don't need to wait
+		ProvisionedThroughputDescription throughputDescription = new ProvisionedThroughputDescription();
+		throughputDescription.setReadCapacityUnits(request.getProvisionedThroughput().getReadCapacityUnits());
+		throughputDescription.setWriteCapacityUnits(request.getProvisionedThroughput().getWriteCapacityUnits());
+		desc.setProvisionedThroughput(throughputDescription);
+		result.setTableDescription(desc);
+		return result;
 	}
 
 	protected Object describeTable(DescribeTableRequest request) {
@@ -355,7 +375,7 @@ class AlternatorDBHandler {
 	protected InternalServerErrorException createInternalServerEception(List<Error> errors) {
 		String message = "The following Errors occured: ";
 		for (Error error : errors) {
-			message += error.getMessage()+"\n";
+			message += error.getMessage() + "\n";
 		}
 		return new InternalServerErrorException(message);
 	}
