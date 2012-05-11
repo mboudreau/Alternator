@@ -1,8 +1,10 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
+import com.amazonaws.services.dynamodb.model.*;
 import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.MapUnmarshaller;
+import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
 import org.codehaus.jackson.JsonToken;
 
@@ -16,25 +18,25 @@ public class UpdateTableRequestJsonUnmarshaller implements Unmarshaller<UpdateTa
 
         JsonToken token = context.currentToken;
         if (token == null) token = context.nextToken();
-/*
         while (true) {
             if (token == null) break;
 
-            if (token == FIELD_NAME || token == START_OBJECT) {
-                if (context.testExpression("Items", targetDepth)) {
-                    request.setItem(new MapUnmarshaller<String,AttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), AttributeValueJsonUnmarshaller.getInstance()).unmarshall(context));
-                }
-	            if (context.testExpression("TableName", targetDepth)) {
+            if (token == JsonToken.FIELD_NAME || token == JsonToken.START_OBJECT) {
+                if (context.testExpression("TableName", targetDepth)) {
+                    context.nextToken();
                     request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
                 }
-	             if (context.testExpression("ExpectedAttributeValue", targetDepth)) {
-                   *//* putItemRequest.setExpected(new MapUnmarshaller<String,ExpectedAttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), Expect.getInstance()).unmarshall(context));*//*
+                if (context.testExpression("ProvisionedThroughput", targetDepth)) {
+                    ProvisionedThroughput pr = new ProvisionedThroughput();
+                    pr.setReadCapacityUnits(new MapUnmarshaller<String, Long>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), SimpleTypeJsonUnmarshallers.LongJsonUnmarshaller.getInstance()).unmarshall(context).get("ReadCapacityUnits"));
+                    pr.setWriteCapacityUnits(new MapUnmarshaller<String, Long>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), SimpleTypeJsonUnmarshallers.LongJsonUnmarshaller.getInstance()).unmarshall(context).get("WriteCapacityUnits"));
+                    request.setProvisionedThroughput(pr);
                 }
-            } else if (token == END_ARRAY || token == END_OBJECT) {
+            } else if (token == JsonToken.END_ARRAY || token == JsonToken.END_OBJECT) {
                 if (context.getCurrentDepth() <= originalDepth) break;
             }
             token = context.nextToken();
-        }*/
+        }
 
         return request;
     }

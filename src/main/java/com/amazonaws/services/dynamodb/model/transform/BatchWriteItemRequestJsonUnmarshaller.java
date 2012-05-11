@@ -1,10 +1,10 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
 import com.amazonaws.services.dynamodb.model.BatchWriteItemRequest;
-import com.amazonaws.transform.JsonUnmarshallerContext;
-import com.amazonaws.transform.Unmarshaller;
+import com.amazonaws.transform.*;
 import org.codehaus.jackson.JsonToken;
+import com.amazonaws.services.dynamodb.model.*;
+import java.util.List;
 
 public class BatchWriteItemRequestJsonUnmarshaller implements Unmarshaller<BatchWriteItemRequest, JsonUnmarshallerContext> {
 
@@ -16,25 +16,19 @@ public class BatchWriteItemRequestJsonUnmarshaller implements Unmarshaller<Batch
 
         JsonToken token = context.currentToken;
         if (token == null) token = context.nextToken();
-/*
+
         while (true) {
             if (token == null) break;
 
-            if (token == FIELD_NAME || token == START_OBJECT) {
-                if (context.testExpression("Items", targetDepth)) {
-                    request.setItem(new MapUnmarshaller<String,AttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), AttributeValueJsonUnmarshaller.getInstance()).unmarshall(context));
+            if (token == JsonToken.FIELD_NAME || token == JsonToken.START_OBJECT) {
+                if (context.testExpression("RequestItems", targetDepth)) {
+                    request.setRequestItems(new MapUnmarshaller<String, List<WriteRequest>>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), new ListUnmarshaller<WriteRequest>(WriteRequestJsonUnmarshaller.getInstance())).unmarshall(context));
                 }
-	            if (context.testExpression("TableName", targetDepth)) {
-                    request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
-                }
-	             if (context.testExpression("ExpectedAttributeValue", targetDepth)) {
-                   *//* putItemRequest.setExpected(new MapUnmarshaller<String,ExpectedAttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), Expect.getInstance()).unmarshall(context));*//*
-                }
-            } else if (token == END_ARRAY || token == END_OBJECT) {
+            } else if (token == JsonToken.END_ARRAY || token == JsonToken.END_OBJECT) {
                 if (context.getCurrentDepth() <= originalDepth) break;
             }
             token = context.nextToken();
-        }*/
+        }
 
         return request;
     }

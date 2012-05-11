@@ -1,10 +1,15 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
 import com.amazonaws.services.dynamodb.model.DeleteItemRequest;
-import com.amazonaws.services.dynamodb.model.UpdateItemRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.MapUnmarshaller;
+import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
 import org.codehaus.jackson.JsonToken;
+import com.amazonaws.services.dynamodb.model.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DeleteItemRequestJsonUnmarshaller implements Unmarshaller<DeleteItemRequest, JsonUnmarshallerContext> {
 
@@ -16,25 +21,28 @@ public class DeleteItemRequestJsonUnmarshaller implements Unmarshaller<DeleteIte
 
         JsonToken token = context.currentToken;
         if (token == null) token = context.nextToken();
-/*
+
         while (true) {
             if (token == null) break;
 
-            if (token == FIELD_NAME || token == START_OBJECT) {
-                if (context.testExpression("Items", targetDepth)) {
-                    request.setItem(new MapUnmarshaller<String,AttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), AttributeValueJsonUnmarshaller.getInstance()).unmarshall(context));
+            if (token == JsonToken.FIELD_NAME || token == JsonToken.START_OBJECT) {
+                if (context.testExpression("Expected", targetDepth)) {
+                    Map<String, AttributeValue> map = new MapUnmarshaller<String, AttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), AttributeValueJsonUnmarshaller.getInstance()).unmarshall(context);
+                    Map<String, ExpectedAttributeValue> expected = new HashMap<String,ExpectedAttributeValue>();
+                    for(String key : map.keySet()){
+                        ExpectedAttributeValue value = new ExpectedAttributeValue();
+                        value.setValue(map.get(key));
+                        value.setExists(true);
+                        expected.put(key,value);
+                    }
+                    request.setExpected(expected);
                 }
-	            if (context.testExpression("TableName", targetDepth)) {
-                    request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
-                }
-	             if (context.testExpression("ExpectedAttributeValue", targetDepth)) {
-                   *//* putItemRequest.setExpected(new MapUnmarshaller<String,ExpectedAttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), Expect.getInstance()).unmarshall(context));*//*
-                }
-            } else if (token == END_ARRAY || token == END_OBJECT) {
+
+            } else if (token == JsonToken.END_ARRAY || token == JsonToken.END_OBJECT) {
                 if (context.getCurrentDepth() <= originalDepth) break;
             }
             token = context.nextToken();
-        }*/
+        }
 
         return request;
     }

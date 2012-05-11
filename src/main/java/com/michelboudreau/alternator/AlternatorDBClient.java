@@ -29,14 +29,11 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 	 * Long-term credentials used to obtain the session credentials provider
 	 */
 	/*private AWSCredentials longTermCredentials;*/
-
 	private static final Log log = LogFactory.getLog(AlternatorDBClient.class);
-
 	/**
 	 * List of exception unmarshallers for all AmazonDynamoDB exceptions.
 	 */
 	protected List<Unmarshaller<AmazonServiceException, JSONObject>> exceptionUnmarshallers;
-
 
 	/**
 	 * AWS signer for authenticating requests.
