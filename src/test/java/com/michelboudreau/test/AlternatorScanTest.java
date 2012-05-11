@@ -223,6 +223,13 @@ public class AlternatorScanTest {
             lastKeyEvaluated = result.getLastEvaluatedKey();
         } while (lastKeyEvaluated != null);
     }
+    @Test
+    public void scanWithoutTableNameTest() {
+        ScanRequest request = getBasicReq();
+        request.setTableName(null);
+        ScanResult result = client.scan(request);
+        Assert.assertNull(result.getItems());
+    }
 
     public ScanRequest getBasicReq() {
         ScanRequest req = new ScanRequest();

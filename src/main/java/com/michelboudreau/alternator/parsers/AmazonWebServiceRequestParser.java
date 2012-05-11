@@ -10,6 +10,7 @@ import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.Unmarshaller;
 import com.michelboudreau.alternator.enums.RequestType;
 import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class AmazonWebServiceRequestParser {
 	public <T extends AmazonWebServiceRequest> T getData(Class<T> clazz, Unmarshaller<T, JsonUnmarshallerContext> unmarshaller) {
 		ObjectMapper mapper = new ObjectMapper();
 		String json = getPostString();
-		if (json != null) {
+        if (json != null) {
 			try {
 				JsonParser jsonParser = jsonFactory.createJsonParser(json);
 				try {

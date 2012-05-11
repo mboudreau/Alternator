@@ -100,9 +100,56 @@ public class AlternatorItemTest {
         Assert.assertNull(client.batchGetItem(new BatchGetItemRequest()).getResponses());
     }
     @Test
-    public void delete() {
-        Assert.assertNull(client.batchGetItem(new BatchGetItemRequest()).getResponses());
+    public void deleteItemWithoutTableNameTest() {
+        DeleteItemRequest delete = new DeleteItemRequest();
+        delete.setKey(getHashKey());
+        Assert.assertNull(client.deleteItem(delete).getAttributes());
     }
+    @Test
+    public void deleteItemWithoutKeyTest() {
+        DeleteItemRequest delete = new DeleteItemRequest();
+        delete.setTableName(testTableName);
+        Assert.assertNull(client.deleteItem(delete).getAttributes());
+    }
+    @Test
+    public void getItemWithoutTableNameTest() {
+        GetItemRequest request = new GetItemRequest();
+        request.setKey(new Key().withHashKeyElement(new AttributeValue().withNS("123")));
+        GetItemResult res = client.getItem(request);
+        Assert.assertNull(res.getItem());
+    }
+    @Test
+    public void getItemWithoutKeyTest() {
+        GetItemRequest request = new GetItemRequest();
+        request.setTableName(testTableName);
+        GetItemResult res = client.getItem(request);
+        Assert.assertNull(res.getItem());
+    }
+    @Test
+    public void putItemWithoutTableNameTest() {
+        PutItemRequest req = new PutItemRequest();
+        req.setItem(generateStaticItem());
+        Assert.assertNull(client.putItem(req).getAttributes());
+    }
+    @Test
+    public void putItemWithoutitemTest() {
+        PutItemRequest req = new PutItemRequest();
+        req.setTableName(testTableName);
+        Assert.assertNull(client.putItem(req).getAttributes());
+    }
+    @Test
+    public void updateItemWithoutTableNameTest() {
+        UpdateItemRequest req = new UpdateItemRequest();
+        req.setKey(getHashKey());
+        Assert.assertNull(client.updateItem(req).getAttributes());
+    }
+    @Test
+    public void updateItemWithoutKeyTest() {
+        UpdateItemRequest req = new UpdateItemRequest();
+        req.setTableName(testTableName);
+        Assert.assertNull(client.updateItem(req).getAttributes());
+    }
+
 
 
     public BatchGetItemRequest generateGetBatchRequest(){
@@ -175,6 +222,7 @@ public class AlternatorItemTest {
     public void getItemTest() {
         GetItemRequest request = new GetItemRequest();
         request.setKey(new Key().withHashKeyElement(new AttributeValue().withNS("123")));
+        request.setTableName(testTableName);
         GetItemResult res = client.getItem(request);
         Assert.assertEquals(res.getItem(), generateStaticItem());
     }
@@ -184,6 +232,7 @@ public class AlternatorItemTest {
     public void getNewItemTest() {
         GetItemRequest request = new GetItemRequest();
         request.setKey(new Key().withHashKeyElement(new AttributeValue().withNS("123")));
+        request.setTableName(testTableName);
         GetItemResult res = client.getItem(request);
         Assert.assertEquals(res.getItem(),generateNewStaticItem());
     }

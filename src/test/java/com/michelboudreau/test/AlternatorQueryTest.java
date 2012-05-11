@@ -195,6 +195,13 @@ public class AlternatorQueryTest {
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getCount().intValue(),1);
     }
+    @Test
+    public void queryWithoutTableNameTest() {
+        QueryRequest request = getBasicReq();
+        request.setTableName(null);
+        QueryResult result = client.query(request);
+        Assert.assertNull(result.getItems());
+    }
 
     public QueryRequest getBasicReq(){
         QueryRequest req = new QueryRequest();
