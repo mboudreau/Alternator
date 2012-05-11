@@ -77,16 +77,39 @@ public class AlternatorItemTest {
         Assert.assertNotNull(result);
     }
 
+    @Test
+    public void batchGetItemInTableWithoutKeyTest() {
+        BatchGetItemRequest batchGetItemRequest = new BatchGetItemRequest();
+        Map<String, KeysAndAttributes> requestItems = new HashMap<String, KeysAndAttributes>();
+        requestItems.put(testTableName,null);
+        batchGetItemRequest.withRequestItems(requestItems);
+        Assert.assertNull(client.batchGetItem(batchGetItemRequest).getResponses());
+    }
+
+    @Test
+    public void batchGetItemInTableWithoutNameTest() {
+        BatchGetItemRequest batchGetItemRequest = new BatchGetItemRequest();
+        Map<String, KeysAndAttributes> requestItems = new HashMap<String, KeysAndAttributes>();
+        Key table1key1 = new Key().withHashKeyElement(new AttributeValue().withS("123"));
+        requestItems.put(null,new KeysAndAttributes().withKeys(table1key1));
+        batchGetItemRequest.withRequestItems(requestItems);
+        Assert.assertNull(client.batchGetItem(batchGetItemRequest).getResponses());
+    }
+    @Test
+    public void batchGetItemInTableWithoutRequestItemsTest() {
+        Assert.assertNull(client.batchGetItem(new BatchGetItemRequest()).getResponses());
+    }
+    @Test
+    public void delete() {
+        Assert.assertNull(client.batchGetItem(new BatchGetItemRequest()).getResponses());
+    }
+
 
     public BatchGetItemRequest generateGetBatchRequest(){
         BatchGetItemRequest batchGetItemRequest = new BatchGetItemRequest();
         Map<String, KeysAndAttributes> requestItems = new HashMap<String, KeysAndAttributes>();
         Key table1key1 = new Key().withHashKeyElement(new AttributeValue().withS("123"));
-        requestItems.put(testTableName,
-                new KeysAndAttributes()
-                        .withKeys(table1key1));
-
-
+        requestItems.put(testTableName,new KeysAndAttributes().withKeys(table1key1));
         batchGetItemRequest.withRequestItems(requestItems);
         return batchGetItemRequest;
     }
