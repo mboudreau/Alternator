@@ -4,6 +4,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,28 +25,100 @@ public class ValidatorUtils {
 		}
 	}
 
-	public static List<Error> rejectIfNullOrEmptyOrWhitespace(List<Error> errors,String property) {
-        if(property==null) {
-            errors.add(new Error("property value is null or empty"));
-        }else if (property.replaceAll(" ","").equals("")){
-            errors.add(new Error("property value is null or empty"));
-        }
-        return errors;
+	public static <T> List<Error> rejectIfNull(T property) {
+		List<Error> errors = new ArrayList<Error>();
+		if (property == null) {
+			errors.add(new Error("property value is null"));
+		}
+		return errors;
 	}
 
-    public static List<Error> rejectIfDoesntMatchRegex(List<Error> errors,String property,String regex) {
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(property);
-        if (!m.matches()  ) {
-            errors.add(new Error("property doesn't match provided regex : " +regex));
-        }
-        return errors;
-    }
+	public static <T> List<Error> rejectIfEmpty(T property) {
+		List<Error> errors = new ArrayList<Error>();
+		Boolean empty = false;
+		if (property instanceof String) {
+			String string = (String) property;
+			empty = string.length() == 0;
+		} else if (property.getClass().isArray()) {
+			T[] array = (T[]) property;
+			empty = array.length == 0;
+		} else if (property instanceof Collection) {
+			Collection<?> coll = (Collection) property;
+			empty = coll.size() == 0;
+		} else {
+			errors.add(new Error("The property type is not recognized"));
+		}
 
-    public static List<Error> rejectIfSizeOutOfBounds(List<Error> errors, String property,int min,int max) {
-        if (!(property.length() <= max) || !(property.length() >= min)) {
-            errors.add(new Error("property is out of provided bounds."));
-        }
-        return errors;
-    }
+		if (empty) {
+			errors.add(new Error("property value is empty"));
+		}
+		return errors;
+	}
+
+	public static <T> List<Error> rejectIfWhitespace(T property) {
+		List<Error> errors = new ArrayList<Error>();
+		Boolean empty = false;
+		if (property instanceof String) {
+			String string = (String) property;
+			string = string.trim();
+			empty = string.length() == 0;
+		} else {
+			errors.add(new Error("The property type is not recognized"));
+		}
+
+		if (empty) {
+			errors.add(new Error("property value is empty"));
+		}
+		return errors;
+	}
+
+	public static <T> List<Error> rejectIfNullOrEmptyOrWhitespace(T property) {
+		List<Error> errors = rejectIfNull(property);
+		if (errors.size() == 0) {
+			errors = rejectIfEmpty(property);
+			if (errors.size() == 0) {
+				errors = rejectIfWhitespace(property);
+			}
+		}
+		return errors;
+	}
+
+	public static <T> List<Error> rejectIfNotMatchRegex(T property, String regex) {
+		List<Error> errors = new ArrayList<Error>();
+		if (property instanceof String) {
+			String string = (String) property;
+			Pattern p = Pattern.compile(regex);
+			Matcher m = p.matcher(string);
+			if (!m.matches()) {
+				errors.add(new Error("property is out of bounds of regex: " + regex));
+			}
+		} else {
+			errors.add(new Error("The property type is not recognized"));
+		}
+
+		return errors;
+	}
+
+	public static <T> List<Error> rejectIfSizeOutOfBounds(T property, int min, int max) {
+		List<Error> errors = new ArrayList<Error>();
+		Boolean outOfBounds = false;
+		if (property instanceof String) {
+			String string = (String) property;
+			outOfBounds = (string.length() < min || string.length() > max);
+		} else if (property.getClass().isArray()) {
+			T[] array = (T[]) property;
+			outOfBounds = (array.length < min || array.length > max);
+		} else if (property instanceof Collection) {
+			Collection<?> coll = (Collection) property;
+			outOfBounds = (coll.size() < min || coll.size() > max);
+		} else {
+			errors.add(new Error("The property type is not recognized"));
+		}
+
+		if (outOfBounds) {
+			errors.add(new Error("property is out of provided bounds."));
+		}
+
+		return errors;
+	}
 }

@@ -26,6 +26,7 @@ public class CreateTableRequestJsonUnmarshaller implements Unmarshaller<CreateTa
 
 			if (token == FIELD_NAME || token == START_OBJECT) {
 				if (context.testExpression("TableName", targetDepth)) {
+					context.nextToken();
 					request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
 				}
 				if (context.testExpression("KeySchema", targetDepth)) {

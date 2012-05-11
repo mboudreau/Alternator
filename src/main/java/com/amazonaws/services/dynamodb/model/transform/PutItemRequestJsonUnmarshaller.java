@@ -31,6 +31,7 @@ public class PutItemRequestJsonUnmarshaller implements Unmarshaller<PutItemReque
                     request.setItem(new MapUnmarshaller<String, AttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), AttributeValueJsonUnmarshaller.getInstance()).unmarshall(context));
                 }
 	            if (context.testExpression("TableName", targetDepth)) {
+		            context.nextToken();
                     request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
                 }
 	             if (context.testExpression("ExpectedAttributeValue", targetDepth)) {

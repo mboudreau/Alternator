@@ -8,7 +8,6 @@ import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
 import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -70,46 +69,50 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	protected CreateTableResult createTable(CreateTableRequest request) {
+	protected Object createTable(CreateTableRequest request) {
 		CreateTableRequestValidator validator = new CreateTableRequestValidator();
-		// make sure request is filled properly
-		String tableName = request.getTableName();
-		KeySchemaElement hashKey = request.getKeySchema().getHashKeyElement();
-		KeySchemaElement rangeKey = request.getKeySchema().getRangeKeyElement();
-		String rangeKeyName = null;
-		String rangeKeyType = null;
-		if (rangeKey != null) {
-			rangeKeyName = rangeKey.getAttributeName();
-			rangeKeyType = rangeKey.getAttributeType();
-		}
+		List<Error> errors = validator.validate(request);
+		if (errors.size() == 0) {
+			// make sure request is filled properly
+			String tableName = request.getTableName();
+			KeySchemaElement hashKey = request.getKeySchema().getHashKeyElement();
+			KeySchemaElement rangeKey = request.getKeySchema().getRangeKeyElement();
+			String rangeKeyName = null;
+			String rangeKeyType = null;
+			if (rangeKey != null) {
+				rangeKeyName = rangeKey.getAttributeName();
+				rangeKeyType = rangeKey.getAttributeType();
+			}
 
-		if (getTable(tableName) == null) {
-			Table table = new Table(hashKey.getAttributeName(), rangeKeyName, tableName, hashKey.getAttributeType(), rangeKey.getAttributeType());
-			this.tables.add(table);
+			if (getTable(tableName) == null) {
+				Table table = new Table(hashKey.getAttributeName(), rangeKeyName, tableName, hashKey.getAttributeType(), rangeKeyType);
+				this.tables.add(table);
+			} else {
+				// TODO: create error
+			}
+			return new CreateTableResult();
 		} else {
-			// TODO: create error
+			return createInternalServerEception(errors);
 		}
-
-		return new CreateTableResult();
 	}
 
-	protected DescribeTableResult describeTable(DescribeTableRequest request) {
+	protected Object describeTable(DescribeTableRequest request) {
 		return new DescribeTableResult();
 	}
 
-	protected ListTablesResult listTables(ListTablesRequest request) {
+	protected Object listTables(ListTablesRequest request) {
 		return new ListTablesResult();
 	}
 
-	protected UpdateTableResult updateTable(UpdateTableRequest request) {
+	protected Object updateTable(UpdateTableRequest request) {
 		return new UpdateTableResult();
 	}
 
-	protected DeleteTableResult deleteTable(DeleteTableRequest request) {
+	protected Object deleteTable(DeleteTableRequest request) {
 		return new DeleteTableResult();
 	}
 
-	protected PutItemResult putItem(PutItemRequest request) {
+	protected Object putItem(PutItemRequest request) {
 		/*try {
 			JsonNode actualObj = data.getData();
 			String tableName = actualObj.path("TableName").getTextValue();
@@ -144,7 +147,7 @@ class AlternatorDBHandler {
 		return new PutItemResult();
 	}
 
-	protected GetItemResult getItem(GetItemRequest request) {
+	protected Object getItem(GetItemRequest request) {
 		String key = null;
 		String tableName = null;
 		Map<String, Object> response = new HashMap<String, Object>();
@@ -180,23 +183,23 @@ class AlternatorDBHandler {
 		return new GetItemResult();
 	}
 
-	protected UpdateItemResult updateItem(UpdateItemRequest request) {
+	protected Object updateItem(UpdateItemRequest request) {
 		return new UpdateItemResult();
 	}
 
-	protected DeleteItemResult deleteItem(DeleteItemRequest request) {
+	protected Object deleteItem(DeleteItemRequest request) {
 		return new DeleteItemResult();
 	}
 
-	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
+	protected Object batchGetItem(BatchGetItemRequest request) {
 		return new BatchGetItemResult();
 	}
 
-	protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
+	protected Object batchWriteItem(BatchWriteItemRequest request) {
 		return new BatchWriteItemResult();
 	}
 
-	protected ScanResult scan(ScanRequest request) {
+	protected Object scan(ScanRequest request) {
 		/*List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
 		Map<String, Object> map = new HashMap<String, Object>();
 		JsonNode data = obj.getData();
@@ -274,7 +277,7 @@ class AlternatorDBHandler {
 		return new ScanResult();
 	}
 
-	public QueryResult query(QueryRequest request) {
+	public Object query(QueryRequest request) {
 		/*List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
 		Map<String, Object> map = new HashMap<String, Object>();
 		JsonNode data = obj.getData();
@@ -347,6 +350,14 @@ class AlternatorDBHandler {
 		System.out.println(map.toString());
 		return map;*/
 		return new QueryResult();
+	}
+
+	protected InternalServerErrorException createInternalServerEception(List<Error> errors) {
+		String message = "The following Errors occured: ";
+		for (Error error : errors) {
+			message += error.getMessage()+"\n";
+		}
+		return new InternalServerErrorException(message);
 	}
 
 	protected Table getTable(String tableName) {
