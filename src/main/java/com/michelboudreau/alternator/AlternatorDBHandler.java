@@ -16,7 +16,7 @@ import java.util.*;
 class AlternatorDBHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(AlternatorDBHandler.class);
-	private List<Table> tables = new ArrayList<Table>();
+	private Map<String, Table> tables = new HashMap<String, Table>();
 
 	public AlternatorDBHandler() {
 		// Should we save the results
@@ -84,9 +84,9 @@ class AlternatorDBHandler {
 				rangeKeyType = rangeKey.getAttributeType();
 			}
 
-			if (getTable(tableName) == null) {
+			if (!this.tables.containsKey(tableName)) {
 				Table table = new Table(hashKey.getAttributeName(), rangeKeyName, tableName, hashKey.getAttributeType(), rangeKeyType);
-				this.tables.add(table);
+				this.tables.put(tableName, table);
 			} else {
 				// TODO: create error
 			}
@@ -358,66 +358,5 @@ class AlternatorDBHandler {
 			message += error.getMessage()+"\n";
 		}
 		return new InternalServerErrorException(message);
-	}
-
-	protected Table getTable(String tableName) {
-		for (Table table : this.tables) {
-			if (tableName.equals(table.getName())) {
-				return table;
-			}
-		}
-		return null;
-	}
-
-	protected Item findItemByAttributes(HashMap<String, Map<String, String>> attr, String tableName) {
-		Item result = null;
-		for (Table table : this.tables) {
-			if (tableName.equals(table.getName())) {
-				if (table.getItems() != null) {
-					for (Item itm : table.getItems()) {
-						if (valuesFromAttributes(attr).equals(valuesFromAttributes(itm.getAttributes()))) {
-							result = itm;
-						}
-					}
-				}
-			}
-		}
-		return result;
-	}
-
-	protected List<Item> findItemByKey(String key, String tableName) throws IOException {
-		List<Item> result = new ArrayList<Item>();
-		for (Table table : this.tables) {
-			if (tableName.equals(table.getName())) {
-				if (table.getItems() != null) {
-					for (Item itm : table.getItems()) {
-						if (key != null) {
-							if (!itm.getAttributes().get(table.getHashKey()).get("S").isEmpty()) {
-								if (key.equals(itm.getAttributes().get(table.getHashKey()).get("S"))) {
-									result.add(itm);
-								}
-							} else if (!itm.getAttributes().get(table.getHashKey()).get("N").isEmpty()) {
-								if (key.equals(itm.getAttributes().get(table.getHashKey()).get("N"))) {
-									result.add(itm);
-								}
-							}
-						} else {
-							throw new IOException("bad requests in findItemByKey");
-						}
-					}
-				}
-			}
-		}
-		return result;
-	}
-
-	protected HashSet<String> valuesFromAttributes(HashMap<String, Map<String, String>> map) {
-		HashSet<String> result = new HashSet<String>();
-		for (Map<String, String> mp : map.values()) {
-			for (String attr : mp.values()) {
-				result.add(attr);
-			}
-		}
-		return result;
 	}
 }
