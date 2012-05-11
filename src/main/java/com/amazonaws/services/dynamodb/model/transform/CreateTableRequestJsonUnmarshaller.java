@@ -26,7 +26,7 @@ public class CreateTableRequestJsonUnmarshaller implements Unmarshaller<CreateTa
 		while (true) {
 			if (token == null) break;
 
-			if (token == FIELD_NAME || token == START_OBJECT) {
+			if (token == FIELD_NAME /*|| token == START_OBJECT*/) {
 				if (context.testExpression("TableName", targetDepth)) {
 					context.nextToken();
 					request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
@@ -35,10 +35,7 @@ public class CreateTableRequestJsonUnmarshaller implements Unmarshaller<CreateTa
 					request.setKeySchema(KeySchemaJsonUnmarshaller.getInstance().unmarshall(context));
 				}
                 if (context.testExpression("ProvisionedThroughput", targetDepth)) {
-                    ProvisionedThroughput pr = new ProvisionedThroughput();
-                    pr.setReadCapacityUnits(new MapUnmarshaller<String, Long>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), SimpleTypeJsonUnmarshallers.LongJsonUnmarshaller.getInstance()).unmarshall(context).get("ReadCapacityUnits"));
-                    pr.setWriteCapacityUnits(new MapUnmarshaller<String, Long>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), SimpleTypeJsonUnmarshallers.LongJsonUnmarshaller.getInstance()).unmarshall(context).get("WriteCapacityUnits"));
-                    request.setProvisionedThroughput(pr);
+	                request.setProvisionedThroughput(ProvisionedThroughputJsonUnmarshaller.getInstance().unmarshall(context));
                 }
 			} else if (token == END_ARRAY || token == END_OBJECT) {
 				if (context.getCurrentDepth() <= originalDepth) break;

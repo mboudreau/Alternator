@@ -28,7 +28,8 @@ class AlternatorDBController {
 	@RequestMapping(method = RequestMethod.POST, consumes = "application/x-amz-json-1.0")
 	@ResponseBody
 	public Object alternatorDBController(HttpServletRequest request) {
-		return handler.handle(request);
+		Object obj = handler.handle(request);
+		return obj;
 	}
 
 	/*@ResponseStatus(HttpStatus.OK)

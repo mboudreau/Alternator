@@ -40,11 +40,11 @@ public class AlternatorTableTest {
 	public void createTableWithHashKeySTest() {
 		KeySchema schema = new KeySchema();
 		schema.setHashKeyElement(getSSchema());
-
-		TableDescription res = client.createTable(getRequest(schema)).getTableDescription();
-		Assert.assertNotNull(res);
-		Assert.assertEquals(res.getKeySchema(), schema);
-		Assert.assertEquals(res.getTableName(), testTableName);
+		CreateTableResult result = client.createTable(getRequest(schema));
+		TableDescription desc = result.getTableDescription();
+		Assert.assertNotNull(desc);
+		Assert.assertEquals(desc.getKeySchema(), schema);
+		Assert.assertEquals(desc.getTableName(), testTableName);
 		testAfterCreatingTable();
 	}
 
