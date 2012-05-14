@@ -1,9 +1,7 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
 import com.amazonaws.services.dynamodb.model.AttributeValue;
-import com.amazonaws.services.dynamodb.model.ExpectedAttributeValue;
 import com.amazonaws.services.dynamodb.model.PutItemRequest;
-import com.amazonaws.services.dynamodb.model.PutItemResult;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.MapUnmarshaller;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;

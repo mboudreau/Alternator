@@ -1,7 +1,5 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
-import com.amazonaws.services.dynamodb.model.KeysAndAttributes;
 import com.amazonaws.transform.*;
 import org.codehaus.jackson.JsonToken;
 import com.amazonaws.services.dynamodb.model.*;

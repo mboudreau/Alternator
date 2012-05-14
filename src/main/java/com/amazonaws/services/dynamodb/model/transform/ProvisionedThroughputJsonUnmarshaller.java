@@ -1,9 +1,7 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
 import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
 import com.amazonaws.transform.JsonUnmarshallerContext;
-import com.amazonaws.transform.MapUnmarshaller;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
 import org.codehaus.jackson.JsonToken;

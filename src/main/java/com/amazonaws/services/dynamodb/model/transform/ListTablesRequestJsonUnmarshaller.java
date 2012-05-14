@@ -1,6 +1,5 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodb.model.ListTablesRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;

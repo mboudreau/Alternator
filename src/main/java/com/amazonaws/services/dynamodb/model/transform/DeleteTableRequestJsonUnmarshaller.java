@@ -1,7 +1,6 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
 import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
-import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;

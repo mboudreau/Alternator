@@ -6,7 +6,6 @@ import com.amazonaws.transform.ListUnmarshaller;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
 import org.codehaus.jackson.JsonToken;
-import com.amazonaws.services.dynamodb.model.*;
 
 
 public class QueryRequestJsonUnmarshaller implements Unmarshaller<QueryRequest, JsonUnmarshallerContext> {

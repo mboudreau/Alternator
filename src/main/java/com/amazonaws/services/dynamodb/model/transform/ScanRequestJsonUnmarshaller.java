@@ -1,6 +1,5 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.QueryRequest;
 import com.amazonaws.services.dynamodb.model.ScanRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.ListUnmarshaller;

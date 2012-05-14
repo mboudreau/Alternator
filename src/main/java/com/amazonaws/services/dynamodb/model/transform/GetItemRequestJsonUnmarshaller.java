@@ -1,13 +1,8 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.Key;
-import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.GetItemRequest;
 import com.amazonaws.transform.*;
 import org.codehaus.jackson.JsonToken;
-
-import java.util.Map;
-import java.util.HashMap;
 
 public class GetItemRequestJsonUnmarshaller implements Unmarshaller<GetItemRequest, JsonUnmarshallerContext> {
 

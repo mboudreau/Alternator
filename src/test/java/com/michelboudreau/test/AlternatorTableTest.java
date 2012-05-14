@@ -26,9 +26,7 @@ public class AlternatorTableTest {
 	@Before
 	public void setUp() throws Exception {
 		db = new AlternatorDB().start();
-		client.setEndpoint("http://localhost:9090");
 		testTableName = "Testing";
-        System.out.println("Before");
 	}
 
 	@After
@@ -46,7 +44,6 @@ public class AlternatorTableTest {
 		Assert.assertNotNull(desc);
 		Assert.assertEquals(desc.getKeySchema(), schema);
 		Assert.assertEquals(desc.getTableName(), testTableName);
-		testAfterCreatingTable();
 	}
 
 	@Test
@@ -57,7 +54,6 @@ public class AlternatorTableTest {
 		Assert.assertNotNull(res);
 		Assert.assertEquals(res.getKeySchema(), schema);
 		Assert.assertEquals(res.getTableName(), testTableName);
-		testAfterCreatingTable();
 	}
 
 	@Test
@@ -69,7 +65,6 @@ public class AlternatorTableTest {
 		Assert.assertNotNull(res);
 		Assert.assertEquals(res.getKeySchema(), schema);
 		Assert.assertEquals(res.getTableName(), testTableName);
-		testAfterCreatingTable();
 	}
 
 
@@ -82,8 +77,6 @@ public class AlternatorTableTest {
 		Assert.assertNotNull(res);
 		Assert.assertEquals(res.getKeySchema(), schema);
 		Assert.assertEquals(res.getTableName(), testTableName);
-		testAfterCreatingTable();
-
 	}
 
 	@Test
@@ -95,8 +88,6 @@ public class AlternatorTableTest {
 		Assert.assertNotNull(res);
 		Assert.assertEquals(res.getKeySchema(), schema);
 		Assert.assertEquals(res.getTableName(), testTableName);
-		testAfterCreatingTable();
-
 	}
 
 	@Test
@@ -108,7 +99,6 @@ public class AlternatorTableTest {
 		Assert.assertNotNull(res);
 		Assert.assertEquals(res.getKeySchema(), schema);
 		Assert.assertEquals(res.getTableName(), testTableName);
-		testAfterCreatingTable();
 	}
 
 	@Test
@@ -208,13 +198,13 @@ public class AlternatorTableTest {
 	}
 
 
-	@Ignore
+	/*@Ignore
 	@Test
 	public void testAfterCreatingTable() {
 		listTablesTest();
 		describeTableTest();
 		deleteTableTest();
-	}
+	}*/
 
 	@Ignore
 	@Test
