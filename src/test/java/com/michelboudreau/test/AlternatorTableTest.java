@@ -28,6 +28,7 @@ public class AlternatorTableTest {
 		db = new AlternatorDB().start();
 		client.setEndpoint("http://localhost:9090");
 		testTableName = "Testing";
+        System.out.println("Before");
 	}
 
 	@After
