@@ -3,10 +3,13 @@ package com.michelboudreau.alternator;
 import com.amazonaws.services.dynamodb.model.*;
 import com.amazonaws.services.dynamodb.model.transform.CreateTableRequestJsonUnmarshaller;
 import com.amazonaws.services.dynamodb.model.transform.CreateTableResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DescribeTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DescribeTableResultMarshaller;
 import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
 import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
+import com.michelboudreau.alternator.validators.DescribeTableRequestValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,41 +33,41 @@ class AlternatorDBHandler {
 		mapper.writeValue(new File(dbName), models);*/
 	}
 
-	public String handle(HttpServletRequest request) {
+	public String handle(HttpServletRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException {
 		AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
 
 		switch (parser.getType()) {
 			// Tables
 			case CREATE_TABLE:
 				return new CreateTableResultMarshaller().marshall(createTable(parser.getData(CreateTableRequest.class, CreateTableRequestJsonUnmarshaller.getInstance())));
-			/*case DESCRIBE_TABLE:
-								return describeTable(parser.getData(DescribeTableRequest.class, DescribeTableRequestJsonUnmarshaller.getInstance()));
-							case LIST_TABLES:
-								return listTables(parser.getData(ListTablesRequest.class, ListTablesRequestJsonUnmarshaller.getInstance()));
-							case UPDATE_TABLE:
-								return updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance()));
-							case DELETE_TABLE:
-								return deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance()));
+			case DESCRIBE_TABLE:
+				return new DescribeTableResultMarshaller().marshall(describeTable(parser.getData(DescribeTableRequest.class, DescribeTableRequestJsonUnmarshaller.getInstance())));
+			/*			case LIST_TABLES:
+											return listTables(parser.getData(ListTablesRequest.class, ListTablesRequestJsonUnmarshaller.getInstance()));
+										case UPDATE_TABLE:
+											return updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance()));
+										case DELETE_TABLE:
+											return deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance()));
 
-							// Items
-							case PUT:
-								return putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance()));
-							case GET:
-								return getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance()));
-							case UPDATE:
-								return updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance()));
-							case DELETE:
-								return deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance()));
-							case BATCH_GET_ITEM:
-								return batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()));
-							case BATCH_WRITE_ITEM:
-								return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
+										// Items
+										case PUT:
+											return putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance()));
+										case GET:
+											return getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance()));
+										case UPDATE:
+											return updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance()));
+										case DELETE:
+											return deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance()));
+										case BATCH_GET_ITEM:
+											return batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()));
+										case BATCH_WRITE_ITEM:
+											return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
 
-							// Operations
-							case QUERY:
-								return query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance()));
-							case SCAN:
-								return scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance()));*/
+										// Operations
+										case QUERY:
+											return query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance()));
+										case SCAN:
+											return scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance()));*/
 			default:
 				logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
 				break;
@@ -72,7 +75,7 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	protected CreateTableResult createTable(CreateTableRequest request) {
+	protected CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
 		// table limit of 256
 		if (this.tables.size() >= Limits.TABLE_MAX) {
 			throw new LimitExceededException("Cannot exceed 256 tables per account.");
@@ -87,14 +90,6 @@ class AlternatorDBHandler {
 
 		// get information
 		String tableName = request.getTableName();
-		KeySchemaElement hashKey = request.getKeySchema().getHashKeyElement();
-		KeySchemaElement rangeKey = request.getKeySchema().getRangeKeyElement();
-		String rangeKeyName = null;
-		String rangeKeyType = null;
-		if (rangeKey != null) {
-			rangeKeyName = rangeKey.getAttributeName();
-			rangeKeyType = rangeKey.getAttributeType();
-		}
 
 		// Check to make sure table with same name doesn't exist
 		if (this.tables.containsKey(tableName)) {
@@ -102,23 +97,51 @@ class AlternatorDBHandler {
 		}
 
 		// Add table to map
-		this.tables.put(tableName, new Table(hashKey.getAttributeName(), rangeKeyName, tableName, hashKey.getAttributeType(), rangeKeyType));
+		Table table = new Table(tableName, request.getKeySchema(), request.getProvisionedThroughput());
+		this.tables.put(tableName, table);
 		CreateTableResult result = new CreateTableResult();
 		TableDescription desc = new TableDescription();
-		desc.setCreationDateTime(new Date());
-		desc.setKeySchema(request.getKeySchema());
-		desc.setTableName(tableName);
-		desc.setTableStatus(TableStatus.ACTIVE); // Set active right away since we don't need to wait
-		ProvisionedThroughputDescription throughputDescription = new ProvisionedThroughputDescription();
-		throughputDescription.setReadCapacityUnits(request.getProvisionedThroughput().getReadCapacityUnits());
-		throughputDescription.setWriteCapacityUnits(request.getProvisionedThroughput().getWriteCapacityUnits());
-		desc.setProvisionedThroughput(throughputDescription);
+		desc.setCreationDateTime(table.getCreationDate());
+		desc.setKeySchema(table.getKeySchema());
+		desc.setTableName(table.getName());
+		desc.setTableStatus(table.getStatus());
+		desc.setProvisionedThroughput(getProvisionedThroughputDescription(table));
 		result.setTableDescription(desc);
 		return result;
 	}
 
-	protected Object describeTable(DescribeTableRequest request) {
-		return new DescribeTableResult();
+	protected DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+		// Validate data coming in
+		DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerEception(errors);
+		}
+
+		// get information
+		String tableName = request.getTableName();
+		DescribeTableResult result = null;
+
+		// Check to make sure table with same name doesn't exist
+		if (this.tables.containsKey(tableName)) {
+			Table table = this.tables.get(tableName);
+			result = new DescribeTableResult();
+			TableDescription desc = new TableDescription();
+			desc.setTableName(tableName);
+			desc.setTableStatus("ACTIVE");
+			desc.setItemCount(table.getItemCount());
+			desc.setTableSizeBytes(table.getSizeBytes());
+			desc.setCreationDateTime(table.getCreationDate());
+			desc.setKeySchema(table.getKeySchema());
+			ProvisionedThroughputDescription throughputDescription = getProvisionedThroughputDescription(table);
+			throughputDescription.setLastDecreaseDateTime(new Date(0));
+			throughputDescription.setLastIncreaseDateTime(new Date(0));
+			desc.setProvisionedThroughput(throughputDescription);
+			result.setTable(desc);
+		} else {
+			throw new ResourceNotFoundException("The table '" + tableName + "' does not exist.");
+		}
+		return result;
 	}
 
 	protected Object listTables(ListTablesRequest request) {
@@ -371,6 +394,13 @@ class AlternatorDBHandler {
 		System.out.println(map.toString());
 		return map;*/
 		return new QueryResult();
+	}
+
+	protected ProvisionedThroughputDescription getProvisionedThroughputDescription(Table table) {
+		ProvisionedThroughputDescription desc = new ProvisionedThroughputDescription();
+			desc.setReadCapacityUnits(table.getProvisionedThroughput().getReadCapacityUnits());
+			desc.setWriteCapacityUnits(table.getProvisionedThroughput().getWriteCapacityUnits());
+		return desc;
 	}
 
 	protected InternalServerErrorException createInternalServerEception(List<Error> errors) {

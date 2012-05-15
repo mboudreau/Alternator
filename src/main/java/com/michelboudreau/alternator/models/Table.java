@@ -1,30 +1,29 @@
 package com.michelboudreau.alternator.models;
 
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodb.model.TableStatus;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Table {
 
-	private String hashKey;
-	private String rangeKey;
-	private boolean hasRangeKey;
+	private String name;
+	private KeySchema keySchema;
+	private ProvisionedThroughput provisionedThroughput;
 	private List<String> attributes;
 	private List<Item> items;
-	private String name;
-	private String rangeKeyType;
-	private String hashKeyType;
+	private Date creationDate;
+	private final TableStatus status = TableStatus.ACTIVE;; // Set active right away since we don't need to wait
 
-	public Table() {
-
-	}
-
-	public Table(String hashKey, String rangeKey, String name, String hashKeyType, String rangeKeyType) {
-		this.hashKey = hashKey;
-		this.rangeKey = rangeKey;
+	public Table(String name, KeySchema keySchema, ProvisionedThroughput provisionedThroughput) {
 		this.name = name;
+		this.keySchema = keySchema;
+		this.provisionedThroughput = provisionedThroughput;
 		this.items = new ArrayList<Item>();
-		this.rangeKeyType = rangeKeyType;
-		this.hashKeyType = hashKeyType;
+		this.creationDate = new Date();
 	}
 
 	public List<Item> getItemsWithKey(String hashKey) {
@@ -45,115 +44,51 @@ public class Table {
 		items.remove(item);
 	}
 
-	/**
-	 * @return the hashKey
-	 */
-	public String getHashKey() {
-		return hashKey;
-	}
-
-	/**
-	 * @param hashKey the hashKey to set
-	 */
-	public void setHashKey(String hashKey) {
-		this.hashKey = hashKey;
-	}
-
-	/**
-	 * @return the rangeKey
-	 */
-	public String getRangeKey() {
-		return rangeKey;
-	}
-
-	/**
-	 * @param rangeKey the rangeKey to set
-	 */
-	public void setRangeKey(String rangeKey) {
-		this.rangeKey = rangeKey;
-	}
-
-	/**
-	 * @return the hasRangeKey
-	 */
-	public boolean isHasRangeKey() {
-		return hasRangeKey;
-	}
-
-	/**
-	 * @param hasRangeKey the hasRangeKey to set
-	 */
-	public void setHasRangeKey(boolean hasRangeKey) {
-		this.hasRangeKey = hasRangeKey;
-	}
-
-	/**
-	 * @return the attributes
-	 */
 	public List<String> getAttributes() {
 		return attributes;
 	}
 
-	/**
-	 * @param attributes the attributes to set
-	 */
 	public void setAttributes(List<String> attributes) {
 		this.attributes = attributes;
 	}
 
-	/**
-	 * @return the items
-	 */
+	public KeySchema getKeySchema() {
+		return keySchema;
+	}
+
+	public ProvisionedThroughput getProvisionedThroughput() {
+		return provisionedThroughput;
+	}
+
+	public Long getItemCount() {
+		return new Long(items.size());
+	}
+
+	public Long getSizeBytes() {
+		return new Long(items.size());
+	}
+
 	public List<Item> getItems() {
 		return items;
 	}
 
-	/**
-	 * @param items the items to set
-	 */
 	public void setItems(List<Item> items) {
 		this.items = items;
 	}
 
-	/**
-	 * @return the name
-	 */
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @param name the name to set
-	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	/**
-	 * @return the rangeKeyType
-	 */
-	public String getRangeKeyType() {
-		return rangeKeyType;
+	public Date getCreationDate() {
+		return creationDate;
 	}
 
-	/**
-	 * @param rangeKeyType the rangeKeyType to set
-	 */
-	public void setRangeKeyType(String rangeKeyType) {
-		this.rangeKeyType = rangeKeyType;
-	}
-
-	/**
-	 * @return the hashKeyType
-	 */
-	public String getHashKeyType() {
-		return hashKeyType;
-	}
-
-	/**
-	 * @param hashKeyType the hashKeyType to set
-	 */
-	public void setHashKeyType(String hashKeyType) {
-		this.hashKeyType = hashKeyType;
+	public TableStatus getStatus() {
+		return status;
 	}
 }
