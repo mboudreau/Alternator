@@ -1,0 +1,109 @@
+package com.amazonaws.services.dynamodb.model.transform;
+
+
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.transform.Marshaller;
+import com.amazonaws.util.json.JSONWriter;
+
+import java.io.StringWriter;
+
+public class UpdateTableResultMarshaller implements Marshaller<String, UpdateTableResult> {
+
+	public String marshall(UpdateTableResult describeTableResult) {
+		if (describeTableResult == null) {
+			throw new AmazonClientException("Invalid argument passed to marshall(...)");
+		}
+
+		/*
+		{"TableName":"Table1",
+    "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":15}
+}
+
+
+{"TableDescription":
+    {"CreationDateTime":1.321657838135E9,
+    "KeySchema":
+        {"HashKeyElement":{"AttributeName":"AttributeValue1","AttributeType":"S"},
+        "RangeKeyElement":{"AttributeName":"AttributeValue2","AttributeType":"N"}},
+    "ProvisionedThroughput":
+        {"LastDecreaseDateTime":1.321661704489E9,
+        "LastIncreaseDateTime":1.321663607695E9,
+        "ReadCapacityUnits":5,
+        "WriteCapacityUnits":10},
+    "TableName":"Table1",
+    "TableStatus":"UPDATING"}}
+		 */
+
+		try {
+			StringWriter stringWriter = new StringWriter();
+			JSONWriter jsonWriter = new JSONWriter(stringWriter);
+			jsonWriter.object();
+
+			/*TableDescription table = describeTableResult.getTable();
+			if (table != null) {
+				jsonWriter.key("Table").object();
+				jsonWriter.key("ItemCount").value(table.getItemCount());
+				jsonWriter.key("TableName").value(table.getTableName());
+				jsonWriter.key("TableSizeBytes").value(table.getTableSizeBytes());
+				jsonWriter.key("TableStatus").value(table.getTableStatus());
+				jsonWriter.key("CreationDateTime").value(table.getCreationDateTime().getTime());
+
+				KeySchema keySchema = table.getKeySchema();
+				if (keySchema != null) {
+					jsonWriter.key("KeySchema").object();
+					KeySchemaElement hashKeyElement = keySchema.getHashKeyElement();
+					if (hashKeyElement != null) {
+						jsonWriter.key("HashKeyElement").object();
+						if (hashKeyElement.getAttributeName() != null) {
+							jsonWriter.key("AttributeName").value(hashKeyElement.getAttributeName());
+						}
+						if (hashKeyElement.getAttributeType() != null) {
+							jsonWriter.key("AttributeType").value(hashKeyElement.getAttributeType());
+						}
+						jsonWriter.endObject();
+					}
+
+					KeySchemaElement rangeKeyElement = keySchema.getRangeKeyElement();
+					if (rangeKeyElement != null) {
+						jsonWriter.key("RangeKeyElement").object();
+						if (rangeKeyElement.getAttributeName() != null) {
+							jsonWriter.key("AttributeName").value(rangeKeyElement.getAttributeName());
+						}
+						if (rangeKeyElement.getAttributeType() != null) {
+							jsonWriter.key("AttributeType").value(rangeKeyElement.getAttributeType());
+						}
+						jsonWriter.endObject();
+					}
+					jsonWriter.endObject();
+				}
+
+				ProvisionedThroughputDescription provisionedThroughput = table.getProvisionedThroughput();
+				if (provisionedThroughput != null) {
+					jsonWriter.key("ProvisionedThroughput").object();
+					if (provisionedThroughput.getReadCapacityUnits() != null) {
+						jsonWriter.key("ReadCapacityUnits").value(provisionedThroughput.getReadCapacityUnits());
+					}
+					if (provisionedThroughput.getWriteCapacityUnits() != null) {
+						jsonWriter.key("WriteCapacityUnits").value(provisionedThroughput.getWriteCapacityUnits());
+					}
+					if (provisionedThroughput.getLastDecreaseDateTime() != null) {
+						jsonWriter.key("LastDecreaseDateTime").value(provisionedThroughput.getLastDecreaseDateTime());
+					}
+					if (provisionedThroughput.getLastIncreaseDateTime() != null) {
+						jsonWriter.key("LastIncreaseDateTime").value(provisionedThroughput.getLastIncreaseDateTime());
+					}
+					jsonWriter.endObject();
+				}
+
+				jsonWriter.endObject();
+			}*/
+
+			jsonWriter.endObject();
+
+			return stringWriter.toString();
+		} catch (Throwable t) {
+			throw new AmazonClientException("Unable to marshall request to JSON: " + t.getMessage(), t);
+		}
+	}
+}

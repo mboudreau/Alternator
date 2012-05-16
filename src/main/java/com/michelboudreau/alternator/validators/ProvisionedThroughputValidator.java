@@ -12,10 +12,14 @@ public class ProvisionedThroughputValidator extends Validator {
 	public Boolean supports(Class clazz) {
 		return ProvisionedThroughput.class.isAssignableFrom(clazz);
 	}
+
 	public List<Error> validate(Object target) {
 		ProvisionedThroughput instance = (ProvisionedThroughput) target;
-		List<Error> errors = ValidatorUtils.rejectIfSizeOutOfBounds(instance.getWriteCapacityUnits(), 5, Limits.NUMBER_MAX);
-		errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(instance.getReadCapacityUnits(), 5, Limits.NUMBER_MAX));
+		List<Error> errors = ValidatorUtils.rejectIfNull(instance);
+		if (errors.size() == 0) {
+			errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(instance.getWriteCapacityUnits(), 5, Limits.NUMBER_MAX));
+			errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(instance.getReadCapacityUnits(), 5, Limits.NUMBER_MAX));
+		}
 
 		return removeNulls(errors);
 	}

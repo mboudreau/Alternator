@@ -28,7 +28,7 @@ public class ValidatorUtils {
 	public static <T> List<Error> rejectIfNull(T property) {
 		List<Error> errors = new ArrayList<Error>();
 		if (property == null) {
-			errors.add(new Error("property value is null"));
+			errors.add(new Error("property value is null."));
 		}
 		return errors;
 	}
@@ -85,6 +85,11 @@ public class ValidatorUtils {
 
 	public static <T> List<Error> rejectIfNotMatchRegex(T property, String regex) {
 		List<Error> errors = new ArrayList<Error>();
+		if(property == null) {
+			errors.add(new Error("The property is null"));
+			return errors;
+		}
+
 		if (property instanceof String) {
 			String string = (String) property;
 			Pattern p = Pattern.compile(regex);
@@ -101,6 +106,11 @@ public class ValidatorUtils {
 
 	public static <T> List<Error> rejectIfSizeOutOfBounds(T property, int min, int max) {
 		List<Error> errors = new ArrayList<Error>();
+		if(property == null) {
+			errors.add(new Error("The property is null"));
+			return errors;
+		}
+
 		Boolean outOfBounds = false;
 		if (property instanceof String) {
 			String string = (String) property;

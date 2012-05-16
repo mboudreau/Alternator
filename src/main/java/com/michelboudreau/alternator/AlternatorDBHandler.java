@@ -1,28 +1,25 @@
 package com.michelboudreau.alternator;
 
 import com.amazonaws.services.dynamodb.model.*;
-import com.amazonaws.services.dynamodb.model.transform.CreateTableRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.CreateTableResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.DescribeTableRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.DescribeTableResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.*;
 import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
 import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
+import com.michelboudreau.alternator.validators.DeleteTableRequestValidator;
 import com.michelboudreau.alternator.validators.DescribeTableRequestValidator;
+import com.michelboudreau.alternator.validators.ListTablesRequestValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class AlternatorDBHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(AlternatorDBHandler.class);
 	private Map<String, Table> tables = new HashMap<String, Table>();
+	private List<Table> tableList = new ArrayList<Table>();
 
 	public AlternatorDBHandler() {
 		// Should we save the results
@@ -42,13 +39,13 @@ class AlternatorDBHandler {
 				return new CreateTableResultMarshaller().marshall(createTable(parser.getData(CreateTableRequest.class, CreateTableRequestJsonUnmarshaller.getInstance())));
 			case DESCRIBE_TABLE:
 				return new DescribeTableResultMarshaller().marshall(describeTable(parser.getData(DescribeTableRequest.class, DescribeTableRequestJsonUnmarshaller.getInstance())));
-			/*			case LIST_TABLES:
-											return listTables(parser.getData(ListTablesRequest.class, ListTablesRequestJsonUnmarshaller.getInstance()));
-										case UPDATE_TABLE:
-											return updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance()));
-										case DELETE_TABLE:
-											return deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance()));
-
+			case LIST_TABLES:
+				return new ListTablesResultMarshaller().marshall(listTables(parser.getData(ListTablesRequest.class, ListTablesRequestJsonUnmarshaller.getInstance())));
+			case UPDATE_TABLE:
+				return new UpdateTableResultMarshaller().marshall(updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance())));
+			case DELETE_TABLE:
+				return new DeleteTableResultMarshaller().marshall(deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance())));
+/*
 										// Items
 										case PUT:
 											return putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance()));
@@ -82,6 +79,7 @@ class AlternatorDBHandler {
 		}
 
 		// Validate data coming in
+		// TODO: Look into how we're doing validation, maybe implement better solution
 		CreateTableRequestValidator validator = new CreateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
@@ -96,9 +94,12 @@ class AlternatorDBHandler {
 			throw new ResourceInUseException("The table you're currently trying to create (" + tableName + ") is already available.");
 		}
 
-		// Add table to map
+		// Add table to map, array
 		Table table = new Table(tableName, request.getKeySchema(), request.getProvisionedThroughput());
 		this.tables.put(tableName, table);
+		this.tableList.add(table);
+
+		// Send result object back
 		CreateTableResult result = new CreateTableResult();
 		TableDescription desc = new TableDescription();
 		desc.setCreationDateTime(table.getCreationDate());
@@ -107,6 +108,7 @@ class AlternatorDBHandler {
 		desc.setTableStatus(table.getStatus());
 		desc.setProvisionedThroughput(getProvisionedThroughputDescription(table));
 		result.setTableDescription(desc);
+
 		return result;
 	}
 
@@ -144,16 +146,92 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected Object listTables(ListTablesRequest request) {
-		return new ListTablesResult();
+	protected ListTablesResult listTables(ListTablesRequest request) {
+		// Validate data coming in
+		ListTablesRequestValidator validator = new ListTablesRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerEception(errors);
+		}
+
+		// Create defaults
+		String startTableName = request.getExclusiveStartTableName();
+		Integer limit = request.getLimit();
+		if (limit == null) {
+			limit = 100;
+		}
+
+		// Check if startTableName exists
+		int startIndex = 0;
+		if (startTableName != null) {
+			if (this.tables.containsKey(startTableName)) {
+				for (int i = 0; i < this.tableList.size(); i++) {
+					if (tableList.get(i).getName().equals(startTableName)) {
+						startIndex = i;
+						break;
+					}
+				}
+			} else {
+				throw new ResourceNotFoundException("The ExclusiveStartTableName '" + startTableName + "' doesn't exist.");
+			}
+		}
+
+		// Calculate size max. depending on array size and limit
+		int size = this.tableList.size();
+		Boolean setTableName = false;
+		if (size > (startIndex + limit)) {
+			size = startIndex + limit;
+			setTableName = true;
+		}
+
+		// Get list
+		List<String> tables = new ArrayList<String>();
+		for (int i = startIndex; i < size; i++) {
+			tables.add(this.tableList.get(i).getName());
+		}
+
+		// Create result object
+		ListTablesResult result = new ListTablesResult().withTableNames(tables);
+		if (setTableName) {
+			result.setLastEvaluatedTableName(this.tableList.get(size).getName());
+		}
+
+		return result;
 	}
 
-	protected Object updateTable(UpdateTableRequest request) {
+	protected DeleteTableResult deleteTable(DeleteTableRequest request) {
+		// Validate data coming in
+		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerEception(errors);
+		}
+
+		// Check existance
+		if (!this.tables.containsKey(request.getTableName())) {
+			throw new ResourceNotFoundException("The table you want to delete '" + request.getTableName() + "' doesn't exist.");
+		}
+
+		// Delete Table
+		Table table = tables.remove(request.getTableName());
+		tableList.remove(table);
+
+		// Create result object
+		ProvisionedThroughputDescription provisionThroughput = new ProvisionedThroughputDescription()
+				.withReadCapacityUnits(table.getProvisionedThroughput().getReadCapacityUnits())
+				.withWriteCapacityUnits(table.getProvisionedThroughput().getWriteCapacityUnits());
+		TableDescription desc = new TableDescription()
+				.withCreationDateTime(table.getCreationDate())
+				.withKeySchema(table.getKeySchema())
+				.withProvisionedThroughput(provisionThroughput)
+				.withTableName(table.getName())
+				.withTableStatus(TableStatus.DELETING);
+
+		return new DeleteTableResult().withTableDescription(desc);
+	}
+
+	protected UpdateTableResult updateTable(UpdateTableRequest request) {
 		return new UpdateTableResult();
-	}
-
-	protected Object deleteTable(DeleteTableRequest request) {
-		return new DeleteTableResult();
 	}
 
 	protected Object putItem(PutItemRequest request) {
@@ -398,8 +476,8 @@ class AlternatorDBHandler {
 
 	protected ProvisionedThroughputDescription getProvisionedThroughputDescription(Table table) {
 		ProvisionedThroughputDescription desc = new ProvisionedThroughputDescription();
-			desc.setReadCapacityUnits(table.getProvisionedThroughput().getReadCapacityUnits());
-			desc.setWriteCapacityUnits(table.getProvisionedThroughput().getWriteCapacityUnits());
+		desc.setReadCapacityUnits(table.getProvisionedThroughput().getReadCapacityUnits());
+		desc.setWriteCapacityUnits(table.getProvisionedThroughput().getWriteCapacityUnits());
 		return desc;
 	}
 

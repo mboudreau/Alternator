@@ -1,12 +1,11 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodb.model.*;
-import com.michelboudreau.alternator.AlternatorDB;
-import com.michelboudreau.alternator.AlternatorDBClient;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -14,219 +13,285 @@ import java.util.UUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
-public class AlternatorTableTest {
+public class AlternatorTableTest extends AlternatorTest {
 
-	@Autowired
-	private AlternatorDBClient client;
-	@Autowired
-	private DynamoDBMapper mapper;
-	private AlternatorDB db;
-	private String testTableName;
+	private ProvisionedThroughput provisionedThroughput;
 
 	@Before
-	public void setUp() throws Exception {
-		db = new AlternatorDB().start();
-		testTableName = "Testing";
+	public void setUp() {
+		provisionedThroughput = new ProvisionedThroughput();
+		provisionedThroughput.setReadCapacityUnits(5L);
+		provisionedThroughput.setWriteCapacityUnits(5L);
 	}
 
 	@After
-	public void tearDown() throws Exception {
-		this.db.stop();
-	}
-
-
-	@Test
-	public void createTableWithHashKeySTest() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getSSchema());
-		CreateTableResult result = client.createTable(getRequest(schema));
-		TableDescription desc = result.getTableDescription();
-		Assert.assertNotNull(desc);
-		Assert.assertEquals(desc.getKeySchema(), schema);
-		Assert.assertEquals(desc.getTableName(), testTableName);
+	public void tearDown() {
+		deleteAllTables();
 	}
 
 	@Test
-	public void createTableWithHashKeyNTest() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getNSchema());
-		TableDescription res = client.createTable(getRequest(schema)).getTableDescription();
+	public void createTableWithStringHashKey() {
+		String name = createTableName();
+		TableDescription res = createTable(name, createKeySchema(createStringKeyElement()));
 		Assert.assertNotNull(res);
-		Assert.assertEquals(res.getKeySchema(), schema);
-		Assert.assertEquals(res.getTableName(), testTableName);
+		Assert.assertEquals(res.getTableName(), name);
 	}
 
 	@Test
-	public void createTableWithHashKeySRangeKeySTest() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getSSchema());
-		schema.setRangeKeyElement(getSSchema());
-		TableDescription res = client.createTable(getRequest(schema)).getTableDescription();
+	public void createTableWithNumberHashKey() {
+		String name = createTableName();
+		TableDescription res = createTable(name, createKeySchema(createNumberKeyElement()));
 		Assert.assertNotNull(res);
-		Assert.assertEquals(res.getKeySchema(), schema);
-		Assert.assertEquals(res.getTableName(), testTableName);
+		Assert.assertEquals(res.getTableName(), name);
+	}
+
+	@Test
+	public void createTableWithStringHashKeyAndStringRangeKey() {
+		String name = createTableName();
+		TableDescription res = createTable(name, createKeySchema(createStringKeyElement(), createStringKeyElement()));
+		Assert.assertNotNull(res);
+		Assert.assertEquals(res.getTableName(), name);
 	}
 
 
 	@Test
-	public void createTableWithHashKeySRangeKeyNTest() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getSSchema());
-		schema.setRangeKeyElement(getNSchema());
-		TableDescription res = client.createTable(getRequest(schema)).getTableDescription();
+	public void createTableWithStringHashKeyAndNumberRangeKey() {
+		String name = createTableName();
+		TableDescription res = createTable(name, createKeySchema(createStringKeyElement(), createNumberKeyElement()));
 		Assert.assertNotNull(res);
-		Assert.assertEquals(res.getKeySchema(), schema);
-		Assert.assertEquals(res.getTableName(), testTableName);
+		Assert.assertEquals(res.getTableName(), name);
 	}
 
 	@Test
-	public void createTableWithHashKeyNRangeKeySTest() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getNSchema());
-		schema.setRangeKeyElement(getSSchema());
-		TableDescription res = client.createTable(getRequest(schema)).getTableDescription();
+	public void createTableWithNumberHashKeyAndStringRangeKey() {
+		String name = createTableName();
+		TableDescription res = createTable(name, createKeySchema(createNumberKeyElement(), createStringKeyElement()));
 		Assert.assertNotNull(res);
-		Assert.assertEquals(res.getKeySchema(), schema);
-		Assert.assertEquals(res.getTableName(), testTableName);
+		Assert.assertEquals(res.getTableName(), name);
 	}
 
 	@Test
-	public void createTableWithHashKeyNRangeKeyNTest() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getNSchema());
-		schema.setRangeKeyElement(getNSchema());
-		TableDescription res = client.createTable(getRequest(schema)).getTableDescription();
+	public void createTableWithNumberHashKeyAndNumberRangeKey() {
+		String name = createTableName();
+		TableDescription res = createTable(name, createKeySchema(createNumberKeyElement(), createNumberKeyElement()));
 		Assert.assertNotNull(res);
-		Assert.assertEquals(res.getKeySchema(), schema);
-		Assert.assertEquals(res.getTableName(), testTableName);
+		Assert.assertEquals(res.getTableName(), name);
 	}
 
 	@Test
 	public void createTableWithoutHashKey() {
-		KeySchema schema = new KeySchema();
-		schema.setRangeKeyElement(getNSchema());
-		Assert.assertNull(client.createTable(getRequest(schema)).getTableDescription());
+		Assert.assertNull(createTable(createKeySchema(null, createNumberKeyElement())));
 	}
 
 	@Test
 	public void createTableWithoutName() {
-		KeySchema schema = new KeySchema();
-		schema.setRangeKeyElement(getNSchema());
-		CreateTableRequest req = new CreateTableRequest();
-		req.setKeySchema(schema);
-		req.setProvisionedThroughput(getThroughput());
-		Assert.assertNull(client.createTable(req).getTableDescription());
+		Assert.assertNull(createTable(null, createKeySchema()));
 	}
 
 	@Test
 	public void createTableWithoutThroughput() {
-		KeySchema schema = new KeySchema();
-		schema.setRangeKeyElement(getNSchema());
-		CreateTableRequest req = new CreateTableRequest();
-		req.setKeySchema(schema);
-		req.setTableName(testTableName);
-		Assert.assertNull(client.createTable(req).getTableDescription());
+		Assert.assertNull(createTable(createTableName(), createKeySchema(), null));
 	}
 
 	@Test
+	public void createTableWithSameHashAndRangeKey() {
+		KeySchemaElement el = createStringKeyElement();
+		Assert.assertNull(createTable(createKeySchema(el, el)));
+	}
+
+	@Test
+	public void describeTable() {
+		String name = createTableName();
+		createTable(name);
+		DescribeTableResult res = client.describeTable(new DescribeTableRequest().withTableName(name));
+		Assert.assertNotNull(res.getTable());
+		Assert.assertEquals(res.getTable().getTableName(), name);
+	}
+
+	@Test
+	public void describeTableWithoutTableName() {
+		createTable();
+		DescribeTableResult res = client.describeTable(new DescribeTableRequest());
+		Assert.assertNull(res.getTable());
+	}
+
+	@Test
+	public void listTables() {
+		String name = createTableName();
+		createTable(name);
+		ListTablesResult res = client.listTables();
+		Assert.assertTrue(res.getTableNames().contains(name));
+	}
+
+	@Test
+	public void listTablesWithLimitOverTableCount() {
+		String name = createTableName();
+		createTable(name);
+		ListTablesResult res = client.listTables(new ListTablesRequest().withLimit(5));
+		Assert.assertTrue(res.getTableNames().contains(name));
+		Assert.assertTrue(res.getTableNames().size() == 1);
+	}
+
+	@Test
+	public void listTablesWithLimitUnderTableCount() {
+		String name = createTableName();
+		createTable();
+		createTable(name);
+		createTable();
+		ListTablesResult res = client.listTables(new ListTablesRequest().withLimit(2));
+		Assert.assertTrue(res.getTableNames().contains(name));
+		Assert.assertTrue(res.getTableNames().size() == 2);
+	}
+
+	@Test
+	public void listTablesWithExclusiveTableName() {
+		String name = createTableName();
+		createTable();
+		createTable();
+		createTable(name);
+		ListTablesResult res = client.listTables(new ListTablesRequest().withExclusiveStartTableName(name));
+		Assert.assertTrue(res.getTableNames().contains(name));
+		Assert.assertTrue(res.getTableNames().size() == 1);
+	}
+
+	@Test
+	public void listTablesWithLimitUnderTableCountAndExclusiveTableName() {
+		String name = createTableName();
+		createTable();
+		createTable();
+		createTable(name);
+		createTable();
+		createTable();
+		ListTablesResult res = client.listTables(new ListTablesRequest().withLimit(1).withExclusiveStartTableName(name));
+		Assert.assertTrue(res.getTableNames().contains(name));
+		Assert.assertTrue(res.getTableNames().size() == 1);
+	}
+
+	@Test
+	public void listTablesWithLimitOverTableCountAndExclusiveTableName() {
+		String name = createTableName();
+		createTable();
+		createTable(name);
+		createTable();
+		createTable();
+		createTable();
+		ListTablesResult res = client.listTables(new ListTablesRequest().withLimit(10).withExclusiveStartTableName(name));
+		Assert.assertTrue(res.getTableNames().contains(name));
+		Assert.assertTrue(res.getTableNames().size() == 4);
+	}
+
+	@Test
+	public void deleteTableTest() {
+		String name = createTableName();
+		createTable(name);
+		client.deleteTable(new DeleteTableRequest(name));
+		ListTablesResult res = client.listTables();
+		Assert.assertFalse(res.getTableNames().contains(name));
+		Assert.assertTrue(res.getTableNames().size() == 0);
+	}
+
+	/*@Test
 	public void deleteTableWithoutName() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getSSchema());
-		schema.setRangeKeyElement(getNSchema());
-		client.createTable(new CreateTableRequest(testTableName, schema));
+		KeySchema schema = createKeySchema(createStringKeyElement(), createNumberKeyElement());
+		client.createTable(new CreateTableRequest(tableName, schema));
 		DeleteTableRequest req = new DeleteTableRequest();
 		client.deleteTable(req);
-		Assert.assertTrue(client.listTables().getTableNames().contains(testTableName));
-		deleteTableTest();
-		Assert.assertFalse(client.listTables().getTableNames().contains(testTableName));
+		Assert.assertTrue(client.listTables().getTableNames().contains(tableName));
 	}
 
 	@Test
 	public void updateTableWithoutName() {
 		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getSSchema());
-		schema.setRangeKeyElement(getNSchema());
-		client.createTable(getRequest(schema));
+		schema.setHashKeyElement(stringSchema);
+		schema.setRangeKeyElement(numberSchema);
+		client.createTable(createRequest(schema));
 		UpdateTableRequest up = new UpdateTableRequest();
-		up.setProvisionedThroughput(getThroughput());
+		up.setProvisionedThroughput(provisionedThroughput);
 		UpdateTableResult res = client.updateTable(up);
 		Assert.assertEquals(res.getTableDescription(), null);
-	}
+	}*/
 
-	@Test
+	/*@Test
 	public void updateTableWithoutThroughput() {
 		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(getSSchema());
-		schema.setRangeKeyElement(getNSchema());
+		schema.setHashKeyElement(stringSchema);
+		schema.setRangeKeyElement(numberSchema);
 		CreateTableRequest ct = new CreateTableRequest();
 		ct.setKeySchema(schema);
-		ct.setTableName(testTableName);
+		ct.setTableName(tableName);
 		Assert.assertNull(client.createTable(ct).getTableDescription());
-	}
-
+	}*/
+/*
 	@Test
 	public void describeTableWithoutName() {
 		DescribeTableResult res = client.describeTable(new DescribeTableRequest());
 		Assert.assertEquals(res.getTable(), null);
 	}
 
-	protected KeySchemaElement getSSchema() {
+	*/
+
+	protected KeySchemaElement createStringKeyElement() {
 		KeySchemaElement el = new KeySchemaElement();
-		el.setAttributeName(UUID.randomUUID().toString().substring(1, 4));
+		el.setAttributeName(UUID.randomUUID().toString().substring(0, 2));
 		el.setAttributeType(ScalarAttributeType.S);
 		return el;
 	}
 
-	protected KeySchemaElement getNSchema() {
-		KeySchemaElement el = new KeySchemaElement();
-		el.setAttributeName(UUID.randomUUID().toString().substring(1, 4));
+	protected KeySchemaElement createNumberKeyElement() {
+		KeySchemaElement el = createStringKeyElement();
 		el.setAttributeType(ScalarAttributeType.N);
 		return el;
 	}
 
-	protected ProvisionedThroughput getThroughput() {
-		ProvisionedThroughput pt = new ProvisionedThroughput();
-		pt.setReadCapacityUnits(5L);
-		pt.setWriteCapacityUnits(5L);
-		return pt;
+	protected KeySchema createKeySchema() {
+		return createKeySchema(createStringKeyElement(), null);
 	}
 
-	protected CreateTableRequest getRequest(KeySchema schema) {
-		CreateTableRequest request = new CreateTableRequest(testTableName, schema);
-		request.setProvisionedThroughput(getThroughput());
-		return request;
+	protected KeySchema createKeySchema(KeySchemaElement hashKey) {
+		return createKeySchema(hashKey, null);
 	}
 
-
-	/*@Ignore
-	@Test
-	public void testAfterCreatingTable() {
-		listTablesTest();
-		describeTableTest();
-		deleteTableTest();
-	}*/
-
-	@Ignore
-	@Test
-	public void describeTableTest() {
-		DescribeTableRequest request = new DescribeTableRequest();
-		request.setTableName(testTableName);
-		Assert.assertEquals(client.describeTable(request).getTable().getTableName(), testTableName);
+	protected KeySchema createKeySchema(KeySchemaElement hashKey, KeySchemaElement rangeKey) {
+		KeySchema schema = new KeySchema(hashKey);
+		schema.setRangeKeyElement(rangeKey);
+		return schema;
 	}
 
-	@Ignore
-	@Test
-	public void listTablesTest() {
-		ListTablesResult res = client.listTables();
-		Assert.assertTrue(res.getTableNames().contains(testTableName));
+	protected String createTableName() {
+		return "Table" + UUID.randomUUID().toString().substring(0, 4);
 	}
 
-	@Ignore
-	@Test
-	public void deleteTableTest() {
-		DeleteTableRequest req = new DeleteTableRequest();
-		req.setTableName(testTableName);
-		client.deleteTable(req);
-		Assert.assertFalse(client.listTables().getTableNames().contains(testTableName));
+	protected TableDescription createTable() {
+		return createTable(createTableName(), createKeySchema(), provisionedThroughput);
+	}
+
+	protected TableDescription createTable(String name) {
+		return createTable(name, createKeySchema(), provisionedThroughput);
+	}
+
+	protected TableDescription createTable(KeySchema schema) {
+		return createTable(createTableName(), schema, provisionedThroughput);
+	}
+
+	protected TableDescription createTable(String name, KeySchema schema) {
+		return createTable(name, schema, provisionedThroughput);
+	}
+
+	protected TableDescription createTable(String name, KeySchema schema, ProvisionedThroughput throughput) {
+		return client.createTable(new CreateTableRequest(name, schema).withProvisionedThroughput(throughput)).getTableDescription();
+	}
+
+	protected void deleteAllTables() {
+		String lastTableName = null;
+		while (true) {
+			ListTablesResult res = client.listTables(new ListTablesRequest().withExclusiveStartTableName(lastTableName));
+			for (String tableName : res.getTableNames()) {
+				client.deleteTable(new DeleteTableRequest(tableName));
+			}
+			lastTableName = res.getLastEvaluatedTableName();
+			if (lastTableName == null) {
+				break;
+			}
+		}
 	}
 }

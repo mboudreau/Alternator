@@ -15,10 +15,10 @@ public class TableNameValidator extends Validator {
 
 	public List<Error> validate(Object target) {
 		List<Error> errors = ValidatorUtils.rejectIfNullOrEmptyOrWhitespace(target);
-
-		errors.addAll(ValidatorUtils.rejectIfNotMatchRegex(target, "^[a-zA-Z0-9_.-]*$"));
-		errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(target, 3, 255));
-
+		if(errors.size() == 0) {
+			errors.addAll(ValidatorUtils.rejectIfNotMatchRegex(target, "^[a-zA-Z0-9_.-]*$"));
+			errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(target, 3, 255));
+		}
 		return removeNulls(errors);
 	}
 }
