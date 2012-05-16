@@ -15,39 +15,17 @@ public class UpdateTableResultMarshaller implements Marshaller<String, UpdateTab
 			throw new AmazonClientException("Invalid argument passed to marshall(...)");
 		}
 
-		/*
-		{"TableName":"Table1",
-    "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":15}
-}
-
-
-{"TableDescription":
-    {"CreationDateTime":1.321657838135E9,
-    "KeySchema":
-        {"HashKeyElement":{"AttributeName":"AttributeValue1","AttributeType":"S"},
-        "RangeKeyElement":{"AttributeName":"AttributeValue2","AttributeType":"N"}},
-    "ProvisionedThroughput":
-        {"LastDecreaseDateTime":1.321661704489E9,
-        "LastIncreaseDateTime":1.321663607695E9,
-        "ReadCapacityUnits":5,
-        "WriteCapacityUnits":10},
-    "TableName":"Table1",
-    "TableStatus":"UPDATING"}}
-		 */
-
 		try {
 			StringWriter stringWriter = new StringWriter();
 			JSONWriter jsonWriter = new JSONWriter(stringWriter);
 			jsonWriter.object();
 
-			/*TableDescription table = describeTableResult.getTable();
+			TableDescription table = describeTableResult.getTableDescription();
 			if (table != null) {
-				jsonWriter.key("Table").object();
-				jsonWriter.key("ItemCount").value(table.getItemCount());
+				jsonWriter.key("TableDescription").object();
 				jsonWriter.key("TableName").value(table.getTableName());
-				jsonWriter.key("TableSizeBytes").value(table.getTableSizeBytes());
 				jsonWriter.key("TableStatus").value(table.getTableStatus());
-				jsonWriter.key("CreationDateTime").value(table.getCreationDateTime().getTime());
+				jsonWriter.key("CreationDateTime").value(table.getCreationDateTime());
 
 				KeySchema keySchema = table.getKeySchema();
 				if (keySchema != null) {
@@ -97,7 +75,7 @@ public class UpdateTableResultMarshaller implements Marshaller<String, UpdateTab
 				}
 
 				jsonWriter.endObject();
-			}*/
+			}
 
 			jsonWriter.endObject();
 

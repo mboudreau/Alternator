@@ -25,7 +25,7 @@ public class DeleteTableResultMarshaller implements Marshaller<String, DeleteTab
 				jsonWriter.key("TableDescription").object();
 				jsonWriter.key("TableName").value(table.getTableName());
 				jsonWriter.key("TableStatus").value(table.getTableStatus());
-				jsonWriter.key("CreationDateTime").value(table.getCreationDateTime().getTime());
+				jsonWriter.key("CreationDateTime").value(table.getCreationDateTime());
 
 				KeySchema keySchema = table.getKeySchema();
 				if (keySchema != null) {

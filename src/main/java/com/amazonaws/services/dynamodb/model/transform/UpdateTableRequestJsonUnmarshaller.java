@@ -26,11 +26,8 @@ public class UpdateTableRequestJsonUnmarshaller implements Unmarshaller<UpdateTa
                     context.nextToken();
                     request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
                 }
-                if (context.testExpression("ProvisionedThroughput", targetDepth)) {
-                    ProvisionedThroughput pr = new ProvisionedThroughput();
-                    pr.setReadCapacityUnits(new MapUnmarshaller<String, Long>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), SimpleTypeJsonUnmarshallers.LongJsonUnmarshaller.getInstance()).unmarshall(context).get("ReadCapacityUnits"));
-                    pr.setWriteCapacityUnits(new MapUnmarshaller<String, Long>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), SimpleTypeJsonUnmarshallers.LongJsonUnmarshaller.getInstance()).unmarshall(context).get("WriteCapacityUnits"));
-                    request.setProvisionedThroughput(pr);
+	            if (context.testExpression("ProvisionedThroughput", targetDepth)) {
+	                request.setProvisionedThroughput(ProvisionedThroughputJsonUnmarshaller.getInstance().unmarshall(context));
                 }
             } else if (token == JsonToken.END_ARRAY || token == JsonToken.END_OBJECT) {
                 if (context.getCurrentDepth() <= originalDepth) break;

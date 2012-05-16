@@ -24,7 +24,7 @@ public class CreateTableResultMarshaller implements Marshaller<String, CreateTab
 				jsonWriter.key("TableDescription").object();
 				TableDescription desc = createTableResult.getTableDescription();
 				if (desc.getCreationDateTime() != null) {
-					jsonWriter.key("CreationDateTime").value(desc.getCreationDateTime().getTime());
+					jsonWriter.key("CreationDateTime").value(desc.getCreationDateTime());
 				}
 				if (desc.getTableName() != null) {
 					jsonWriter.key("TableName").value(desc.getTableName());

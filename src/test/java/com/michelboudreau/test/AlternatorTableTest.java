@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Date;
 import java.util.UUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -20,8 +21,8 @@ public class AlternatorTableTest extends AlternatorTest {
 	@Before
 	public void setUp() {
 		provisionedThroughput = new ProvisionedThroughput();
-		provisionedThroughput.setReadCapacityUnits(5L);
-		provisionedThroughput.setWriteCapacityUnits(5L);
+		provisionedThroughput.setReadCapacityUnits(10L);
+		provisionedThroughput.setWriteCapacityUnits(10L);
 	}
 
 	@After
@@ -190,45 +191,50 @@ public class AlternatorTableTest extends AlternatorTest {
 		Assert.assertTrue(res.getTableNames().size() == 0);
 	}
 
-	/*@Test
+	@Test
 	public void deleteTableWithoutName() {
-		KeySchema schema = createKeySchema(createStringKeyElement(), createNumberKeyElement());
-		client.createTable(new CreateTableRequest(tableName, schema));
-		DeleteTableRequest req = new DeleteTableRequest();
-		client.deleteTable(req);
-		Assert.assertTrue(client.listTables().getTableNames().contains(tableName));
+		String name = createTableName();
+		createTable(name);
+		DeleteTableResult res = client.deleteTable(new DeleteTableRequest());
+		Assert.assertNull(res.getTableDescription());
+		Assert.assertTrue(client.listTables().getTableNames().contains(name));
+	}
+
+	@Test
+	public void updateTable() {
+		String name = createTableName();
+		createTable(name);
+		ProvisionedThroughput throughput = new ProvisionedThroughput().withReadCapacityUnits(50L).withWriteCapacityUnits(50L);
+		UpdateTableRequest req = new UpdateTableRequest().withTableName(name).withProvisionedThroughput(throughput);
+		Date date = new Date();
+		TableDescription desc = client.updateTable(req).getTableDescription();
+		Assert.assertNotNull(desc);
+		Assert.assertEquals(name, desc.getTableName());
+		Assert.assertEquals(Math.round(date.getTime() / 1000), Math.round(desc.getProvisionedThroughput().getLastDecreaseDateTime().getTime() / 1000));
+		Assert.assertEquals(Math.round(date.getTime() / 1000), Math.round(desc.getProvisionedThroughput().getLastIncreaseDateTime().getTime() / 1000));
 	}
 
 	@Test
 	public void updateTableWithoutName() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(stringSchema);
-		schema.setRangeKeyElement(numberSchema);
-		client.createTable(createRequest(schema));
-		UpdateTableRequest up = new UpdateTableRequest();
-		up.setProvisionedThroughput(provisionedThroughput);
-		UpdateTableResult res = client.updateTable(up);
-		Assert.assertEquals(res.getTableDescription(), null);
-	}*/
-
-	/*@Test
-	public void updateTableWithoutThroughput() {
-		KeySchema schema = new KeySchema();
-		schema.setHashKeyElement(stringSchema);
-		schema.setRangeKeyElement(numberSchema);
-		CreateTableRequest ct = new CreateTableRequest();
-		ct.setKeySchema(schema);
-		ct.setTableName(tableName);
-		Assert.assertNull(client.createTable(ct).getTableDescription());
-	}*/
-/*
-	@Test
-	public void describeTableWithoutName() {
-		DescribeTableResult res = client.describeTable(new DescribeTableRequest());
-		Assert.assertEquals(res.getTable(), null);
+		createTable();
+		ProvisionedThroughput throughput = new ProvisionedThroughput().withReadCapacityUnits(50L).withWriteCapacityUnits(50L);
+		UpdateTableRequest req = new UpdateTableRequest().withProvisionedThroughput(throughput);
+		Assert.assertNull(client.updateTable(req).getTableDescription());
 	}
 
-	*/
+	@Test
+	public void updateTableWithoutThroughput() {
+		String name = createTableName();
+		createTable(name);
+		UpdateTableRequest req = new UpdateTableRequest().withTableName(name);
+		Assert.assertNull(client.updateTable(req).getTableDescription());
+	}
+
+	@Test
+	public void updateTableWithoutNameOrThroughput() {
+		createTable();
+		Assert.assertNull(client.updateTable(new UpdateTableRequest()).getTableDescription());
+	}
 
 	protected KeySchemaElement createStringKeyElement() {
 		KeySchemaElement el = new KeySchemaElement();

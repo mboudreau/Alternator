@@ -1,8 +1,6 @@
 package com.michelboudreau.alternator.models;
 
-import com.amazonaws.services.dynamodb.model.KeySchema;
-import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
-import com.amazonaws.services.dynamodb.model.TableStatus;
+import com.amazonaws.services.dynamodb.model.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,18 +10,23 @@ public class Table {
 
 	private String name;
 	private KeySchema keySchema;
-	private ProvisionedThroughput provisionedThroughput;
+	private ProvisionedThroughputDescription throughputDescription;
+	private Date lastDecreaseDateTime;
+	private Date lastIncreaseDateTime;
 	private List<String> attributes;
 	private List<Item> items;
 	private Date creationDate;
-	private final TableStatus status = TableStatus.ACTIVE;; // Set active right away since we don't need to wait
+	private final TableStatus status = TableStatus.ACTIVE;
+	; // Set active right away since we don't need to wait
 
-	public Table(String name, KeySchema keySchema, ProvisionedThroughput provisionedThroughput) {
+	public Table(String name, KeySchema keySchema, ProvisionedThroughput throughput) {
 		this.name = name;
 		this.keySchema = keySchema;
-		this.provisionedThroughput = provisionedThroughput;
+		setProvisionedThroughput(throughput);
 		this.items = new ArrayList<Item>();
 		this.creationDate = new Date();
+		this.lastDecreaseDateTime = new Date();
+		this.lastIncreaseDateTime = new Date();
 	}
 
 	public List<Item> getItemsWithKey(String hashKey) {
@@ -56,8 +59,24 @@ public class Table {
 		return keySchema;
 	}
 
-	public ProvisionedThroughput getProvisionedThroughput() {
-		return provisionedThroughput;
+	public ProvisionedThroughputDescription getProvisionedThroughputDescription() {
+		return throughputDescription;
+	}
+
+	public void setProvisionedThroughput(ProvisionedThroughput throughput) {
+		ProvisionedThroughputDescription desc = new ProvisionedThroughputDescription();
+		desc.setReadCapacityUnits(throughput.getReadCapacityUnits());
+		desc.setWriteCapacityUnits(throughput.getWriteCapacityUnits());
+		ProvisionedThroughputDescription oldThroughput = getProvisionedThroughputDescription();
+		if (oldThroughput != null) {
+			if (throughput.getReadCapacityUnits() > oldThroughput.getReadCapacityUnits() || throughput.getWriteCapacityUnits() > oldThroughput.getWriteCapacityUnits()) {
+				desc.setLastIncreaseDateTime(new Date());
+			}
+			if (throughput.getReadCapacityUnits() > oldThroughput.getReadCapacityUnits() || throughput.getWriteCapacityUnits() > oldThroughput.getWriteCapacityUnits()) {
+				desc.setLastDecreaseDateTime(new Date());
+			}
+		}
+		throughputDescription = desc;
 	}
 
 	public Long getItemCount() {
@@ -90,5 +109,17 @@ public class Table {
 
 	public TableStatus getStatus() {
 		return status;
+	}
+
+	public TableDescription getTableDescription() {
+		TableDescription desc = new TableDescription();
+		desc.setTableName(getName());
+		desc.setTableStatus(getStatus());
+		desc.setItemCount(getItemCount());
+		desc.setTableSizeBytes(getSizeBytes());
+		desc.setCreationDateTime(getCreationDate());
+		desc.setKeySchema(getKeySchema());
+		desc.setProvisionedThroughput(getProvisionedThroughputDescription());
+		return desc;
 	}
 }

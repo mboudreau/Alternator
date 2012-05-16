@@ -27,7 +27,7 @@ public class DescribeTableResultMarshaller implements Marshaller<String, Describ
 				jsonWriter.key("TableName").value(table.getTableName());
 				jsonWriter.key("TableSizeBytes").value(table.getTableSizeBytes());
 				jsonWriter.key("TableStatus").value(table.getTableStatus());
-				jsonWriter.key("CreationDateTime").value(table.getCreationDateTime().getTime());
+				jsonWriter.key("CreationDateTime").value(table.getCreationDateTime());
 
 				KeySchema keySchema = table.getKeySchema();
 				if (keySchema != null) {

@@ -5,10 +5,7 @@ import com.amazonaws.services.dynamodb.model.transform.*;
 import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
-import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
-import com.michelboudreau.alternator.validators.DeleteTableRequestValidator;
-import com.michelboudreau.alternator.validators.DescribeTableRequestValidator;
-import com.michelboudreau.alternator.validators.ListTablesRequestValidator;
+import com.michelboudreau.alternator.validators.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,17 +96,7 @@ class AlternatorDBHandler {
 		this.tables.put(tableName, table);
 		this.tableList.add(table);
 
-		// Send result object back
-		CreateTableResult result = new CreateTableResult();
-		TableDescription desc = new TableDescription();
-		desc.setCreationDateTime(table.getCreationDate());
-		desc.setKeySchema(table.getKeySchema());
-		desc.setTableName(table.getName());
-		desc.setTableStatus(table.getStatus());
-		desc.setProvisionedThroughput(getProvisionedThroughputDescription(table));
-		result.setTableDescription(desc);
-
-		return result;
+		return new CreateTableResult().withTableDescription(table.getTableDescription());
 	}
 
 	protected DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
@@ -127,19 +114,7 @@ class AlternatorDBHandler {
 		// Check to make sure table with same name doesn't exist
 		if (this.tables.containsKey(tableName)) {
 			Table table = this.tables.get(tableName);
-			result = new DescribeTableResult();
-			TableDescription desc = new TableDescription();
-			desc.setTableName(tableName);
-			desc.setTableStatus("ACTIVE");
-			desc.setItemCount(table.getItemCount());
-			desc.setTableSizeBytes(table.getSizeBytes());
-			desc.setCreationDateTime(table.getCreationDate());
-			desc.setKeySchema(table.getKeySchema());
-			ProvisionedThroughputDescription throughputDescription = getProvisionedThroughputDescription(table);
-			throughputDescription.setLastDecreaseDateTime(new Date(0));
-			throughputDescription.setLastIncreaseDateTime(new Date(0));
-			desc.setProvisionedThroughput(throughputDescription);
-			result.setTable(desc);
+			result = new DescribeTableResult().withTable(table.getTableDescription());
 		} else {
 			throw new ResourceNotFoundException("The table '" + tableName + "' does not exist.");
 		}
@@ -207,7 +182,7 @@ class AlternatorDBHandler {
 			throw createInternalServerEception(errors);
 		}
 
-		// Check existance
+		// Check existence
 		if (!this.tables.containsKey(request.getTableName())) {
 			throw new ResourceNotFoundException("The table you want to delete '" + request.getTableName() + "' doesn't exist.");
 		}
@@ -216,22 +191,27 @@ class AlternatorDBHandler {
 		Table table = tables.remove(request.getTableName());
 		tableList.remove(table);
 
-		// Create result object
-		ProvisionedThroughputDescription provisionThroughput = new ProvisionedThroughputDescription()
-				.withReadCapacityUnits(table.getProvisionedThroughput().getReadCapacityUnits())
-				.withWriteCapacityUnits(table.getProvisionedThroughput().getWriteCapacityUnits());
-		TableDescription desc = new TableDescription()
-				.withCreationDateTime(table.getCreationDate())
-				.withKeySchema(table.getKeySchema())
-				.withProvisionedThroughput(provisionThroughput)
-				.withTableName(table.getName())
-				.withTableStatus(TableStatus.DELETING);
-
-		return new DeleteTableResult().withTableDescription(desc);
+		return new DeleteTableResult().withTableDescription(table.getTableDescription().withTableStatus(TableStatus.DELETING));
 	}
 
 	protected UpdateTableResult updateTable(UpdateTableRequest request) {
-		return new UpdateTableResult();
+		// Validate data coming in
+		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerEception(errors);
+		}
+
+		// Check existence
+		if (!this.tables.containsKey(request.getTableName())) {
+			throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+		}
+
+		// Update Table
+		Table table = this.tables.get(request.getTableName());
+		table.setProvisionedThroughput(request.getProvisionedThroughput());
+
+		return new UpdateTableResult().withTableDescription(table.getTableDescription());
 	}
 
 	protected Object putItem(PutItemRequest request) {
@@ -472,13 +452,6 @@ class AlternatorDBHandler {
 		System.out.println(map.toString());
 		return map;*/
 		return new QueryResult();
-	}
-
-	protected ProvisionedThroughputDescription getProvisionedThroughputDescription(Table table) {
-		ProvisionedThroughputDescription desc = new ProvisionedThroughputDescription();
-		desc.setReadCapacityUnits(table.getProvisionedThroughput().getReadCapacityUnits());
-		desc.setWriteCapacityUnits(table.getProvisionedThroughput().getWriteCapacityUnits());
-		return desc;
 	}
 
 	protected InternalServerErrorException createInternalServerEception(List<Error> errors) {
