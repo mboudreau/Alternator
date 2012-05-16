@@ -4,16 +4,19 @@
 
 	<groupId>com.michelboudreau</groupId>
 	<artifactId>alternator</artifactId>
-	<version>0.1.8</version>
+	<version>0.2.8</version>
 	<packaging>jar</packaging>
-	<name>Alternator Mock DB</name>
+
+	<name>Alternator</name>
+	<description>A mock, local DynamoDB instance for testing</description>
+	<url>https://github.com/mboudreau/Alternator/</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.framework.version>3.1.1.RELEASE</spring.framework.version>
 		<spring.security.version>3.1.0.M1</spring.security.version>
 		<slf4j.version>1.6.4</slf4j.version>
-		<aws.version>1.3.8</aws.version>
+		<aws.version>1.3.10</aws.version>
 		<jetty.version>7.6.3.v20120416</jetty.version>
 	</properties>
 
@@ -128,4 +131,29 @@
 		</dependency>
 	</dependencies>
 
+	<developers>
+		<developer>
+			<id>mboudreau</id>
+			<name>Michel Boudreau</name>
+			<email>michelboudreau@gmail.com</email>
+		</developer>
+		<developer>
+			<id>tbredillet</id>
+			<name>Thomas Bredillet</name>
+			<email>tnbredillet@gmail.com</email>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>The GNU General Public License, Version 3.0</name>
+			<url>https://www.gnu.org/licenses/gpl.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>http://svn.apache.org/viewcvs.cgi/maven</url>
+		<connection>http://svn.apache.org/viewcvs.cgi/maven</connection>
+	</scm>
 </project>
