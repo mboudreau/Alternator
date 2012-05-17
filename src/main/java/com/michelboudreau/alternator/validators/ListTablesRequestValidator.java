@@ -11,7 +11,7 @@ import java.util.List;
 public class ListTablesRequestValidator extends Validator {
 
 	public Boolean supports(Class clazz) {
-		return DescribeTableRequest.class.isAssignableFrom(clazz);
+		return ListTablesRequest.class.isAssignableFrom(clazz);
 	}
 
 	public List<Error> validate(Object target) {

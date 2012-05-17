@@ -7,7 +7,7 @@ import com.michelboudreau.alternator.validation.ValidatorUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryValidator extends Validator {
+public class QueryRequestValidator extends Validator {
 
     public Boolean supports(Class clazz) {
         return QueryRequest.class.isAssignableFrom(clazz);

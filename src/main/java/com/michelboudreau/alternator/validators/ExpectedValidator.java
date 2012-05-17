@@ -12,7 +12,7 @@ import java.util.Map;
 public class ExpectedValidator extends Validator {
 
 	public Boolean supports(Class clazz) {
-		return String.class.isAssignableFrom(clazz);
+		return Map.class.isAssignableFrom(clazz);
 	}
 
 	public List<Error> validate(Object target) {

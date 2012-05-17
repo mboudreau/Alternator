@@ -16,9 +16,7 @@ public class PutItemRequestValidator extends Validator {
 	public List<Error> validate(Object target) {
 		PutItemRequest instance = (PutItemRequest) target;
 		List<Error> errors = ValidatorUtils.invokeValidator(new TableNameValidator(), instance.getTableName());
-		if (instance.getItem() != null) {
-			errors.addAll(ValidatorUtils.invokeValidator(new ItemValidator(), instance.getItem()));
-		}
+		errors.addAll(ValidatorUtils.invokeValidator(new ItemValidator(), instance.getItem()));
 		if (instance.getExpected() != null) {
 			errors.addAll(ValidatorUtils.invokeValidator(new ExpectedValidator(), instance.getExpected()));
 		}
