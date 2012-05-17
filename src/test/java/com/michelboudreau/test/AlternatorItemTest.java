@@ -63,6 +63,8 @@ public class AlternatorItemTest extends AlternatorTest {
 		Assert.assertNull(res.getConsumedCapacityUnits());
 	}
 
+	// TODO: test out put item expected and return value
+
     @Test
     public void getItemWithoutTableNameTest() {
         GetItemRequest request = new GetItemRequest();
@@ -85,15 +87,40 @@ public class AlternatorItemTest extends AlternatorTest {
 		Assert.assertEquals(res.getAttributes(), generateStaticItem());
 		getNewItemTest();
 	}
-
+*/
 	@Test
-	public void deleteItemInTableTest() {
-		DeleteItemRequest request = new DeleteItemRequest();
-		request.setKey(getHashKey());
+	public void deleteItem() {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+		createTable(tableName, schema);
+		AttributeValue hash = createStringAttribute();
+		client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
+		DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(hash));
 		DeleteItemResult result = client.deleteItem(request);
-		getDeletedItemTest();
+		Assert.assertNotNull(result.getConsumedCapacityUnits());
 	}
 
+	@Test
+	public void deleteItemWithoutTableName() {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+		createTable(tableName, schema);
+		AttributeValue hash = createStringAttribute();
+		client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
+		DeleteItemRequest request = new DeleteItemRequest().withKey(new Key(hash));
+		DeleteItemResult result = client.deleteItem(request);
+		Assert.assertNull(result.getConsumedCapacityUnits());
+	}
+
+	@Test
+	public void deleteNonExistantItem() {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+		createTable(tableName, schema);
+		DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(createStringAttribute()));
+		Assert.assertNull(client.deleteItem(request).getConsumedCapacityUnits());
+	}
+
+	// TODO: test out delete item expected and return value
+
+/*
 	@Test
 	public void batchWriteItemInTableTest() {
 		BatchWriteItemResult result = client.batchWriteItem(generateWriteBatchRequest());
@@ -204,9 +231,19 @@ public class AlternatorItemTest extends AlternatorTest {
 	}
 
 	protected Map<String, AttributeValue> createGenericItem() {
+		return createGenericItem(createStringAttribute(), createStringAttribute());
+	}
+
+	protected Map<String, AttributeValue> createGenericItem(AttributeValue hash) {
+		return createGenericItem(hash, createStringAttribute());
+	}
+
+	protected Map<String, AttributeValue> createGenericItem(AttributeValue hash, AttributeValue range) {
 		Map<String, AttributeValue> map = new HashMap<String, AttributeValue>();
-		map.put("id", createStringAttribute());
-		map.put("range", createStringAttribute());
+		map.put("id", hash);
+		if(range != null) {
+			map.put("range", range);
+		}
 		return map;
 	}
 }
