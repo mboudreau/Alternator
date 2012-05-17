@@ -20,6 +20,7 @@ public class GetItemResultMarshaller implements Marshaller<String, GetItemResult
 			JSONWriter jsonWriter = new JSONWriter(stringWriter);
 			jsonWriter.object();
 
+			/*
 			TableDescription table = getItemResult.getTableDescription();
 			if (table != null) {
 				jsonWriter.key("TableDescription").object();
@@ -75,7 +76,7 @@ public class GetItemResultMarshaller implements Marshaller<String, GetItemResult
 				}
 
 				jsonWriter.endObject();
-			}
+			}*/
 
 			jsonWriter.endObject();
 

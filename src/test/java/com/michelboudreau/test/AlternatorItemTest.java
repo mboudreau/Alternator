@@ -6,10 +6,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -27,15 +24,14 @@ public class AlternatorItemTest extends AlternatorTest {
 		deleteAllTables();
 	}
 
-	/*@Test
-	public void putItemInTableTest() {
-		PutItemRequest request = new PutItemRequest().withTableName(tableName);
-		request.setItem(generateStaticItem());
+	@Test
+	public void putItemWithHashKey() {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+		createTable(tableName, schema);
+		PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
 		PutItemResult res = client.putItem(request);
-		Assert.assertEquals(res.getAttributes(), generateStaticItem());
-		getItemTest();
 	}
-
+/*
 	@Test
 	public void updateItemInTableTest() {
 		UpdateItemResult res = client.updateItem(getUpdateItemRequest());
@@ -165,4 +161,19 @@ public class AlternatorItemTest extends AlternatorTest {
 		request.setRequestItems(requestItems);
 		return request;
 	}*/
+
+	protected AttributeValue createStringAttribute() {
+		return new AttributeValue(UUID.randomUUID().toString());
+	}
+
+	protected AttributeValue createNumberAttribute() {
+		return new AttributeValue().withN(Math.round(Math.random() * 1000)+"");
+	}
+
+	protected Map<String, AttributeValue> createGenericItem() {
+		Map<String, AttributeValue> map = new HashMap<String, AttributeValue>();
+		map.put("id", createStringAttribute());
+		map.put("range", createStringAttribute());
+		return map;
+	}
 }

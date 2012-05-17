@@ -3,7 +3,6 @@ package com.michelboudreau.alternator;
 import com.amazonaws.services.dynamodb.model.*;
 import com.amazonaws.services.dynamodb.model.transform.*;
 import com.michelboudreau.alternator.enums.AttributeValueType;
-import com.michelboudreau.alternator.models.Item;
 import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
@@ -251,7 +250,7 @@ class AlternatorDBHandler {
 		}
 
 		// Get current item if it exists
-		Item currentItem = table.getItem(getHashKeyName(request.getItem().get(table.getHashKeyName())));
+		Map<String, AttributeValue> currentItem = table.getItem(getHashKeyName(request.getItem().get(table.getHashKeyName())));
 
 		// Check conditional put
 		if (request.getExpected() != null) {
@@ -265,7 +264,7 @@ class AlternatorDBHandler {
 				if (value.getValue() != null) {
 					// check to see if value conditional is equal
 					if (
-							(value.getValue().getN() != null && !currentItem.getAttributes().get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !currentItem.getAttributes().get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !currentItem.getAttributes().get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !currentItem.getAttributes().get(key).equals(value.getValue().getSS()))
+							(value.getValue().getN() != null && !currentItem.get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !currentItem.get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !currentItem.get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !currentItem.get(key).equals(value.getValue().getSS()))
 							) {
 						throw new ConditionalCheckFailedException("The value conditional could is not equal");
 					}
@@ -275,14 +274,11 @@ class AlternatorDBHandler {
 
 		PutItemResult result = new PutItemResult().withConsumedCapacityUnits(1D);
 		if (currentItem != null && request.getReturnValues() != null && ReturnValue.fromValue(request.getReturnValues()) == ReturnValue.ALL_OLD) {
-			result.setAttributes(currentItem.getAttributes());
+			result.setAttributes(currentItem);
 		}
 
-		// Create item object
-		Item item = new Item(request.getItem());
-
 		// put the item in the table
-		table.putItem(item);
+		table.putItem(request.getItem());
 
 		return result;
 	}

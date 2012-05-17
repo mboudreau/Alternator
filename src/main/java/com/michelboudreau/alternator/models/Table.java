@@ -2,7 +2,9 @@ package com.michelboudreau.alternator.models;
 
 import com.amazonaws.services.dynamodb.model.*;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Table {
 
@@ -11,8 +13,7 @@ public class Table {
 	private ProvisionedThroughputDescription throughputDescription;
 	private Date lastDecreaseDateTime;
 	private Date lastIncreaseDateTime;
-	private Map<String, Item> items = new HashMap<String, Item>();
-	private List<Item> itemList;
+	private Map<String, Map<String, AttributeValue>> items = new HashMap<String, Map<String, AttributeValue>>();
 	private Date creationDate;
 	private String hashKeyName;
 	private String rangeKeyName;
@@ -22,7 +23,6 @@ public class Table {
 		this.name = name;
 		this.keySchema = keySchema;
 		setProvisionedThroughput(throughput);
-		this.itemList = new ArrayList<Item>();
 		this.creationDate = new Date();
 		this.lastDecreaseDateTime = new Date();
 		this.lastIncreaseDateTime = new Date();
@@ -34,34 +34,23 @@ public class Table {
 		}
 	}
 
-	public void putItem(Item item) {
-		String keyValue = getHashKeyValue(item);
-		//TODO: add exception if null or empty
-		if (keyValue != null) {
-			items.put(keyValue, item);
-			itemList.add(item);
+	public void putItem(Map<String, AttributeValue> item) {
+		String hashKeyValue = getHashKeyValue(item);
+		if(hashKeyValue != null) {
+			items.put(hashKeyValue, item);
 		}
 	}
 
-	public void removeItem(Item item) {
-		String keyValue = getHashKeyValue(item);
-		//TODO: add exception if null or empty
-		if (keyValue != null) {
-			itemList.remove(item);
-			items.remove(keyValue);
-		}
+	public void removeItem(String hashKey) {
+		items.remove(hashKey);
 	}
 
-	public Item getItem(String hashKey) {
+	public Map<String, AttributeValue> getItem(String hashKey) {
 		return items.get(hashKey);
 	}
 
-	public Map<String, Item> getItems() {
+	public Map<String, Map<String, AttributeValue>> getItems() {
 		return items;
-	}
-
-	public List<Item> getItemList() {
-		return itemList;
 	}
 
 	public KeySchema getKeySchema() {
@@ -99,11 +88,11 @@ public class Table {
 	}
 
 	public Long getItemCount() {
-		return new Long(itemList.size());
+		return new Long(items.size());
 	}
 
 	public Long getSizeBytes() {
-		return new Long(itemList.size());
+		return new Long(items.size());
 	}
 
 	public String getName() {
@@ -138,8 +127,8 @@ public class Table {
 		return desc;
 	}
 
-	protected String getHashKeyValue(Item item) {
-		AttributeValue value = item.getAttributes().get(getHashKeyName());
+	protected String getHashKeyValue(Map<String, AttributeValue> item) {
+		AttributeValue value = item.get(getHashKeyName());
 		if (value.getN() != null) {
 			return value.getN();
 		} else if (value.getS() != null) {
