@@ -16,6 +16,7 @@ public class UpdateTableRequestJsonUnmarshaller implements Unmarshaller<UpdateTa
         int originalDepth = context.getCurrentDepth();
         int targetDepth = originalDepth + 1;
 
+
         JsonToken token = context.currentToken;
         if (token == null) token = context.nextToken();
         while (true) {

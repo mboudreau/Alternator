@@ -124,6 +124,9 @@ public class ValidatorUtils {
 		} else if (property instanceof Collection) {
 			Collection<?> coll = (Collection) property;
 			outOfBounds = (coll.size() < min || coll.size() > max);
+		} else if (property instanceof byte[]) {
+			byte[] bytes = (byte[]) property;
+			outOfBounds = (bytes.length < min || bytes.length > max);
 		} else {
 			errors.add(new Error("The property type is not recognized"));
 		}

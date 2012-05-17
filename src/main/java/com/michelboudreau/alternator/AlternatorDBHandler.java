@@ -2,6 +2,8 @@ package com.michelboudreau.alternator;
 
 import com.amazonaws.services.dynamodb.model.*;
 import com.amazonaws.services.dynamodb.model.transform.*;
+import com.michelboudreau.alternator.enums.AttributeValueType;
+import com.michelboudreau.alternator.models.Item;
 import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
@@ -10,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 class AlternatorDBHandler {
 
@@ -27,7 +32,7 @@ class AlternatorDBHandler {
 		mapper.writeValue(new File(dbName), models);*/
 	}
 
-	public String handle(HttpServletRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException {
+	public String handle(HttpServletRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException, ConditionalCheckFailedException {
 		AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
 
 		switch (parser.getType()) {
@@ -42,26 +47,27 @@ class AlternatorDBHandler {
 				return new UpdateTableResultMarshaller().marshall(updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance())));
 			case DELETE_TABLE:
 				return new DeleteTableResultMarshaller().marshall(deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance())));
-/*
-										// Items
-										case PUT:
-											return putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance()));
-										case GET:
-											return getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance()));
-										case UPDATE:
-											return updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance()));
-										case DELETE:
-											return deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance()));
-										case BATCH_GET_ITEM:
-											return batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()));
-										case BATCH_WRITE_ITEM:
-											return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
 
-										// Operations
-										case QUERY:
-											return query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance()));
-										case SCAN:
-											return scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance()));*/
+			// Items
+			case PUT:
+				return new PutItemResultMarshaller().marshall(putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance())));
+			case GET:
+				return new GetItemResultMarshaller().marshall(getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance())));
+			/*
+													case UPDATE:
+														return updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance()));
+													case DELETE:
+														return deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance()));
+													case BATCH_GET_ITEM:
+														return batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()));
+													case BATCH_WRITE_ITEM:
+														return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
+
+													// Operations
+													case QUERY:
+														return query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance()));
+													case SCAN:
+														return scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance()));*/
 			default:
 				logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
 				break;
@@ -121,7 +127,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected ListTablesResult listTables(ListTablesRequest request) {
+	protected ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		ListTablesRequestValidator validator = new ListTablesRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -174,7 +180,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected DeleteTableResult deleteTable(DeleteTableRequest request) {
+	protected DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -194,7 +200,7 @@ class AlternatorDBHandler {
 		return new DeleteTableResult().withTableDescription(table.getTableDescription().withTableStatus(TableStatus.DELETING));
 	}
 
-	protected UpdateTableResult updateTable(UpdateTableRequest request) {
+	protected UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -214,42 +220,74 @@ class AlternatorDBHandler {
 		return new UpdateTableResult().withTableDescription(table.getTableDescription());
 	}
 
-	protected Object putItem(PutItemRequest request) {
-		/*try {
-			JsonNode actualObj = data.getData();
-			String tableName = actualObj.path("TableName").getTextValue();
-			Iterator itr = actualObj.path("Item").getFieldNames();
-			HashMap<String, Map<String, String>> attributes = new HashMap<String, Map<String, String>>();
-			while (itr.hasNext()) {
-				String attrName = itr.next().toString();
-				Map<String, String> schema = new HashMap<String, String>();
-				if (actualObj.path("Item").path(attrName).path("S").getTextValue() != null) {
-					schema.put("S", actualObj.path("Item").path(attrName).path("S").getTextValue());
-					attributes.put(attrName, schema);
-				} else if (actualObj.path("Item").path(attrName).path("N").getTextValue() != null) {
-					schema.put("N", actualObj.path("Item").path(attrName).path("N").getTextValue());
-					attributes.put(attrName, schema);
+	protected PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
+		// Validate data coming in
+		PutItemRequestValidator validator = new PutItemRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerEception(errors);
+		}
+
+		// Check existence of table
+		Table table = this.tables.get(request.getTableName());
+		if (table == null) {
+			throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+		}
+
+		// Make sure that item specifies hash key and range key (if in schema)
+		KeySchemaElement hashKey = table.getKeySchema().getHashKeyElement();
+		KeySchemaElement rangeKey = table.getKeySchema().getRangeKeyElement();
+		AttributeValue hashItem = request.getItem().get(hashKey.getAttributeName());
+		AttributeValueType hashItemType = getAttributeValueType(hashItem);
+		if (hashItem == null || hashItemType != AttributeValueType.fromString(hashKey.getAttributeType())) {
+			throw new InternalServerErrorException("Missing hash key (" + hashKey.getAttributeName() + ") from item: " + request.getItem());
+		}
+		if (rangeKey != null) {
+			AttributeValue rangeItem = request.getItem().get(rangeKey.getAttributeName());
+			AttributeValueType rangeItemType = getAttributeValueType(rangeItem);
+			if (rangeItem == null || rangeItemType != AttributeValueType.fromString(rangeKey.getAttributeType())) {
+				throw new InternalServerErrorException("Missing range key (" + rangeKey.getAttributeName() + ") from item: " + request.getItem());
+			}
+		}
+
+		// Get current item if it exists
+		Item currentItem = table.getItem(getHashKeyName(request.getItem().get(table.getHashKeyName())));
+
+		// Check conditional put
+		if (request.getExpected() != null) {
+			for (Map.Entry<String, ExpectedAttributeValue> entry : request.getExpected().entrySet()) {
+				String key = entry.getKey();
+				ExpectedAttributeValue value = entry.getValue();
+				value.setExists(value.getValue() != null);
+				if ((value.getExists() && currentItem == null) || (!value.getExists() && currentItem != null)) {
+					throw new ConditionalCheckFailedException("The exist conditional could not be met.");
+				}
+				if (value.getValue() != null) {
+					// check to see if value conditional is equal
+					if (
+							(value.getValue().getN() != null && !currentItem.getAttributes().get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !currentItem.getAttributes().get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !currentItem.getAttributes().get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !currentItem.getAttributes().get(key).equals(value.getValue().getSS()))
+							) {
+						throw new ConditionalCheckFailedException("The value conditional could is not equal");
+					}
 				}
 			}
-			if (getTable(tableName) == null) {
-				throw new IOException("table doesn't exist");
-			}
-			if (findItemByAttributes(attributes, tableName) != null) {
-				getTable(tableName).removeItem(findItemByAttributes(attributes, tableName));
-			}
-			if (attributes != null && !attributes.isEmpty()) {
-				Item item = new Item(tableName, tableGetHashKey(tableName), tableGetRangeKey(tableName), attributes);
-				getTable(tableName).addItem(item);
-			} else {
-				throw new IOException("item empty");
-			}
-		} catch (IOException e) {
-			logger.debug("item wasn't put correctly : " + e);
-		}*/
-		return new PutItemResult();
+		}
+
+		PutItemResult result = new PutItemResult().withConsumedCapacityUnits(1D);
+		if (currentItem != null && request.getReturnValues() != null && ReturnValue.fromValue(request.getReturnValues()) == ReturnValue.ALL_OLD) {
+			result.setAttributes(currentItem.getAttributes());
+		}
+
+		// Create item object
+		Item item = new Item(request.getItem());
+
+		// put the item in the table
+		table.putItem(item);
+
+		return result;
 	}
 
-	protected Object getItem(GetItemRequest request) {
+	protected GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		String key = null;
 		String tableName = null;
 		Map<String, Object> response = new HashMap<String, Object>();
@@ -452,6 +490,32 @@ class AlternatorDBHandler {
 		System.out.println(map.toString());
 		return map;*/
 		return new QueryResult();
+	}
+
+	protected String getHashKeyName(AttributeValue value) {
+		if (value.getN() != null) {
+			return value.getN();
+		} else if (value.getS() != null) {
+			return value.getS();
+		} /*else if (value.getNS() != null) {
+			return AttributeValueType.NS;
+		} else if (value.getSS() != null) {
+			return AttributeValueType.SS;
+		}*/
+		return null;
+	}
+
+	protected AttributeValueType getAttributeValueType(AttributeValue value) {
+		if (value.getN() != null) {
+			return AttributeValueType.N;
+		} else if (value.getS() != null) {
+			return AttributeValueType.S;
+		} else if (value.getNS() != null) {
+			return AttributeValueType.NS;
+		} else if (value.getSS() != null) {
+			return AttributeValueType.SS;
+		}
+		return AttributeValueType.UNKNOWN;
 	}
 
 	protected InternalServerErrorException createInternalServerEception(List<Error> errors) {

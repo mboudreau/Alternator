@@ -16,13 +16,8 @@ import java.util.UUID;
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
 public class AlternatorTableTest extends AlternatorTest {
 
-	private ProvisionedThroughput provisionedThroughput;
-
 	@Before
 	public void setUp() {
-		provisionedThroughput = new ProvisionedThroughput();
-		provisionedThroughput.setReadCapacityUnits(10L);
-		provisionedThroughput.setWriteCapacityUnits(10L);
 	}
 
 	@After
@@ -234,70 +229,5 @@ public class AlternatorTableTest extends AlternatorTest {
 	public void updateTableWithoutNameOrThroughput() {
 		createTable();
 		Assert.assertNull(client.updateTable(new UpdateTableRequest()).getTableDescription());
-	}
-
-	protected KeySchemaElement createStringKeyElement() {
-		KeySchemaElement el = new KeySchemaElement();
-		el.setAttributeName(UUID.randomUUID().toString().substring(0, 2));
-		el.setAttributeType(ScalarAttributeType.S);
-		return el;
-	}
-
-	protected KeySchemaElement createNumberKeyElement() {
-		KeySchemaElement el = createStringKeyElement();
-		el.setAttributeType(ScalarAttributeType.N);
-		return el;
-	}
-
-	protected KeySchema createKeySchema() {
-		return createKeySchema(createStringKeyElement(), null);
-	}
-
-	protected KeySchema createKeySchema(KeySchemaElement hashKey) {
-		return createKeySchema(hashKey, null);
-	}
-
-	protected KeySchema createKeySchema(KeySchemaElement hashKey, KeySchemaElement rangeKey) {
-		KeySchema schema = new KeySchema(hashKey);
-		schema.setRangeKeyElement(rangeKey);
-		return schema;
-	}
-
-	protected String createTableName() {
-		return "Table" + UUID.randomUUID().toString().substring(0, 4);
-	}
-
-	protected TableDescription createTable() {
-		return createTable(createTableName(), createKeySchema(), provisionedThroughput);
-	}
-
-	protected TableDescription createTable(String name) {
-		return createTable(name, createKeySchema(), provisionedThroughput);
-	}
-
-	protected TableDescription createTable(KeySchema schema) {
-		return createTable(createTableName(), schema, provisionedThroughput);
-	}
-
-	protected TableDescription createTable(String name, KeySchema schema) {
-		return createTable(name, schema, provisionedThroughput);
-	}
-
-	protected TableDescription createTable(String name, KeySchema schema, ProvisionedThroughput throughput) {
-		return client.createTable(new CreateTableRequest(name, schema).withProvisionedThroughput(throughput)).getTableDescription();
-	}
-
-	protected void deleteAllTables() {
-		String lastTableName = null;
-		while (true) {
-			ListTablesResult res = client.listTables(new ListTablesRequest().withExclusiveStartTableName(lastTableName));
-			for (String tableName : res.getTableNames()) {
-				client.deleteTable(new DeleteTableRequest(tableName));
-			}
-			lastTableName = res.getLastEvaluatedTableName();
-			if (lastTableName == null) {
-				break;
-			}
-		}
 	}
 }

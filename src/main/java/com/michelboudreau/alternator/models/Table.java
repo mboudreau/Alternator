@@ -2,9 +2,7 @@ package com.michelboudreau.alternator.models;
 
 import com.amazonaws.services.dynamodb.model.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class Table {
 
@@ -13,50 +11,69 @@ public class Table {
 	private ProvisionedThroughputDescription throughputDescription;
 	private Date lastDecreaseDateTime;
 	private Date lastIncreaseDateTime;
-	private List<String> attributes;
-	private List<Item> items;
+	private Map<String, Item> items = new HashMap<String, Item>();
+	private List<Item> itemList;
 	private Date creationDate;
-	private final TableStatus status = TableStatus.ACTIVE;
-	; // Set active right away since we don't need to wait
+	private String hashKeyName;
+	private String rangeKeyName;
+	private final TableStatus status = TableStatus.ACTIVE; // Set active right away since we don't need to wait
 
 	public Table(String name, KeySchema keySchema, ProvisionedThroughput throughput) {
 		this.name = name;
 		this.keySchema = keySchema;
 		setProvisionedThroughput(throughput);
-		this.items = new ArrayList<Item>();
+		this.itemList = new ArrayList<Item>();
 		this.creationDate = new Date();
 		this.lastDecreaseDateTime = new Date();
 		this.lastIncreaseDateTime = new Date();
-	}
 
-	public List<Item> getItemsWithKey(String hashKey) {
-		List<Item> res = new ArrayList<Item>();
-		for (Item item : this.items) {
-			if (hashKey.equals(item.getAttributes().get(item.getHashKey()))) {
-				res.add(item);
-			}
+		// Get hash key name
+		hashKeyName = keySchema.getHashKeyElement().getAttributeName();
+		if (keySchema.getRangeKeyElement() != null) {
+			rangeKeyName = keySchema.getRangeKeyElement().getAttributeName();
 		}
-		return res;
 	}
 
-	public void addItem(Item item) {
-		items.add(item);
+	public void putItem(Item item) {
+		String keyValue = getHashKeyValue(item);
+		//TODO: add exception if null or empty
+		if (keyValue != null) {
+			items.put(keyValue, item);
+			itemList.add(item);
+		}
 	}
 
 	public void removeItem(Item item) {
-		items.remove(item);
+		String keyValue = getHashKeyValue(item);
+		//TODO: add exception if null or empty
+		if (keyValue != null) {
+			itemList.remove(item);
+			items.remove(keyValue);
+		}
 	}
 
-	public List<String> getAttributes() {
-		return attributes;
+	public Item getItem(String hashKey) {
+		return items.get(hashKey);
 	}
 
-	public void setAttributes(List<String> attributes) {
-		this.attributes = attributes;
+	public Map<String, Item> getItems() {
+		return items;
+	}
+
+	public List<Item> getItemList() {
+		return itemList;
 	}
 
 	public KeySchema getKeySchema() {
 		return keySchema;
+	}
+
+	public String getHashKeyName() {
+		return hashKeyName;
+	}
+
+	public String getRangeKeyName() {
+		return rangeKeyName;
 	}
 
 	public ProvisionedThroughputDescription getProvisionedThroughputDescription() {
@@ -70,37 +87,27 @@ public class Table {
 		ProvisionedThroughputDescription oldThroughput = getProvisionedThroughputDescription();
 		if (oldThroughput != null) {
 			if (throughput.getReadCapacityUnits() > oldThroughput.getReadCapacityUnits() || throughput.getWriteCapacityUnits() > oldThroughput.getWriteCapacityUnits()) {
-				desc.setLastIncreaseDateTime(new Date());
+				lastIncreaseDateTime = new Date();
 			}
 			if (throughput.getReadCapacityUnits() > oldThroughput.getReadCapacityUnits() || throughput.getWriteCapacityUnits() > oldThroughput.getWriteCapacityUnits()) {
-				desc.setLastDecreaseDateTime(new Date());
+				lastDecreaseDateTime = new Date();
 			}
 		}
+		desc.setLastIncreaseDateTime(lastIncreaseDateTime);
+		desc.setLastDecreaseDateTime(lastDecreaseDateTime);
 		throughputDescription = desc;
 	}
 
 	public Long getItemCount() {
-		return new Long(items.size());
+		return new Long(itemList.size());
 	}
 
 	public Long getSizeBytes() {
-		return new Long(items.size());
-	}
-
-	public List<Item> getItems() {
-		return items;
-	}
-
-	public void setItems(List<Item> items) {
-		this.items = items;
+		return new Long(itemList.size());
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public Date getCreationDate() {
@@ -109,6 +116,14 @@ public class Table {
 
 	public TableStatus getStatus() {
 		return status;
+	}
+
+	public Date getLastDecreaseDateTime() {
+		return lastDecreaseDateTime;
+	}
+
+	public Date getLastIncreaseDateTime() {
+		return lastIncreaseDateTime;
 	}
 
 	public TableDescription getTableDescription() {
@@ -121,5 +136,15 @@ public class Table {
 		desc.setKeySchema(getKeySchema());
 		desc.setProvisionedThroughput(getProvisionedThroughputDescription());
 		return desc;
+	}
+
+	protected String getHashKeyValue(Item item) {
+		AttributeValue value = item.getAttributes().get(getHashKeyName());
+		if (value.getN() != null) {
+			return value.getN();
+		} else if (value.getS() != null) {
+			return value.getS();
+		}
+		return null;
 	}
 }
