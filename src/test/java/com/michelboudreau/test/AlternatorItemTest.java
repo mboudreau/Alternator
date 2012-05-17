@@ -62,6 +62,22 @@ public class AlternatorItemTest extends AlternatorTest {
 		PutItemResult res = client.putItem(request);
 		Assert.assertNull(res.getConsumedCapacityUnits());
 	}
+
+    @Test
+    public void getItemWithoutTableNameTest() {
+        GetItemRequest request = new GetItemRequest();
+        request.setKey(new Key().withHashKeyElement(new AttributeValue().withNS("123")));
+        GetItemResult res = client.getItem(request);
+        Assert.assertNull(res.getItem());
+    }
+
+    @Test
+    public void getItemWithoutKeyTest() {
+        GetItemRequest request = new GetItemRequest();
+        request.setTableName(tableName);
+        GetItemResult res = client.getItem(request);
+        Assert.assertNull(res.getItem());
+    }
 /*
 	@Test
 	public void updateItemInTableTest() {
@@ -128,21 +144,7 @@ public class AlternatorItemTest extends AlternatorTest {
 		Assert.assertNull(client.deleteItem(delete).getAttributes());
 	}
 
-	@Test
-	public void getItemWithoutTableNameTest() {
-		GetItemRequest request = new GetItemRequest();
-		request.setKey(new Key().withHashKeyElement(new AttributeValue().withNS("123")));
-		GetItemResult res = client.getItem(request);
-		Assert.assertNull(res.getItem());
-	}
 
-	@Test
-	public void getItemWithoutKeyTest() {
-		GetItemRequest request = new GetItemRequest();
-		request.setTableName(testTableName);
-		GetItemResult res = client.getItem(request);
-		Assert.assertNull(res.getItem());
-	}
 
 	@Test
 	public void putItemWithoutTableNameTest() {

@@ -17,9 +17,6 @@ public class GetItemRequestJsonUnmarshaller implements Unmarshaller<GetItemReque
 
         while (true) {
             if (token == null) break;
-            if (token == JsonToken.START_ARRAY){
-                inArray = true;
-            }
             if (token == JsonToken.FIELD_NAME || token == JsonToken.START_OBJECT) {
                 if (context.testExpression("Key", targetDepth)) {
                     request.setKey(KeyJsonUnmarshaller.getInstance().unmarshall(context));
@@ -36,7 +33,6 @@ public class GetItemRequestJsonUnmarshaller implements Unmarshaller<GetItemReque
                 }
             }
             else if (token == JsonToken.END_ARRAY || token == JsonToken.END_OBJECT) {
-                inArray = false;
                 if (context.getCurrentDepth() <= originalDepth) break;
             }
             token = context.nextToken();
