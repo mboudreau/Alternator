@@ -304,11 +304,17 @@ class AlternatorDBHandler {
 			throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
 		}
 		// Check to make sure Key is valid
-		if (this.tables.get(tableName).getItem(key.getHashKeyElement().toString()) == null) {
+        String keyz = "";
+        if(key.getHashKeyElement().getS()!=null){
+            keyz =  key.getHashKeyElement().getS();
+        } else if (key.getHashKeyElement().getN()!=null){
+            keyz = key.getHashKeyElement().getN();
+        }
+		if (this.tables.get(tableName).getItem(keyz) == null) {
 			throw new ResourceNotFoundException("The item with Hash Key (" + key.getHashKeyElement().toString() + ") you try to get doesn't exists.");
 		} else {
 			if (attributesToGet == null) {
-				result.setItem(this.tables.get(tableName).getItem(key.getHashKeyElement().toString()));
+				result.setItem(this.tables.get(tableName).getItem(keyz));
 			} else {
 				for (String att : attributesToGet) {
 					response.put(att, this.tables.get(tableName).getItem(key.getHashKeyElement().toString()).get(att));
