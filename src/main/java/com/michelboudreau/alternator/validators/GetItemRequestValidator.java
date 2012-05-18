@@ -15,7 +15,7 @@ public class GetItemRequestValidator extends Validator {
 
     public List<Error> validate(Object target) {
         GetItemRequest instance = (GetItemRequest) target;
-        List<Error> errors = ValidatorUtils.rejectIfNullOrEmptyOrWhitespace(instance);
+        List<Error> errors = ValidatorUtils.rejectIfNull(instance);
         errors.addAll(ValidatorUtils.invokeValidator(new TableNameValidator(), instance.getTableName()));
         errors.addAll(ValidatorUtils.invokeValidator(new KeyValidator(), instance.getKey()));
         return removeNulls(errors);

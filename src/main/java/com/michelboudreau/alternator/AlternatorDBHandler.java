@@ -374,7 +374,6 @@ class AlternatorDBHandler {
 
 		// remove the item from the table
 		table.removeItem(hashKey);
-
 		return result;
 	}
 

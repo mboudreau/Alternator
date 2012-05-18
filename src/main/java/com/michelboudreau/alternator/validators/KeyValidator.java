@@ -15,9 +15,9 @@ public class KeyValidator extends Validator {
 
     public List<Error> validate(Object target) {
         Key instance = (Key) target;
-        List<Error> errors = ValidatorUtils.rejectIfNullOrEmptyOrWhitespace(instance);
+        List<Error> errors = ValidatorUtils.rejectIfNull(instance);
         if (errors.size() == 0) {
-            errors.addAll(ValidatorUtils.rejectIfNullOrEmptyOrWhitespace(instance.getHashKeyElement()));
+            errors.addAll(ValidatorUtils.rejectIfNull(instance.getHashKeyElement()));
         }
         return removeNulls(errors);
     }

@@ -66,6 +66,15 @@ public class AlternatorItemTest extends AlternatorTest {
 	}
 
 	// TODO: test out put item expected and return value
+    @Test
+    public void getItemTest() {
+        AttributeValue hash = putItemInDb();
+        GetItemRequest request = new GetItemRequest().withTableName(tableName);
+        request.setKey(new Key().withHashKeyElement(hash));
+        GetItemResult res = client.getItem(request);
+        Assert.assertNotNull(res.getItem());
+        Assert.assertEquals(res.getItem().get("id"),hash);
+    }
 
     @Test
     public void getItemWithoutTableNameTest() {
@@ -82,7 +91,7 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNull(res.getItem());
     }
 
-  /* @Test
+   /*@Test
     public void updateItemInTableTest() {
         UpdateItemResult res = client.updateItem(getUpdateItemRequest());
         Assert.assertEquals(res.getAttributes(), generateStaticItem());
@@ -109,12 +118,11 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNull(client.updateItem(req).getAttributes());
     }*/
 
-
     @Test
 	public void deleteItem() {
 		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
 		createTable(tableName, schema);
-		AttributeValue hash = createStringAttribute();
+		AttributeValue hash = new AttributeValue("ad"); //createStringAttribute();
 		client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
 		DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(hash));
 		DeleteItemResult result = client.deleteItem(request);
@@ -250,4 +258,14 @@ public class AlternatorItemTest extends AlternatorTest {
 		}
 		return map;
 	}
+
+    protected AttributeValue putItemInDb(){
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        AttributeValue hash = createStringAttribute();
+        Map<String, AttributeValue> item = createGenericItem(hash);
+        PutItemRequest req = new PutItemRequest().withTableName(tableName).withItem(item);
+        client.putItem(req);
+        return hash;
+    }
 }
