@@ -15,8 +15,7 @@ public class ScanRequestValidator extends Validator {
 
     public List<Error> validate(Object target) {
         ScanRequest instance = (ScanRequest) target;
-	    List<Error> errors = new ArrayList<Error>();
-        errors.addAll(ValidatorUtils.invokeValidator(new TableNameValidator(), instance.getTableName()));
+	    List<Error> errors = ValidatorUtils.invokeValidator(new TableNameValidator(), instance.getTableName());
         return removeNulls(errors);
     }
 }

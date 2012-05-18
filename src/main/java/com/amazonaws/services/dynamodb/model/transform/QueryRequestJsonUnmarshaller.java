@@ -23,23 +23,31 @@ public class QueryRequestJsonUnmarshaller implements Unmarshaller<QueryRequest, 
             if (token == null) break;
 
             if (token == JsonToken.FIELD_NAME || token == JsonToken.START_OBJECT) {
+	            if (context.testExpression("TableName", targetDepth)) {
+                    context.nextToken();
+                    request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
+                }
+	            if (context.testExpression("Limit", targetDepth)) {
+                    context.nextToken();
+                    request.setLimit(SimpleTypeJsonUnmarshallers.IntegerJsonUnmarshaller.getInstance().unmarshall(context));
+                }
+	             if (context.testExpression("Count", targetDepth)) {
+                    context.nextToken();
+                    request.setCount(SimpleTypeJsonUnmarshallers.BooleanJsonUnmarshaller.getInstance().unmarshall(context));
+                }
+	            if (context.testExpression("ConsistentRead", targetDepth)) {
+                    context.nextToken();
+                    request.setConsistentRead(SimpleTypeJsonUnmarshallers.BooleanJsonUnmarshaller.getInstance().unmarshall(context));
+                }
+	             if (context.testExpression("ScanIndexForward", targetDepth)) {
+                    context.nextToken();
+                    request.setScanIndexForward(SimpleTypeJsonUnmarshallers.BooleanJsonUnmarshaller.getInstance().unmarshall(context));
+                }
                 if (context.testExpression("HashKeyValue", targetDepth)) {
                     request.setHashKeyValue(AttributeValueJsonUnmarshaller.getInstance().unmarshall(context));
                 }
                 if (context.testExpression("RangeKeyCondition", targetDepth)) {
                     request.setRangeKeyCondition(new ConditionJsonUnmarshaller().unmarshall(context));
-                }
-                if (context.testExpression("Limit", targetDepth)) {
-                    context.nextToken();
-                    request.setLimit(SimpleTypeJsonUnmarshallers.IntegerJsonUnmarshaller.getInstance().unmarshall(context));
-                }
-                if (context.testExpression("ConsistentRead", targetDepth)) {
-                    context.nextToken();
-                    request.setConsistentRead(SimpleTypeJsonUnmarshallers.BooleanJsonUnmarshaller.getInstance().unmarshall(context));
-                }
-                if (context.testExpression("ScanIndexForward", targetDepth)) {
-                    context.nextToken();
-                    request.setScanIndexForward(SimpleTypeJsonUnmarshallers.BooleanJsonUnmarshaller.getInstance().unmarshall(context));
                 }
                 if (context.testExpression("ExclusiveStartKey", targetDepth)) {
                     request.setExclusiveStartKey(KeyJsonUnmarshaller.getInstance().unmarshall(context));

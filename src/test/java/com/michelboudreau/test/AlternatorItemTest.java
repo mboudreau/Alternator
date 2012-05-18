@@ -68,7 +68,7 @@ public class AlternatorItemTest extends AlternatorTest {
 	// TODO: test out put item expected and return value
     @Test
     public void getItemTest() {
-        AttributeValue hash = putItemInDb();
+        AttributeValue hash = createItem(tableName);
         GetItemRequest request = new GetItemRequest().withTableName(tableName);
         request.setKey(new Key().withHashKeyElement(hash));
         GetItemResult res = client.getItem(request);
@@ -186,86 +186,5 @@ public class AlternatorItemTest extends AlternatorTest {
 	public void batchGetItemInTableWithoutRequestItemsTest() {
 		Assert.assertNull(client.batchGetItem(new BatchGetItemRequest()).getResponses());
 	}
-
-
-	@Test
-	public void deleteItemWithoutTableNameTest() {
-		DeleteItemRequest delete = new DeleteItemRequest();
-		delete.setKey(getHashKey());
-		Assert.assertNull(client.deleteItem(delete).getAttributes());
-	}
-
-	@Test
-	public void deleteItemWithoutKeyTest() {
-		DeleteItemRequest delete = new DeleteItemRequest();
-		delete.setTableName(testTableName);
-		Assert.assertNull(client.deleteItem(delete).getAttributes());
-	}
-
-
-	@Test
-	public void putItemWithoutitemTest() {
-		PutItemRequest req = new PutItemRequest();
-		req.setTableName(testTableName);
-		Assert.assertNull(client.putItem(req).getAttributes());
-	}
-
 */
-
-/*
-	public BatchGetItemRequest generateGetBatchRequest() {
-		BatchGetItemRequest batchGetItemRequest = new BatchGetItemRequest();
-		Map<String, KeysAndAttributes> requestItems = new HashMap<String, KeysAndAttributes>();
-		Key table1key1 = new Key().withHashKeyElement(new AttributeValue().withS("123"));
-		requestItems.put(testTableName, new KeysAndAttributes().withKeys(table1key1));
-		batchGetItemRequest.withRequestItems(requestItems);
-		return batchGetItemRequest;
-	}
-
-	public BatchWriteItemRequest generateWriteBatchRequest() {
-		BatchWriteItemRequest request = new BatchWriteItemRequest();
-		Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
-		List<WriteRequest> itemList = new ArrayList<WriteRequest>();
-		itemList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(generateStaticItem())));
-		itemList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(generateNewStaticItem())));
-		requestItems.put(testTableName, itemList);
-		request.setRequestItems(requestItems);
-		return request;
-	}*/
-
-
-	protected AttributeValue createStringAttribute() {
-		return new AttributeValue(UUID.randomUUID().toString());
-	}
-
-	protected AttributeValue createNumberAttribute() {
-		return new AttributeValue().withN(Math.round(Math.random() * 1000)+"");
-	}
-
-	protected Map<String, AttributeValue> createGenericItem() {
-		return createGenericItem(createStringAttribute(), createStringAttribute());
-	}
-
-	protected Map<String, AttributeValue> createGenericItem(AttributeValue hash) {
-		return createGenericItem(hash, createStringAttribute());
-	}
-
-	protected Map<String, AttributeValue> createGenericItem(AttributeValue hash, AttributeValue range) {
-		Map<String, AttributeValue> map = new HashMap<String, AttributeValue>();
-		map.put("id", hash);
-		if(range != null) {
-			map.put("range", range);
-		}
-		return map;
-	}
-
-    protected AttributeValue putItemInDb(){
-        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-        createTable(tableName, schema);
-        AttributeValue hash = createStringAttribute();
-        Map<String, AttributeValue> item = createGenericItem(hash);
-        PutItemRequest req = new PutItemRequest().withTableName(tableName).withItem(item);
-        client.putItem(req);
-        return hash;
-    }
 }
