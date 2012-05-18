@@ -74,7 +74,6 @@ public class AlternatorItemTest extends AlternatorTest {
         GetItemResult res = client.getItem(request);
         Assert.assertNull(res.getItem());
     }
-
     @Test
     public void getItemWithoutKeyTest() {
         GetItemRequest request = new GetItemRequest();
