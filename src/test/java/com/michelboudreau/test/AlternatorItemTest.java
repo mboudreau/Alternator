@@ -12,60 +12,60 @@ import java.util.*;
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
 public class AlternatorItemTest extends AlternatorTest {
 
-	private String tableName;
+    private String tableName;
 
-	@Before
-	public void setUp() throws Exception {
-		tableName = createTableName();
-	}
+    @Before
+    public void setUp() throws Exception {
+        tableName = createTableName();
+    }
 
-	@After
-	public void tearDown() throws Exception {
-		deleteAllTables();
-	}
+    @After
+    public void tearDown() throws Exception {
+        deleteAllTables();
+    }
 
-	// TODO: need to test for different schemas
+    // TODO: need to test for different schemas
 
-	@Test
-	public void putItemWithHashKey() {
-		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-		createTable(tableName, schema);
-		PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
-		PutItemResult res = client.putItem(request);
-		Assert.assertNotNull(res);
-		Assert.assertNotNull(res.getConsumedCapacityUnits());
-	}
+    @Test
+    public void putItemWithHashKey() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
+        PutItemResult res = client.putItem(request);
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+    }
 
-	@Test
-	public void putItemWithHashKeyOverwriteItem() {
-		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-		createTable(tableName, schema);
-		PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
-		client.putItem(request); // put item beforehand
-		PutItemResult res = client.putItem(request); // Add another
-		Assert.assertNotNull(res);
-		Assert.assertNotNull(res.getConsumedCapacityUnits());
-	}
+    @Test
+    public void putItemWithHashKeyOverwriteItem() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
+        client.putItem(request); // put item beforehand
+        PutItemResult res = client.putItem(request); // Add another
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+    }
 
-	@Test
-	public void putItemWithHashKeyWithoutTableName() {
-		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-		createTable(tableName, schema);
-		PutItemRequest request = new PutItemRequest().withTableName(tableName);
-		PutItemResult res = client.putItem(request);
-		Assert.assertNull(res.getConsumedCapacityUnits());
-	}
+    @Test
+    public void putItemWithHashKeyWithoutTableName() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName);
+        PutItemResult res = client.putItem(request);
+        Assert.assertNull(res.getConsumedCapacityUnits());
+    }
 
-	@Test
-	public void putItemWithHashKeyWithoutItem() {
-		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-		createTable(tableName, schema);
-		PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
-		PutItemResult res = client.putItem(request);
-		Assert.assertNull(res.getConsumedCapacityUnits());
-	}
+    @Test
+    public void putItemWithHashKeyWithoutItem() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
+        PutItemResult res = client.putItem(request);
+        Assert.assertNull(res.getConsumedCapacityUnits());
+    }
 
-	// TODO: test out put item expected and return value
+    // TODO: test out put item expected and return value
     @Test
     public void getItemTest() {
         AttributeValue hash = putItemInDb();
@@ -73,7 +73,7 @@ public class AlternatorItemTest extends AlternatorTest {
         request.setKey(new Key().withHashKeyElement(hash));
         GetItemResult res = client.getItem(request);
         Assert.assertNotNull(res.getItem());
-        Assert.assertEquals(res.getItem().get("id"),hash);
+        Assert.assertEquals(res.getItem().get("id"), hash);
     }
 
     @Test
@@ -83,6 +83,7 @@ public class AlternatorItemTest extends AlternatorTest {
         GetItemResult res = client.getItem(request);
         Assert.assertNull(res.getItem());
     }
+
     @Test
     public void getItemWithoutKeyTest() {
         GetItemRequest request = new GetItemRequest();
@@ -91,64 +92,83 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNull(res.getItem());
     }
 
-   /*@Test
-    public void updateItemInTableTest() {
-        UpdateItemResult res = client.updateItem(getUpdateItemRequest());
-        Assert.assertEquals(res.getAttributes(), generateStaticItem());
-    }
-
     @Test
-    public void putItemWithoutTableNameTest() {
-        PutItemRequest req = new PutItemRequest();
-        req.setItem(generateStaticItem());
-        Assert.assertNull(client.putItem(req).getAttributes());
+    public void updateItemInTableTest() {
+        AttributeValue hash = putItemInDb();
+        Map<String, AttributeValueUpdate> attrToUp = new HashMap<String, AttributeValueUpdate>();
+        AttributeValueUpdate update = new AttributeValueUpdate();
+        update.setAction("PUT");
+        update.setValue(hash);
+        attrToUp.put("updated",update);
+        Key key = new Key(hash);
+        UpdateItemRequest request = new UpdateItemRequest(tableName, key, attrToUp);
+        UpdateItemResult res = client.updateItem(request);
+        Assert.assertEquals(res.getAttributes().get("updated"),hash);
     }
 
     @Test
     public void updateItemWithoutTableNameTest() {
-        UpdateItemRequest req = new UpdateItemRequest();
-        req.setKey(getHashKey());
-        Assert.assertNull(client.updateItem(req).getAttributes());
+        AttributeValue hash = putItemInDb();
+        Map<String, AttributeValueUpdate> attrToUp = new HashMap<String, AttributeValueUpdate>();
+        AttributeValueUpdate update = new AttributeValueUpdate();
+        update.setAction("PUT");
+        update.setValue(hash);
+        attrToUp.put("updated",update);
+        Key key = new Key(hash);
+        UpdateItemRequest request = new UpdateItemRequest();
+        request.setKey(key);
+        request.setAttributeUpdates(attrToUp);
+        UpdateItemResult res = client.updateItem(request);
+        Assert.assertNull(res.getConsumedCapacityUnits());
     }
 
     @Test
     public void updateItemWithoutKeyTest() {
-        UpdateItemRequest req = new UpdateItemRequest();
-        req.setTableName(testTableName);
-        Assert.assertNull(client.updateItem(req).getAttributes());
-    }*/
+        AttributeValue hash = putItemInDb();
+        Map<String, AttributeValueUpdate> attrToUp = new HashMap<String, AttributeValueUpdate>();
+        AttributeValueUpdate update = new AttributeValueUpdate();
+        update.setAction("PUT");
+        update.setValue(hash);
+        attrToUp.put("updated",update);
+        Key key = new Key(hash);
+        UpdateItemRequest request = new UpdateItemRequest();
+        request.setTableName(tableName);
+        request.setAttributeUpdates(attrToUp);
+        UpdateItemResult res = client.updateItem(request);
+        Assert.assertNull(res.getConsumedCapacityUnits());
+    }
 
     @Test
-	public void deleteItem() {
-		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-		createTable(tableName, schema);
-		AttributeValue hash = new AttributeValue("ad"); //createStringAttribute();
-		client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
-		DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(hash));
-		DeleteItemResult result = client.deleteItem(request);
-		Assert.assertNotNull(result.getConsumedCapacityUnits());
-	}
+    public void deleteItem() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        AttributeValue hash = new AttributeValue("ad"); //createStringAttribute();
+        client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
+        DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(hash));
+        DeleteItemResult result = client.deleteItem(request);
+        Assert.assertNotNull(result.getConsumedCapacityUnits());
+    }
 
-	@Test
-	public void deleteItemWithoutTableName() {
-		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-		createTable(tableName, schema);
-		AttributeValue hash = createStringAttribute();
-		client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
-		DeleteItemRequest request = new DeleteItemRequest().withKey(new Key(hash));
-		DeleteItemResult result = client.deleteItem(request);
-		Assert.assertNull(result.getConsumedCapacityUnits());
-	}
+    @Test
+    public void deleteItemWithoutTableName() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        AttributeValue hash = createStringAttribute();
+        client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
+        DeleteItemRequest request = new DeleteItemRequest().withKey(new Key(hash));
+        DeleteItemResult result = client.deleteItem(request);
+        Assert.assertNull(result.getConsumedCapacityUnits());
+    }
 
-	@Test
-	public void deleteNonExistantItem() {
-		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-		createTable(tableName, schema);
-		DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(createStringAttribute()));
-		Assert.assertNull(client.deleteItem(request).getConsumedCapacityUnits());
-	}
+    @Test
+    public void deleteNonExistantItem() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(createStringAttribute()));
+        Assert.assertNull(client.deleteItem(request).getConsumedCapacityUnits());
+    }
 
-	// TODO: test out delete item expected and return value
+    // TODO: test out delete item expected and return value
 
 /*
 	@Test
@@ -234,32 +254,32 @@ public class AlternatorItemTest extends AlternatorTest {
 	}*/
 
 
-	protected AttributeValue createStringAttribute() {
-		return new AttributeValue(UUID.randomUUID().toString());
-	}
+    protected AttributeValue createStringAttribute() {
+        return new AttributeValue(UUID.randomUUID().toString());
+    }
 
-	protected AttributeValue createNumberAttribute() {
-		return new AttributeValue().withN(Math.round(Math.random() * 1000)+"");
-	}
+    protected AttributeValue createNumberAttribute() {
+        return new AttributeValue().withN(Math.round(Math.random() * 1000) + "");
+    }
 
-	protected Map<String, AttributeValue> createGenericItem() {
-		return createGenericItem(createStringAttribute(), createStringAttribute());
-	}
+    protected Map<String, AttributeValue> createGenericItem() {
+        return createGenericItem(createStringAttribute(), createStringAttribute());
+    }
 
-	protected Map<String, AttributeValue> createGenericItem(AttributeValue hash) {
-		return createGenericItem(hash, createStringAttribute());
-	}
+    protected Map<String, AttributeValue> createGenericItem(AttributeValue hash) {
+        return createGenericItem(hash, createStringAttribute());
+    }
 
-	protected Map<String, AttributeValue> createGenericItem(AttributeValue hash, AttributeValue range) {
-		Map<String, AttributeValue> map = new HashMap<String, AttributeValue>();
-		map.put("id", hash);
-		if(range != null) {
-			map.put("range", range);
-		}
-		return map;
-	}
+    protected Map<String, AttributeValue> createGenericItem(AttributeValue hash, AttributeValue range) {
+        Map<String, AttributeValue> map = new HashMap<String, AttributeValue>();
+        map.put("id", hash);
+        if (range != null) {
+            map.put("range", range);
+        }
+        return map;
+    }
 
-    protected AttributeValue putItemInDb(){
+    protected AttributeValue putItemInDb() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         AttributeValue hash = createStringAttribute();
