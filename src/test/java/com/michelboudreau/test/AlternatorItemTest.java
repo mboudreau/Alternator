@@ -99,7 +99,7 @@ public class AlternatorItemTest extends AlternatorTest {
         AttributeValueUpdate update = new AttributeValueUpdate();
         update.setAction("PUT");
         update.setValue(hash);
-        attrToUp.put("updated",update);
+        attrToUp.put("updated", update);
         Key key = new Key(hash);
         UpdateItemRequest request = new UpdateItemRequest(tableName, key, attrToUp);
         UpdateItemResult res = client.updateItem(request);
@@ -114,7 +114,7 @@ public class AlternatorItemTest extends AlternatorTest {
         AttributeValueUpdate update = new AttributeValueUpdate();
         update.setAction("PUT");
         update.setValue(hash);
-        attrToUp.put("updated",update);
+        attrToUp.put("updated", update);
         Key key = new Key(hash);
         UpdateItemRequest request = new UpdateItemRequest();
         request.setKey(key);
@@ -130,7 +130,7 @@ public class AlternatorItemTest extends AlternatorTest {
         AttributeValueUpdate update = new AttributeValueUpdate();
         update.setAction("PUT");
         update.setValue(hash);
-        attrToUp.put("updated",update);
+        attrToUp.put("updated", update);
         Key key = new Key(hash);
         UpdateItemRequest request = new UpdateItemRequest();
         request.setTableName(tableName);

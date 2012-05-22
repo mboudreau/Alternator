@@ -11,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class AlternatorDBHandler {
 
@@ -597,7 +594,8 @@ class AlternatorDBHandler {
 			//TODO to do the handler
 		} else {
 			Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
-			for (String sKey : item.keySet()) {
+            Set<String> sKeyz = Collections.synchronizedSet(item.keySet());
+			for (String sKey : sKeyz) {
 				if (attributesToUpdate.containsKey(sKey)) {
 					if (attributesToUpdate.get(sKey).getAction().equals("PUT")) {
 						item.remove(sKey);
