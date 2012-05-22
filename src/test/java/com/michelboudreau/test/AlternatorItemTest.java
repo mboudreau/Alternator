@@ -68,7 +68,7 @@ public class AlternatorItemTest extends AlternatorTest {
     // TODO: test out put item expected and return value
     @Test
     public void getItemTest() {
-        AttributeValue hash = putItemInDb();
+        AttributeValue hash = createItem(tableName);
         GetItemRequest request = new GetItemRequest().withTableName(tableName);
         request.setKey(new Key().withHashKeyElement(hash));
         GetItemResult res = client.getItem(request);
@@ -206,30 +206,6 @@ public class AlternatorItemTest extends AlternatorTest {
 	public void batchGetItemInTableWithoutRequestItemsTest() {
 		Assert.assertNull(client.batchGetItem(new BatchGetItemRequest()).getResponses());
 	}
-
-
-	@Test
-	public void deleteItemWithoutTableNameTest() {
-		DeleteItemRequest delete = new DeleteItemRequest();
-		delete.setKey(getHashKey());
-		Assert.assertNull(client.deleteItem(delete).getAttributes());
-	}
-
-	@Test
-	public void deleteItemWithoutKeyTest() {
-		DeleteItemRequest delete = new DeleteItemRequest();
-		delete.setTableName(testTableName);
-		Assert.assertNull(client.deleteItem(delete).getAttributes());
-	}
-
-
-	@Test
-	public void putItemWithoutitemTest() {
-		PutItemRequest req = new PutItemRequest();
-		req.setTableName(testTableName);
-		Assert.assertNull(client.putItem(req).getAttributes());
-	}
-
 */
 
 /*

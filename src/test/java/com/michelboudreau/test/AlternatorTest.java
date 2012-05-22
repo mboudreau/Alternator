@@ -8,6 +8,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class AlternatorTest {
@@ -107,4 +109,39 @@ public class AlternatorTest {
 			}
 		}
 	}
+
+	protected AttributeValue createStringAttribute() {
+		return new AttributeValue(UUID.randomUUID().toString());
+	}
+
+	protected AttributeValue createNumberAttribute() {
+		return new AttributeValue().withN(Math.round(Math.random() * 1000)+"");
+	}
+
+	protected Map<String, AttributeValue> createGenericItem() {
+		return createGenericItem(createStringAttribute(), createStringAttribute());
+	}
+
+	protected Map<String, AttributeValue> createGenericItem(AttributeValue hash) {
+		return createGenericItem(hash, createStringAttribute());
+	}
+
+	protected Map<String, AttributeValue> createGenericItem(AttributeValue hash, AttributeValue range) {
+		Map<String, AttributeValue> map = new HashMap<String, AttributeValue>();
+		map.put("id", hash);
+		if(range != null) {
+			map.put("range", range);
+		}
+		return map;
+	}
+
+    protected AttributeValue createItem(String tableName){
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        AttributeValue hash = createStringAttribute();
+        Map<String, AttributeValue> item = createGenericItem(hash);
+        PutItemRequest req = new PutItemRequest().withTableName(tableName).withItem(item);
+        client.putItem(req);
+        return hash;
+    }
 }

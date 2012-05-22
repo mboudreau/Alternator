@@ -1,5 +1,6 @@
 package com.michelboudreau.alternator.enums;
 
+
 public enum RequestType {
 	// Item Actions
 	PUT("PutItem"),
@@ -30,7 +31,7 @@ public enum RequestType {
 	}
 
 	public String toString() {
-		return type;
+        return type;
 	}
 
 	public static RequestType fromString(String value) {

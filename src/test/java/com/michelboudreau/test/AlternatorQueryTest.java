@@ -15,38 +15,36 @@ import java.util.*;
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
 public class AlternatorQueryTest extends AlternatorTest {
 
-	private String testTableName;
-	private int nbOfItems;
-	private int numberOfSameHK;
+	private String tableName;
 
 	@Before
 	public void setUp() throws Exception {
-		testTableName = "Testing";
-		nbOfItems = 60;
-		numberOfSameHK = 10;
-		client.createTable(new CreateTableRequest().withTableName("Testing").withKeySchema(new KeySchema().withHashKeyElement(getSSchema()).withRangeKeyElement(getNSchema())));
-		client.batchWriteItem(generateItems());
+		tableName = createTableName();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		DeleteTableRequest del = new DeleteTableRequest();
-		del.setTableName("Testing");
-		client.deleteTable(del);
+		deleteAllTables();
 	}
 
 	@Test
-	public void queryWithHashKeyTest() {
-		QueryRequest request = getBasicReq();
-		request.setHashKeyValue(getHashKey());
-		QueryResult result = client.query(request);
-		Assert.assertNotNull(result);
-		Assert.assertNotNull(result.getItems());
-		Assert.assertNotNull(result.getItems().get(0));
-		Assert.assertEquals(result.getCount().intValue(), 1);
-		Assert.assertEquals(result.getItems().get(0).get("id"), getHashKey());
-	}
+	public void queryWithHashKey() {
+		// Setup table with items
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+		createTable(tableName, schema);
+		AttributeValue hashKey = createStringAttribute();
+		createGenericItem();
+		createGenericItem(hashKey);
+		createGenericItem();
+		createGenericItem();
 
+		QueryRequest request = new QueryRequest(tableName, hashKey);
+		QueryResult result = client.query(request);
+		Assert.assertNotNull(result.getItems());
+		Assert.assertNotSame(result.getItems().size(), 0);
+		Assert.assertEquals(result.getItems().get(0).get("id"), hashKey);
+	}
+/*
 	@Test
 	public void queryWithHashKeyAndAttributesToGetTest() {
 		QueryRequest request = getBasicReq();
@@ -192,52 +190,5 @@ public class AlternatorQueryTest extends AlternatorTest {
 		request.setTableName(null);
 		QueryResult result = client.query(request);
 		Assert.assertNull(result.getItems());
-	}
-
-	public QueryRequest getBasicReq() {
-		QueryRequest req = new QueryRequest();
-		req.setTableName(testTableName);
-		req.setHashKeyValue(getHashKey());
-		return req;
-	}
-
-
-	public BatchWriteItemRequest generateItems() {
-		BatchWriteItemRequest req = new BatchWriteItemRequest();
-		Map<String, List<WriteRequest>> items = new HashMap<String, List<WriteRequest>>();
-		List<WriteRequest> list = new ArrayList<WriteRequest>();
-		for (int i = 0; i < nbOfItems; i++) {
-			WriteRequest wreq = new WriteRequest();
-			Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
-			item.put("id", new AttributeValue().withS("" + (i % (nbOfItems - numberOfSameHK))));
-			item.put("date", new AttributeValue().withN(i + ""));
-			item.put("testfield", new AttributeValue().withS(UUID.randomUUID().toString().substring(1, 4)));
-			PutRequest putRequest = new PutRequest();
-			putRequest.withItem(item);
-			wreq.withPutRequest(putRequest);
-			list.add(wreq);
-		}
-		items.put(testTableName, list);
-		req.setRequestItems(items);
-		return req;
-	}
-
-	public AttributeValue getHashKey() {
-		return new AttributeValue().withS("1");
-	}
-
-
-	public KeySchemaElement getSSchema() {
-		KeySchemaElement el = new KeySchemaElement();
-		el.setAttributeName("id");
-		el.setAttributeType(ScalarAttributeType.S);
-		return el;
-	}
-
-	public KeySchemaElement getNSchema() {
-		KeySchemaElement el = new KeySchemaElement();
-		el.setAttributeName("date");
-		el.setAttributeType(ScalarAttributeType.N);
-		return el;
-	}
+	}*/
 }
