@@ -103,7 +103,8 @@ public class AlternatorItemTest extends AlternatorTest {
         Key key = new Key(hash);
         UpdateItemRequest request = new UpdateItemRequest(tableName, key, attrToUp);
         UpdateItemResult res = client.updateItem(request);
-        Assert.assertEquals(res.getAttributes().get("updated"),hash);
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getAttributes());
     }
 
     @Test

@@ -53,8 +53,8 @@ class AlternatorDBHandler {
 			case GET:
 				return new GetItemResultMarshaller().marshall(getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance())));
 
-			/*case UPDATE:
-				return updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance()));*/
+			case UPDATE:
+				return new UpdateItemResultMarshaller().marshall(updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance())));
 			case DELETE:
 				return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
 			/*
@@ -251,7 +251,7 @@ class AlternatorDBHandler {
 		}
 
 		// Get current item if it exists
-		Map<String, AttributeValue> item = table.getItem(getKeyName(request.getItem().get(table.getHashKeyName())));
+		Map<String, AttributeValue> item = table.getItem(getKeyValue(request.getItem().get(table.getHashKeyName())));
 
 		// Check conditional put
 		if (request.getExpected() != null) {
@@ -311,13 +311,13 @@ class AlternatorDBHandler {
 			keyz = key.getHashKeyElement().getN();
 		}
 		if (this.tables.get(tableName).getItem(keyz) == null) {
-			throw new ResourceNotFoundException("The item with Hash Key (" + key.getHashKeyElement().toString() + ") you try to get doesn't exists.");
+			throw new ResourceNotFoundException("The item with Hash Key (" + getKeyValue(key.getHashKeyElement()) + ") you try to get doesn't exists.");
 		} else {
 			if (attributesToGet == null) {
 				result.setItem(this.tables.get(tableName).getItem(keyz));
 			} else {
 				for (String att : attributesToGet) {
-					response.put(att, this.tables.get(tableName).getItem(key.getHashKeyElement().toString()).get(att));
+					response.put(att, this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())).get(att));
 				}
 				result.setItem(response);
 			}
@@ -341,8 +341,8 @@ class AlternatorDBHandler {
 		}
 
 		// Get hash and range key
-		String hashKey = getKeyName(request.getKey().getHashKeyElement());
-		String rangeKey = getKeyName(request.getKey().getRangeKeyElement());
+		String hashKey = getKeyValue(request.getKey().getHashKeyElement());
+		String rangeKey = getKeyValue(request.getKey().getRangeKeyElement());
 
 		// Get current item if exist
 		Map<String, AttributeValue> item = table.getItem(hashKey);
@@ -532,7 +532,7 @@ class AlternatorDBHandler {
 		return new QueryResult();
 	}
 
-	protected String getKeyName(AttributeValue value) {
+	protected String getKeyValue(AttributeValue value) {
 		if (value != null) {
 			if (value.getN() != null) {
 				return value.getN();
@@ -593,10 +593,10 @@ class AlternatorDBHandler {
 			throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
 		}
 		// Check to make sure Key is valid
-		if (this.tables.get(tableName).getItem(key.getHashKeyElement().toString()) == null) {
+		if (this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())) == null) {
 			//TODO to do the handler
 		} else {
-			Map<String, AttributeValue> item = this.tables.get(tableName).getItem(key.getHashKeyElement().toString());
+			Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
 			for (String sKey : item.keySet()) {
 				if (attributesToUpdate.containsKey(sKey)) {
 					if (attributesToUpdate.get(sKey).getAction().equals("PUT")) {

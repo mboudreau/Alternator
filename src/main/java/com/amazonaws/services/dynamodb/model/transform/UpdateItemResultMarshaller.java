@@ -33,7 +33,7 @@ public class UpdateItemResultMarshaller implements Marshaller<String, UpdateItem
                 jsonWriter.endObject();
             }
             jsonWriter.endObject();
-
+            jsonWriter.key("ConsumedCapacityUnits").value(updateItemResult.getConsumedCapacityUnits());
             jsonWriter.endObject();
 
             return stringWriter.toString();
