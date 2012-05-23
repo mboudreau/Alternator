@@ -11,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class AlternatorDBHandler {
 
@@ -53,8 +50,8 @@ class AlternatorDBHandler {
 			case GET:
 				return new GetItemResultMarshaller().marshall(getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance())));
 
-			/*case UPDATE:
-				return updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance()));*/
+			case UPDATE:
+				return new UpdateItemResultMarshaller().marshall(updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance())));
 			case DELETE:
 				return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
 			/*
@@ -64,10 +61,10 @@ class AlternatorDBHandler {
 																				   return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
 																				   */
 			// Operations
-			case QUERY:
-				return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
-			/*case SCAN:
-																							   return scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance()));*/
+			/*case QUERY:
+				return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));*/
+            case SCAN:
+                return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
 			default:
 				logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
 				break;
@@ -251,7 +248,7 @@ class AlternatorDBHandler {
 		}
 
 		// Get current item if it exists
-		Map<String, AttributeValue> item = table.getItem(getKeyName(request.getItem().get(table.getHashKeyName())));
+		Map<String, AttributeValue> item = table.getItem(getKeyValue(request.getItem().get(table.getHashKeyName())));
 
 		// Check conditional put
 		if (request.getExpected() != null) {
@@ -311,13 +308,13 @@ class AlternatorDBHandler {
 			keyz = key.getHashKeyElement().getN();
 		}
 		if (this.tables.get(tableName).getItem(keyz) == null) {
-			throw new ResourceNotFoundException("The item with Hash Key (" + key.getHashKeyElement().toString() + ") you try to get doesn't exists.");
+			throw new ResourceNotFoundException("The item with Hash Key (" + getKeyValue(key.getHashKeyElement()) + ") you try to get doesn't exists.");
 		} else {
 			if (attributesToGet == null) {
 				result.setItem(this.tables.get(tableName).getItem(keyz));
 			} else {
 				for (String att : attributesToGet) {
-					response.put(att, this.tables.get(tableName).getItem(key.getHashKeyElement().toString()).get(att));
+					response.put(att, this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())).get(att));
 				}
 				result.setItem(response);
 			}
@@ -341,8 +338,8 @@ class AlternatorDBHandler {
 		}
 
 		// Get hash and range key
-		String hashKey = getKeyName(request.getKey().getHashKeyElement());
-		String rangeKey = getKeyName(request.getKey().getRangeKeyElement());
+		String hashKey = getKeyValue(request.getKey().getHashKeyElement());
+		String rangeKey = getKeyValue(request.getKey().getRangeKeyElement());
 
 		// Get current item if exist
 		Map<String, AttributeValue> item = table.getItem(hashKey);
@@ -389,83 +386,135 @@ class AlternatorDBHandler {
 		return new BatchWriteItemResult();
 	}
 
-	protected Object scan(ScanRequest request) {
-		/*List<HashMap<String, Map<String, String>>> result = new ArrayList<HashMap<String, Map<String, String>>>();
-				  Map<String, Object> map = new HashMap<String, Object>();
-				  JsonNode data = obj.getData();
-				  try {
-					  String tableName = data.path("TableName").getTextValue();
-					  String limit = null;
-					  if (!data.path("limit").isNull()) {
-						  limit = "" + data.path("limit").getIntValue();
-					  }
-					  if (data.path("ScanFilter").getTextValue() != null) {
-						  if (getTable(tableName).isHasRangeKey()) {
-							  String comparator = data.path("ScanFilter").path("ComparisonOperator").getTextValue();
-							  String rangeKey = tableGetRangeKey(tableName);
-							  String rangeKeyType = getTable(tableName).getRangeKeyType();
-							  if ("BETWEEN".equals(comparator)) {
-								  String lowerBound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-								  String upperBound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(1).getTextValue();
-								  for (Item itm : getTable(tableName).getItems()) {
-									  if ((lowerBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0) && (upperBound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
-										  result.add(itm.getAttributes());
-									  }
-								  }
-							  }
-							  if ("LT".equals(comparator)) {
-								  String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-								  for (Item itm : getTable(tableName).getItems()) {
-									  if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) > 0)) {
-										  result.add(itm.getAttributes());
-									  }
-								  }
-							  }
-							  if ("LE".equals(comparator)) {
-								  String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-								  for (Item itm : getTable(tableName).getItems()) {
-									  if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) >= 0)) {
-										  result.add(itm.getAttributes());
-									  }
-								  }
-							  }
-							  if ("GT".equals(comparator)) {
-								  String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-								  for (Item itm : getTable(tableName).getItems()) {
-									  if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) < 0)) {
-										  result.add(itm.getAttributes());
-									  }
-								  }
-							  }
-							  if ("GE".equals(comparator)) {
-								  String bound = data.path("ScanFilter").path(rangeKey).path("AttributeValueList").path(0).getTextValue();
-								  for (Item itm : getTable(tableName).getItems()) {
-									  if ((bound.compareTo(itm.getAttributes().get(itm.getRangeKey()).get(rangeKeyType)) <= 0)) {
-										  result.add(itm.getAttributes());
-									  }
-								  }
-							  }
-						  } else {
-							  throw new RuntimeException("RangeKeyCondition with no rangekey on the table");
-						  }
-					  } else {
-						  for (Item itm : getTable(tableName).getItems()) {
-							  result.add(itm.getAttributes());
-						  }
+    protected ScanResult scan(ScanRequest request) {
+        ScanResult result = new ScanResult();
+        List<Error> errors = new ScanRequestValidator().validate(request);
+        if (errors.size() > 0) {
+            throw createInternalServerException(errors);
+        }
+        result.setConsumedCapacityUnits(0.5);
+        result.setLastEvaluatedKey(new Key());
+        List<Map<String, AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
+        for (String key : this.tables.get(request.getTableName()).getItems().keySet()) {
+            Map<String, AttributeValue> item = this.tables.get(request.getTableName()).getItem(key);
+            if (request.getScanFilter() != null) {
+                for (String k : request.getScanFilter().keySet()) {
+                    Condition cond = request.getScanFilter().get(k);
+                    if (cond.getComparisonOperator().equals("EQ")) {
+                        if (cond.getAttributeValueList().size() == 1) {
+                            if (item.get(k).equals(cond.getAttributeValueList().get(0))) {
+                                items.add(item);
+                            }
+                        } else {
+                            if (item.get(k).equals(cond.getAttributeValueList())) {
+                                items.add(item);
+                            }
+                        }
+                    }
+                    if (cond.getComparisonOperator().equals("LE")) {
+                        if (cond.getAttributeValueList().size() == 1) {
+                            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                if (value.compareTo(comp) <= 0) {
+                                    items.add(item);
+                                }
+                            } else {
+                                //TODO to do
+                                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+                            }
 
-					  }
-					  map.put("ConsumedCapacityUnits", 1);
-					  map.put("Count", 0);
-					  map.put("ScannedCount", 1);
-					  map.put("Items", result);
+                        } else {
+                            //TODO to do
+                            if (item.get(k).equals(cond.getAttributeValueList())) {
+                                items.add(item);
+                            }
+                        }
+                    }
+                    if (cond.getComparisonOperator().equals("LT")) {
+                        if (cond.getAttributeValueList().size() == 1) {
+                            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                if (value.compareTo(comp) < 0) {
+                                    items.add(item);
+                                }
+                            } else {
+                                //TODO to do
+                                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+                            }
 
-				  } catch (RuntimeException e) {
-					  logger.debug("table wasn't created correctly : " + e);
-				  }
-				  System.out.println(map.toString());
-				  return map;*/
-		return new ScanResult();
-	}
+                        } else {
+                            //TODO to do
+                            if (item.get(k).equals(cond.getAttributeValueList())) {
+                                items.add(item);
+                            }
+                        }
+                    }
+                    if (cond.getComparisonOperator().equals("GE")) {
+                        if (cond.getAttributeValueList().size() == 1) {
+                            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                if (value.compareTo(comp) >= 0) {
+                                    items.add(item);
+                                }
+                            } else {
+                                //TODO to do
+                                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+                            }
+
+                        } else {
+                            //TODO to do
+                            if (item.get(k).equals(cond.getAttributeValueList())) {
+                                items.add(item);
+                            }
+                        }
+                    }
+                    if (cond.getComparisonOperator().equals("GT")) {
+                        if (cond.getAttributeValueList().size() == 1) {
+                            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                if (value.compareTo(comp) > 0) {
+                                    items.add(item);
+                                }
+                            } else {
+                                //TODO to do
+                                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+                            }
+
+                        } else {
+                            //TODO to do
+                            if (item.get(k).equals(cond.getAttributeValueList())) {
+                                items.add(item);
+                            }
+                        }
+                    }
+                }
+            } else {
+                items.add(item);
+            }
+        }
+        if(request.getLimit()!=null){
+            items = items.subList(0,request.getLimit()-1);
+        }
+        if (request.getAttributesToGet() != null) {
+            request.getAttributesToGet();
+            for (Map<String, AttributeValue> item : result.getItems()) {
+                for (String att : request.getAttributesToGet()) {
+                    item.remove(item.get(att));
+                }
+            }
+        }
+        for(Map<String,AttributeValue> item : items){
+            result.setLastEvaluatedKey(new Key(item.get("id")));
+        }
+        result.setItems(items);
+        result.setCount(items.size());
+        result.setScannedCount(items.size());
+        return result;
+    }
 
 	public QueryResult query(QueryRequest request) {
 		// Validate data coming in
@@ -475,12 +524,12 @@ class AlternatorDBHandler {
 			throw createInternalServerException(errors);
 		}
 
-		
+
 
 		return new QueryResult();
 	}
 
-	protected String getKeyName(AttributeValue value) {
+	protected String getKeyValue(AttributeValue value) {
 		if (value != null) {
 			if (value.getN() != null) {
 				return value.getN();
@@ -541,11 +590,12 @@ class AlternatorDBHandler {
 			throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
 		}
 		// Check to make sure Key is valid
-		if (this.tables.get(tableName).getItem(key.getHashKeyElement().toString()) == null) {
+		if (this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())) == null) {
 			//TODO to do the handler
 		} else {
-			Map<String, AttributeValue> item = this.tables.get(tableName).getItem(key.getHashKeyElement().toString());
-			for (String sKey : item.keySet()) {
+			Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
+            Set<String> sKeyz = Collections.synchronizedSet(item.keySet());
+			for (String sKey : sKeyz) {
 				if (attributesToUpdate.containsKey(sKey)) {
 					if (attributesToUpdate.get(sKey).getAction().equals("PUT")) {
 						item.remove(sKey);
@@ -616,5 +666,6 @@ class AlternatorDBHandler {
 		}
 		return result;
 	}
+
 
 }

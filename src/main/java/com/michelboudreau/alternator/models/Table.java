@@ -13,7 +13,7 @@ public class Table {
 	private ProvisionedThroughputDescription throughputDescription;
 	private Date lastDecreaseDateTime;
 	private Date lastIncreaseDateTime;
-	private Map<String, Map<String, AttributeValue>> items = new HashMap<String, Map<String, AttributeValue>>();
+    private Map<String, Map<String, AttributeValue>> items = new HashMap<String, Map<String, AttributeValue>>();
 	private Date creationDate;
 	private String hashKeyName;
 	private String rangeKeyName;

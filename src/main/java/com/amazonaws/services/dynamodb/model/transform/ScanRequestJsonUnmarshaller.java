@@ -1,11 +1,10 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
 import com.amazonaws.services.dynamodb.model.ScanRequest;
-import com.amazonaws.transform.JsonUnmarshallerContext;
-import com.amazonaws.transform.ListUnmarshaller;
-import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
-import com.amazonaws.transform.Unmarshaller;
+import com.amazonaws.transform.*;
 import org.codehaus.jackson.JsonToken;
+import com.amazonaws.services.dynamodb.model.Condition;
+
 
 public class ScanRequestJsonUnmarshaller implements Unmarshaller<ScanRequest, JsonUnmarshallerContext> {
 
@@ -21,9 +20,15 @@ public class ScanRequestJsonUnmarshaller implements Unmarshaller<ScanRequest, Js
             if (token == null) break;
 
             if (token == JsonToken.FIELD_NAME || token == JsonToken.START_OBJECT) {
+                if (context.testExpression("TableName", targetDepth)) {
+                    context.nextToken();
+                    request.setTableName(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
+                }
                 if (context.testExpression("Limit", targetDepth)) {
                     context.nextToken();
                     request.setLimit(SimpleTypeJsonUnmarshallers.IntegerJsonUnmarshaller.getInstance().unmarshall(context));
+                }if (context.testExpression("ScanFilter", targetDepth)) {
+                    request.setScanFilter(new MapUnmarshaller<String, Condition>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), ConditionJsonUnmarshaller.getInstance()).unmarshall(context));
                 }
                 if (context.testExpression("ExclusiveStartKey", targetDepth)) {
                     request.setExclusiveStartKey(KeyJsonUnmarshaller.getInstance().unmarshall(context));
