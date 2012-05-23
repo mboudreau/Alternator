@@ -63,7 +63,7 @@ public class AlternatorScanTest extends AlternatorTest {
     }
 
 
-   /* @Test
+    @Test
     public void scanWithAttributesToGetTest() {
         ScanRequest request = getBasicReq();
         List<String> attrToGet = new ArrayList<String>();
@@ -227,7 +227,7 @@ public class AlternatorScanTest extends AlternatorTest {
         request.setTableName(null);
         ScanResult result = client.scan(request);
         Assert.assertNull(result.getItems());
-    }*/
+    }
 
     protected ScanRequest getBasicReq() {
         ScanRequest req = new ScanRequest();

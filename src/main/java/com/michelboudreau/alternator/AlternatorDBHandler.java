@@ -594,7 +594,7 @@ class AlternatorDBHandler {
 			//TODO to do the handler
 		} else {
 			Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
-            Set<String> sKeyz = Collections.synchronizedSet(item.keySet());
+            Set<String> sKeyz = new HashSet<String>(item.keySet());
 			for (String sKey : sKeyz) {
 				if (attributesToUpdate.containsKey(sKey)) {
 					if (attributesToUpdate.get(sKey).getAction().equals("PUT")) {

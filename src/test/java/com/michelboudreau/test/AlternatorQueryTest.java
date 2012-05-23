@@ -30,7 +30,7 @@ public class AlternatorQueryTest extends AlternatorTest {
 	@Test
 	public void queryWithHashKey() {
 		// Setup table with items
-		/*KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
 		createTable(tableName, schema);
 		AttributeValue hashKey = createStringAttribute();
 		createGenericItem();
@@ -42,7 +42,7 @@ public class AlternatorQueryTest extends AlternatorTest {
 		QueryResult result = client.query(request);
 		Assert.assertNotNull(result.getItems());
 		Assert.assertNotSame(result.getItems().size(), 0);
-		Assert.assertEquals(result.getItems().get(0).get("id"), hashKey);*/
+		Assert.assertEquals(result.getItems().get(0).get("id"), hashKey);
 	}
 /*
 	@Test
