@@ -1,7 +1,6 @@
 package com.michelboudreau.test;
 
 import com.amazonaws.services.dynamodb.model.*;
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.AttributeType;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
