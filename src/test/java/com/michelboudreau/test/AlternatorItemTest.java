@@ -1,11 +1,22 @@
 package com.michelboudreau.test;
 
+import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.transform.UpdateItemRequestJsonUnmarshaller;
+import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.Unmarshaller;
+import com.michelboudreau.alternator.enums.AttributeValueType;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -140,6 +151,38 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
+    public void updateItemWithCustomRequestTest() throws Exception {
+        String json = readFileAsString("customUpdateItemRequest.json");
+        UpdateItemRequest request = getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance(), json);
+        String tableName = request.getTableName();
+        KeySchema schema = new KeySchema();
+        KeySchemaElement hk = new KeySchemaElement();
+        hk.setAttributeName("id");
+        hk.setAttributeType(getAttributeValueType(request.getKey().getHashKeyElement()).toString());
+        if(request.getKey().getRangeKeyElement()!=null){
+            KeySchemaElement rk = new KeySchemaElement();
+            rk.setAttributeName("range");
+            rk.setAttributeType(getAttributeValueType(request.getKey().getRangeKeyElement()).toString());
+            schema.setRangeKeyElement(rk);
+        }
+        schema.setHashKeyElement(hk);
+        CreateTableRequest createTableRequest = new CreateTableRequest(tableName,schema );
+        ProvisionedThroughput pv = new ProvisionedThroughput();
+        pv.setReadCapacityUnits(5L);
+        pv.setWriteCapacityUnits(5L);
+        createTableRequest.setProvisionedThroughput(pv);
+        client.createTable(createTableRequest);
+        UpdateItemResult res = client.updateItem(request);
+
+
+
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+    }
+
+
+
+
+     @Test
     public void deleteItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
@@ -209,26 +252,79 @@ public class AlternatorItemTest extends AlternatorTest {
 	}
 */
 
-/*
-	public BatchGetItemRequest generateGetBatchRequest() {
-		BatchGetItemRequest batchGetItemRequest = new BatchGetItemRequest();
-		Map<String, KeysAndAttributes> requestItems = new HashMap<String, KeysAndAttributes>();
-		Key table1key1 = new Key().withHashKeyElement(new AttributeValue().withS("123"));
-		requestItems.put(testTableName, new KeysAndAttributes().withKeys(table1key1));
-		batchGetItemRequest.withRequestItems(requestItems);
-		return batchGetItemRequest;
-	}
+    /*
+     public BatchGetItemRequest generateGetBatchRequest() {
+         BatchGetItemRequest batchGetItemRequest = new BatchGetItemRequest();
+         Map<String, KeysAndAttributes> requestItems = new HashMap<String, KeysAndAttributes>();
+         Key table1key1 = new Key().withHashKeyElement(new AttributeValue().withS("123"));
+         requestItems.put(testTableName, new KeysAndAttributes().withKeys(table1key1));
+         batchGetItemRequest.withRequestItems(requestItems);
+         return batchGetItemRequest;
+     }
 
-	public BatchWriteItemRequest generateWriteBatchRequest() {
-		BatchWriteItemRequest request = new BatchWriteItemRequest();
-		Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
-		List<WriteRequest> itemList = new ArrayList<WriteRequest>();
-		itemList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(generateStaticItem())));
-		itemList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(generateNewStaticItem())));
-		requestItems.put(testTableName, itemList);
-		request.setRequestItems(requestItems);
-		return request;
-	}*/
+     public BatchWriteItemRequest generateWriteBatchRequest() {
+         BatchWriteItemRequest request = new BatchWriteItemRequest();
+         Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
+         List<WriteRequest> itemList = new ArrayList<WriteRequest>();
+         itemList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(generateStaticItem())));
+         itemList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(generateNewStaticItem())));
+         requestItems.put(testTableName, itemList);
+         request.setRequestItems(requestItems);
+         return request;
+     }*/
+
+    private static String readFileAsString(String filePath)
+            throws java.io.IOException{
+        StringBuffer fileData = new StringBuffer(1000);
+        BufferedReader reader = new BufferedReader(
+                new FileReader(filePath));
+        char[] buf = new char[1024];
+        int numRead=0;
+        while((numRead=reader.read(buf)) != -1){
+            String readData = String.valueOf(buf, 0, numRead);
+            fileData.append(readData);
+            buf = new char[1024];
+        }
+        reader.close();
+        return fileData.toString();
+    }
+
+    public <T extends AmazonWebServiceRequest> T getData(Class<T> clazz, Unmarshaller<T, JsonUnmarshallerContext> unmarshaller, String json) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonFactory jsonFactory = new JsonFactory();
+        if (json != null) {
+            try {
+                JsonParser jsonParser = jsonFactory.createJsonParser(json);
+                try {
+                    JsonUnmarshallerContext unmarshallerContext = new JsonUnmarshallerContext(jsonParser);
+                    T result = unmarshaller.unmarshall(unmarshallerContext);
+                    return result;
+                } finally {
+                }
+                //return mapper.readValue(json, clazz);
+            } catch (Exception e) {
+
+            }
+        } else {
+
+        }
+        return null;
+    }
+
+    protected AttributeValueType getAttributeValueType(AttributeValue value) {
+        if (value != null) {
+            if (value.getN() != null) {
+                return AttributeValueType.N;
+            } else if (value.getS() != null) {
+                return AttributeValueType.S;
+            } else if (value.getNS() != null) {
+                return AttributeValueType.NS;
+            } else if (value.getSS() != null) {
+                return AttributeValueType.SS;
+            }
+        }
+        return AttributeValueType.UNKNOWN;
+    }
 
 
     protected AttributeValue createStringAttribute() {
