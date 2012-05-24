@@ -21,7 +21,7 @@ public class ScanResultMarshaller implements Marshaller<String, ScanResult> {
             JSONWriter jsonWriter = new JSONWriter(stringWriter);
             jsonWriter.object();
             jsonWriter.key("Count").value(scanResult.getCount());
-            jsonWriter.key("items").array();
+            jsonWriter.key("Items").array();
             for (Map<String, AttributeValue> item : scanResult.getItems()) {
                 jsonWriter.object();
                 for (String k : item.keySet()) {

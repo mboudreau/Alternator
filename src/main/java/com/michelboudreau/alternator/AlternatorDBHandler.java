@@ -400,6 +400,9 @@ class AlternatorDBHandler {
             if (request.getScanFilter() != null) {
                 for (String k : request.getScanFilter().keySet()) {
                     Condition cond = request.getScanFilter().get(k);
+                    if(cond.getComparisonOperator()==null){
+                        throw new ResourceNotFoundException("There must be a comparisonOperator");
+                    }
                     if (cond.getComparisonOperator().equals("EQ")) {
                         if (cond.getAttributeValueList().size() == 1) {
                             if (item.get(k).equals(cond.getAttributeValueList().get(0))) {
@@ -416,7 +419,7 @@ class AlternatorDBHandler {
                             if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
                                 String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
                                 String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                if (value.compareTo(comp) <= 0) {
+                                if (value.compareTo(comp) >= 0) {
                                     items.add(item);
                                 }
                             } else {
@@ -456,7 +459,7 @@ class AlternatorDBHandler {
                             if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
                                 String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
                                 String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                if (value.compareTo(comp) >= 0) {
+                                if (value.compareTo(comp) <= 0) {
                                     items.add(item);
                                 }
                             } else {
@@ -499,17 +502,25 @@ class AlternatorDBHandler {
         if (request.getLimit() != null) {
             items = items.subList(0, request.getLimit() - 1);
         }
-        if (request.getAttributesToGet() != null) {
-            request.getAttributesToGet();
-            for (Map<String, AttributeValue> item : result.getItems()) {
-                for (String att : request.getAttributesToGet()) {
-                    item.remove(item.get(att));
-                }
-            }
-        }
+
         for (Map<String, AttributeValue> item : items) {
             result.setLastEvaluatedKey(new Key(item.get("id")));
         }
+
+        if (request.getAttributesToGet() != null) {
+            List<Map<String,AttributeValue>> copy = new ArrayList<Map<String, AttributeValue>>();
+            for (Map<String, AttributeValue> item : items) {
+                Set<String> keyz = new HashSet<String>(item.keySet());
+                for(String sKey : keyz){
+                   if(!request.getAttributesToGet().contains(sKey)){
+                       item.remove(sKey);
+                   }
+                }
+                copy.add(item);
+            }
+            items = copy;
+        }
+
         result.setItems(items);
         result.setCount(items.size());
         result.setScannedCount(items.size());

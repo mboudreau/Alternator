@@ -22,7 +22,7 @@ public class ConditionJsonUnmarshaller implements Unmarshaller<Condition, JsonUn
                 if (context.testExpression("AttributeValueList", targetDepth)) {
                     request.setAttributeValueList(new ListUnmarshaller<AttributeValue>(AttributeValueJsonUnmarshaller.getInstance()).unmarshall(context));
                 }
-                if (context.testExpression("ComparisonOperator", targetDepth)) {
+                if (context.testExpression("ComparisonOperator", originalDepth)) {
                     context.nextToken();
                     request.setComparisonOperator(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
                 }
