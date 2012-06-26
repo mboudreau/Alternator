@@ -314,11 +314,13 @@ class AlternatorDBHandler {
                 result.setItem(this.tables.get(tableName).getItem(keyz));
             } else {
                 for (String att : attributesToGet) {
-                    response.put(att, this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())).get(att));
+                    AttributeValue res = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())).get(att);
+                    if (res != null) {
+                        response.put(att, res);
+                    }
                 }
                 result.setItem(response);
             }
-
         }
         return result;
     }
