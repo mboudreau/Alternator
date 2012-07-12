@@ -13,7 +13,7 @@ You can now add the dependency into your maven project with:
 		<dependency>
 			<groupId>com.michelboudreau</groupId>
 			<artifactId>alternator</artifactId>
-			<version><alternator version></version>
+			<version><!-- ALTERNATOR VERSION (look in pom.xml to find version) --></version>
 		</dependency>
 	</dependencies>
 	<repositories>
