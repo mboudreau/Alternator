@@ -2,14 +2,48 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<!-- Need Sonatype Parent to Deploy -->
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
 	<groupId>com.michelboudreau</groupId>
 	<artifactId>alternator</artifactId>
-	<version>0.2.5</version>
+	<version>0.2.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Alternator</name>
 	<description>A mock, local DynamoDB instance for testing</description>
 	<url>https://github.com/mboudreau/Alternator/</url>
+
+	<developers>
+		<developer>
+			<id>mboudreau</id>
+			<name>Michel Boudreau</name>
+			<email>michelboudreau@gmail.com</email>
+		</developer>
+		<developer>
+			<id>tbredillet</id>
+			<name>Thomas Bredillet</name>
+			<email>tnbredillet@gmail.com</email>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>The GNU General Public License, Version 3.0</name>
+			<url>https://www.gnu.org/licenses/gpl.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>git@github.com:mboudreau/Alternator.git</url>
+		<connection>scm:git:git@github.com:mboudreau/Alternator.git</connection>
+		<developerConnection>scm:git:git@github.com:mboudreau/Alternator.git</developerConnection>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -158,29 +192,4 @@
 		</dependency>
 	</dependencies>
 
-	<developers>
-		<developer>
-			<id>mboudreau</id>
-			<name>Michel Boudreau</name>
-			<email>michelboudreau@gmail.com</email>
-		</developer>
-		<developer>
-			<id>tbredillet</id>
-			<name>Thomas Bredillet</name>
-			<email>tnbredillet@gmail.com</email>
-		</developer>
-	</developers>
-
-	<licenses>
-		<license>
-			<name>The GNU General Public License, Version 3.0</name>
-			<url>https://www.gnu.org/licenses/gpl.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
-	<scm>
-		<url>http://svn.apache.org/viewcvs.cgi/maven</url>
-		<connection>http://svn.apache.org/viewcvs.cgi/maven</connection>
-	</scm>
 </project>
