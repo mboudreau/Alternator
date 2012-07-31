@@ -506,7 +506,7 @@ class AlternatorDBHandler {
         }
 
         for (Map<String, AttributeValue> item : items) {
-            result.setLastEvaluatedKey(new Key(item.get("id")));
+            result.setLastEvaluatedKey(new Key(item.get(this.tables.get(request.getTableName()).getHashKeyName())));
         }
 
         if (request.getAttributesToGet() != null) {
