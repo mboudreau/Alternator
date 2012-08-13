@@ -17,8 +17,8 @@ public class ProvisionedThroughputValidator extends Validator {
 		ProvisionedThroughput instance = (ProvisionedThroughput) target;
 		List<Error> errors = ValidatorUtils.rejectIfNull(instance);
 		if (errors.size() == 0) {
-			errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(instance.getWriteCapacityUnits(), 5, Limits.NUMBER_MAX));
-			errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(instance.getReadCapacityUnits(), 5, Limits.NUMBER_MAX));
+			errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(instance.getWriteCapacityUnits(), 1, Limits.NUMBER_MAX));
+			errors.addAll(ValidatorUtils.rejectIfSizeOutOfBounds(instance.getReadCapacityUnits(), 1, Limits.NUMBER_MAX));
 		}
 
 		return removeNulls(errors);
