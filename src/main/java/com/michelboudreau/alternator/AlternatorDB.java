@@ -10,17 +10,21 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import java.io.File;
+
 public class AlternatorDB {
 
-	private final Logger logger = LoggerFactory.getLogger(AlternatorDB.class);
+    public static final String PERSISTENCE_LOCATION = "persistence-location";
+
+    private final Logger logger = LoggerFactory.getLogger(AlternatorDB.class);
 	private Server server;
 	private ServletContextHandler context;
 
 	public AlternatorDB() {
-		this(9090);
+		this(9090, null);
 	}
 
-	public AlternatorDB(int port) {
+	public AlternatorDB(int port, File persistence) {
 		if (port == 0) {
 			port = 9090;
 		}
@@ -36,7 +40,9 @@ public class AlternatorDB {
 		this.context = new ServletContextHandler(this.server, "/", ServletContextHandler.SESSIONS);
 		this.context.setContextPath("/");
 		this.context.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
-		this.context.setInitParameter("contextConfigLocation", AlternatorDBConfig.class.getName());
+        if(persistence!=null){
+		    this.context.setInitParameter(PERSISTENCE_LOCATION, persistence.getAbsolutePath());
+        }
 
 		// Add listener
 		ContextLoaderListener listener = new ContextLoaderListener();
