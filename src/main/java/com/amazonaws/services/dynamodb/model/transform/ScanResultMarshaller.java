@@ -42,14 +42,16 @@ public class ScanResultMarshaller implements Marshaller<String, ScanResult> {
             jsonWriter.endArray();
             jsonWriter.key("LastEvaluatedKey").object();
             jsonWriter.key("HashKeyElement").object();
-            if (scanResult.getLastEvaluatedKey().getHashKeyElement().getS() != null) {
-                jsonWriter.key("S").value(scanResult.getLastEvaluatedKey().getHashKeyElement().getS());
-            } else if (scanResult.getLastEvaluatedKey().getHashKeyElement().getN() != null) {
-                jsonWriter.key("N").value(scanResult.getLastEvaluatedKey().getHashKeyElement().getN());
-            } else if (scanResult.getLastEvaluatedKey().getHashKeyElement().getSS() != null) {
-                jsonWriter.key("SS").value(scanResult.getLastEvaluatedKey().getHashKeyElement().getSS());
-            } else if (scanResult.getLastEvaluatedKey().getHashKeyElement().getNS() != null) {
-                jsonWriter.key("NS").value(scanResult.getLastEvaluatedKey().getHashKeyElement().getNS());
+            if(scanResult.getLastEvaluatedKey().getHashKeyElement()!=null){
+                if (scanResult.getLastEvaluatedKey().getHashKeyElement().getS() != null) {
+                    jsonWriter.key("S").value(scanResult.getLastEvaluatedKey().getHashKeyElement().getS());
+                } else if (scanResult.getLastEvaluatedKey().getHashKeyElement().getN() != null) {
+                    jsonWriter.key("N").value(scanResult.getLastEvaluatedKey().getHashKeyElement().getN());
+                } else if (scanResult.getLastEvaluatedKey().getHashKeyElement().getSS() != null) {
+                    jsonWriter.key("SS").value(scanResult.getLastEvaluatedKey().getHashKeyElement().getSS());
+                } else if (scanResult.getLastEvaluatedKey().getHashKeyElement().getNS() != null) {
+                    jsonWriter.key("NS").value(scanResult.getLastEvaluatedKey().getHashKeyElement().getNS());
+                }
             }
             jsonWriter.endObject();
             jsonWriter.key("RangeKeyElement").object();

@@ -7,25 +7,65 @@ import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
 import com.michelboudreau.alternator.validators.*;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 class AlternatorDBHandler {
 
     private final Logger logger = LoggerFactory.getLogger(AlternatorDBHandler.class);
+
     private Map<String, Table> tables = new HashMap<String, Table>();
     private List<Table> tableList = new ArrayList<Table>();
 
     public AlternatorDBHandler() {
-        // Should we save the results
-        /*ObjectMapper mapper = new ObjectMapper();
-                    if (new File(dbName).exists()) {
-                        this.models = mapper.readValue(new File(dbName), AlternatorDB.class);
-                    }
-                    mapper.writeValue(new File(dbName), models);*/
+    }
+
+    public void save(String persistence){
+        try {
+            createObjectMapper().writeValue(new File(persistence), tableList);
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
+    public void restore(String persistence){
+        try {
+            File dbFile = new File(persistence);
+            if(dbFile.exists()==false) {
+                return;
+            }
+
+            tableList = createObjectMapper().readValue(dbFile, TypeFactory.collectionType(ArrayList.class, Table.class));
+
+            for (Table table : tableList){
+                tables.put(table.getName(), table);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
+    public ObjectMapper createObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setVisibility(JsonMethod.FIELD, JsonAutoDetect.Visibility.ANY)
+                .setVisibility(JsonMethod.CREATOR, JsonAutoDetect.Visibility.ANY)
+                .setVisibility(JsonMethod.SETTER, JsonAutoDetect.Visibility.NONE)
+                .setVisibility(JsonMethod.GETTER, JsonAutoDetect.Visibility.NONE)
+                .setVisibility(JsonMethod.IS_GETTER, JsonAutoDetect.Visibility.NONE);
+
+        mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
+
+        return mapper;
     }
 
     public String handle(HttpServletRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException, ConditionalCheckFailedException {
