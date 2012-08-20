@@ -19,6 +19,9 @@ public class Table {
 	private String rangeKeyName;
 	private final TableStatus status = TableStatus.ACTIVE; // Set active right away since we don't need to wait
 
+    private Table(){
+    }
+
 	public Table(String name, KeySchema keySchema, ProvisionedThroughput throughput) {
 		this.name = name;
 		this.keySchema = keySchema;
