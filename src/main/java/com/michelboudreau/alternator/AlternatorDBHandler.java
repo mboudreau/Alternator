@@ -27,9 +27,11 @@ class AlternatorDBHandler {
     private Map<String, Table> tables = new HashMap<String, Table>();
     private List<Table> tableList = new ArrayList<Table>();
 
+	// TODO: create constructor that can handle a file
     public AlternatorDBHandler() {
     }
 
+	// Maybe save automatically on destroy?
     public void save(String persistence){
         try {
             createObjectMapper().writeValue(new File(persistence), tableList);
@@ -56,6 +58,7 @@ class AlternatorDBHandler {
         }
     }
 
+	// Not sure about this.  If correct and only need one, only create one instance
     public ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(JsonMethod.FIELD, JsonAutoDetect.Visibility.ANY)

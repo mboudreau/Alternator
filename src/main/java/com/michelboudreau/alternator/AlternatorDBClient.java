@@ -1,8 +1,6 @@
 package com.michelboudreau.alternator;
 
 import com.amazonaws.*;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.SessionCredentialsProviderFactory;
 import com.amazonaws.handlers.HandlerChainFactory;
 import com.amazonaws.http.ExecutionContext;
 import com.amazonaws.http.HttpResponseHandler;
@@ -22,37 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlternatorDBClient extends AmazonWebServiceClient implements AmazonDynamoDB {
-	/** Provider for AWS credentials. */
-	/*private AWSCredentialsProvider awsCredentialsProvider;*/
-
-	/**
-	 * Long-term credentials used to obtain the session credentials provider
-	 */
-	/*private AWSCredentials longTermCredentials;*/
 	private static final Log log = LogFactory.getLog(AlternatorDBClient.class);
-	/**
-	 * List of exception unmarshallers for all AmazonDynamoDB exceptions.
-	 */
 	protected List<Unmarshaller<AmazonServiceException, JSONObject>> exceptionUnmarshallers;
 
-	/**
-	 * AWS signer for authenticating requests.
-	 */
-	/*private AWS3Signer signer;*/
-	public AlternatorDBClient(/*AWSCredentials awsCredentials*/) {
-		this(/*awsCredentials,*/ new ClientConfiguration());
+	public AlternatorDBClient() {
+		this(new ClientConfiguration());
 	}
 
-	public AlternatorDBClient(/*AWSCredentials awsCredentials,*/ ClientConfiguration clientConfiguration) {
+	public AlternatorDBClient(ClientConfiguration clientConfiguration) {
 		super(clientConfiguration);
-
-		/* if (awsCredentials instanceof AWSSessionCredentials ||
-					   awsCredentials instanceof NoSessionSupportCredentials) {
-					   this.awsCredentialsProvider = new StaticCredentialsProvider(awsCredentials);
-				   } else {
-					   this.longTermCredentials = awsCredentials;
-				   }*/
-
 		init();
 	}
 
@@ -68,11 +44,9 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		exceptionUnmarshallers.add(new JsonErrorUnmarshaller());
 		setEndpoint("http://localhost:9090/");
 
-		/*signer = new AWS3Signer();*/
 
 		HandlerChainFactory chainFactory = new HandlerChainFactory();
-		requestHandlers.addAll(chainFactory.newRequestHandlerChain(
-				"/com/amazonaws/services/dynamodb/request.handlers"));
+		requestHandlers.addAll(chainFactory.newRequestHandlerChain("/com/amazonaws/services/dynamodb/request.handlers"));
 
 
 		clientConfiguration = new ClientConfiguration(clientConfiguration);
@@ -120,7 +94,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		Unmarshaller<UpdateItemResult, JsonUnmarshallerContext> unmarshaller = new UpdateItemResultJsonUnmarshaller();
 		JsonResponseHandler<UpdateItemResult> responseHandler = new JsonResponseHandler<UpdateItemResult>(unmarshaller);
 
-
 		return invoke(request, responseHandler);
 	}
 
@@ -130,7 +103,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 
 		Unmarshaller<PutItemResult, JsonUnmarshallerContext> unmarshaller = new PutItemResultJsonUnmarshaller();
 		JsonResponseHandler<PutItemResult> responseHandler = new JsonResponseHandler<PutItemResult>(unmarshaller);
-
 
 		return invoke(request, responseHandler);
 	}
@@ -142,7 +114,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		Unmarshaller<DescribeTableResult, JsonUnmarshallerContext> unmarshaller = new DescribeTableResultJsonUnmarshaller();
 		JsonResponseHandler<DescribeTableResult> responseHandler = new JsonResponseHandler<DescribeTableResult>(unmarshaller);
 
-
 		return invoke(request, responseHandler);
 	}
 
@@ -152,7 +123,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 
 		Unmarshaller<ScanResult, JsonUnmarshallerContext> unmarshaller = new ScanResultJsonUnmarshaller();
 		JsonResponseHandler<ScanResult> responseHandler = new JsonResponseHandler<ScanResult>(unmarshaller);
-
 
 		return invoke(request, responseHandler);
 	}
@@ -164,7 +134,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		Unmarshaller<CreateTableResult, JsonUnmarshallerContext> unmarshaller = new CreateTableResultJsonUnmarshaller();
 		JsonResponseHandler<CreateTableResult> responseHandler = new JsonResponseHandler<CreateTableResult>(unmarshaller);
 
-
 		return invoke(request, responseHandler);
 	}
 
@@ -174,7 +143,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 
 		Unmarshaller<UpdateTableResult, JsonUnmarshallerContext> unmarshaller = new UpdateTableResultJsonUnmarshaller();
 		JsonResponseHandler<UpdateTableResult> responseHandler = new JsonResponseHandler<UpdateTableResult>(unmarshaller);
-
 
 		return invoke(request, responseHandler);
 	}
@@ -186,7 +154,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		Unmarshaller<DeleteTableResult, JsonUnmarshallerContext> unmarshaller = new DeleteTableResultJsonUnmarshaller();
 		JsonResponseHandler<DeleteTableResult> responseHandler = new JsonResponseHandler<DeleteTableResult>(unmarshaller);
 
-
 		return invoke(request, responseHandler);
 	}
 
@@ -196,7 +163,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 
 		Unmarshaller<DeleteItemResult, JsonUnmarshallerContext> unmarshaller = new DeleteItemResultJsonUnmarshaller();
 		JsonResponseHandler<DeleteItemResult> responseHandler = new JsonResponseHandler<DeleteItemResult>(unmarshaller);
-
 
 		return invoke(request, responseHandler);
 	}
@@ -208,7 +174,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		Unmarshaller<GetItemResult, JsonUnmarshallerContext> unmarshaller = new GetItemResultJsonUnmarshaller();
 		JsonResponseHandler<GetItemResult> responseHandler = new JsonResponseHandler<GetItemResult>(unmarshaller);
 
-
 		return invoke(request, responseHandler);
 	}
 
@@ -219,7 +184,6 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		Unmarshaller<BatchGetItemResult, JsonUnmarshallerContext> unmarshaller = new BatchGetItemResultJsonUnmarshaller();
 		JsonResponseHandler<BatchGetItemResult> responseHandler = new JsonResponseHandler<BatchGetItemResult>(unmarshaller);
 
-
 		return invoke(request, responseHandler);
 	}
 
@@ -227,18 +191,9 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		return listTables(new ListTablesRequest());
 	}
 
-	/**
-	 * Setting the endpoint will also change the session credentials provider,
-	 * if it's being automatically managed.
-	 */
 	@Override
 	public void setEndpoint(String endpoint) throws IllegalArgumentException {
 		super.setEndpoint(endpoint);
-
-		/*if (this.longTermCredentials != null) {
-			this.awsCredentialsProvider = SessionCredentialsProviderFactory.getSessionCredentialsProvider(
-					this.longTermCredentials, endpoint, clientConfiguration);
-		}*/
 	}
 
 	public ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) {
@@ -248,15 +203,9 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 	private <X, Y extends AmazonWebServiceRequest> X invoke(Request<Y> request, HttpResponseHandler<AmazonWebServiceResponse<X>> responseHandler) {
 		request.setEndpoint(endpoint);
 
-		//AWSCredentials credentials = awsCredentialsProvider.getCredentials();
 		AmazonWebServiceRequest originalRequest = request.getOriginalRequest();
-		/*if (originalRequest != null && originalRequest.getRequestCredentials() != null) {
-			credentials = originalRequest.getRequestCredentials();
-		}*/
 
 		ExecutionContext executionContext = createExecutionContext();
-		/*executionContext.setSigner(signer);
-		executionContext.setCredentials(credentials);*/
 		executionContext.setCustomBackoffStrategy(com.amazonaws.internal.DynamoDBBackoffStrategy.DEFAULT);
 		JsonErrorResponseHandler errorResponseHandler = new JsonErrorResponseHandler(exceptionUnmarshallers);
 
