@@ -45,7 +45,8 @@ class AlternatorDBHandler {
                 return;
             }
 
-            tableList = createObjectMapper().readValue(dbFile, TypeFactory.collectionType(ArrayList.class, Table.class));
+	        ObjectMapper objectMapper = createObjectMapper();
+            tableList = objectMapper.readValue(dbFile, objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, Table.class));
 
             for (Table table : tableList){
                 tables.put(table.getName(), table);
