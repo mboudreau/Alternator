@@ -14,14 +14,18 @@ import java.io.File;
 
 public class AlternatorDB {
 
-    public static final String PERSISTENCE_LOCATION = "persistence-location";
+	public static final String PERSISTENCE_LOCATION = "persistence-location";
 
-    private final Logger logger = LoggerFactory.getLogger(AlternatorDB.class);
+	private final Logger logger = LoggerFactory.getLogger(AlternatorDB.class);
 	private Server server;
 	private ServletContextHandler context;
 
 	public AlternatorDB() {
 		this(9090, null);
+	}
+
+	public AlternatorDB(int port) {
+		this(port, null);
 	}
 
 	public AlternatorDB(int port, File persistence) {
@@ -40,9 +44,9 @@ public class AlternatorDB {
 		this.context = new ServletContextHandler(this.server, "/", ServletContextHandler.SESSIONS);
 		this.context.setContextPath("/");
 		this.context.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
-        if(persistence!=null){
-		    this.context.setInitParameter(PERSISTENCE_LOCATION, persistence.getAbsolutePath());
-        }
+		if (persistence != null) {
+			this.context.setInitParameter(PERSISTENCE_LOCATION, persistence.getAbsolutePath());
+		}
 
 		// Add listener
 		ContextLoaderListener listener = new ContextLoaderListener();
