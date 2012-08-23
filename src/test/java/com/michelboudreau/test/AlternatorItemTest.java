@@ -35,8 +35,7 @@ public class AlternatorItemTest extends AlternatorTest {
         deleteAllTables();
     }
 
-    // TODO: need to test for different schemas
-
+    //Test: put item with HashKey
     @Test
     public void putItemWithHashKey() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
@@ -75,6 +74,51 @@ public class AlternatorItemTest extends AlternatorTest {
         PutItemResult res = client.putItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
+
+    //Test: put item with HashKey and RangeKey@Test
+    public void putItemWithHashKeyAndRangeKey() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("name").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
+        PutItemResult res = client.putItem(request);
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+    }
+
+    @Test
+    public void putItemWithHashKeyAndRangeKeyOverwriteItem() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("name").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
+        client.putItem(request); // put item beforehand
+        PutItemResult res = client.putItem(request); // Add another
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+    }
+
+    @Test
+    public void putItemWithHashKeyAndRangeKeyWithoutTableName() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("name").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName);
+        PutItemResult res = client.putItem(request);
+        Assert.assertNull(res.getConsumedCapacityUnits());
+    }
+
+    @Test
+    public void putItemWithHashKeyAndRangeKeyWithoutItem() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("name").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
+        PutItemResult res = client.putItem(request);
+        Assert.assertNull(res.getConsumedCapacityUnits());
+    }
+
+    //---------------------------------------------------------------------------
 
     // TODO: test out put item expected and return value
     @Test
