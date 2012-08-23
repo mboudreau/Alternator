@@ -52,6 +52,7 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
 
+
     @Test
     public void putItemWithHashKeyOverwriteItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
@@ -64,7 +65,7 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyWithoutTableName() {
+    public void putItemWithHashKeyWithoutItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName);
@@ -73,7 +74,7 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyWithoutItem() {
+    public void putItemWithHashKeyWithoutTableName() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
@@ -106,7 +107,7 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyAndRangeKeyWithoutTableName() {
+    public void putItemWithHashKeyAndRangeKeyWithoutItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
@@ -116,7 +117,7 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyAndRangeKeyWithoutItem() {
+    public void putItemWithHashKeyAndRangeKeyWithoutTableName() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
