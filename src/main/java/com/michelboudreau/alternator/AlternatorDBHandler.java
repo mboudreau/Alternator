@@ -61,8 +61,8 @@ class AlternatorDBHandler {
                                                                                       return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
                                                                                       */
             // Operations
-            /*case QUERY:
-                   return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));*/
+            case QUERY:
+                return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
             case SCAN:
                 return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
             default:
@@ -522,7 +522,9 @@ class AlternatorDBHandler {
             }
             items = copy;
         }
-
+        if(items.size()==0){
+           result.setLastEvaluatedKey(new Key(new AttributeValue().withS(null)));
+        }
         result.setItems(items);
         result.setCount(items.size());
         result.setScannedCount(items.size());
@@ -537,8 +539,25 @@ class AlternatorDBHandler {
             throw createInternalServerException(errors);
         }
 
+	    String keyValue = getKeyValue(request.getHashKeyValue());
 
-        return new QueryResult();
+	    // Check existence of table
+	    Table table = this.tables.get(request.getTableName());
+	    if (table == null) {
+		    throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+	    }
+
+	    Map<String,AttributeValue> item = table.getItem(keyValue);
+
+	    QueryResult queryResult = new QueryResult();
+	    List<Map<String,AttributeValue>> list = new ArrayList<Map<String, AttributeValue>>();
+	    list.add(item);
+		queryResult.setItems(list);
+		queryResult.setCount(list.size());
+	    queryResult.setConsumedCapacityUnits(0.5);
+	    queryResult.setLastEvaluatedKey(new Key(request.getHashKeyValue()));
+
+        return queryResult;
     }
 
     protected String getKeyValue(AttributeValue value) {
@@ -574,7 +593,6 @@ class AlternatorDBHandler {
         }
         return new InternalServerErrorException(message);
     }
-
 
     protected UpdateItemResult updateItem(UpdateItemRequest request) {
         // Validate data coming in
@@ -698,6 +716,5 @@ class AlternatorDBHandler {
         }
         return result;
     }
-
 
 }
