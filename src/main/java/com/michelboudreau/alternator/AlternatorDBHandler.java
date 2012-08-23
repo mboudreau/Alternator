@@ -61,8 +61,8 @@ class AlternatorDBHandler {
                                                                                       return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
                                                                                       */
             // Operations
-            /*case QUERY:
-                   return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));*/
+            case QUERY:
+                   return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
             case SCAN:
                 return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
             default:
@@ -537,8 +537,25 @@ class AlternatorDBHandler {
             throw createInternalServerException(errors);
         }
 
+	    String keyValue = getKeyValue(request.getHashKeyValue());
 
-        return new QueryResult();
+	    // Check existence of table
+	    Table table = this.tables.get(request.getTableName());
+	    if (table == null) {
+		    throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+	    }
+
+	    Map<String,AttributeValue> item = table.getItem(keyValue);
+
+	    QueryResult queryResult = new QueryResult();
+	    List<Map<String,AttributeValue>> list = new ArrayList<Map<String, AttributeValue>>();
+	    list.add(item);
+		queryResult.setItems(list);
+		queryResult.setCount(list.size());
+	    queryResult.setConsumedCapacityUnits(0.5);
+	    queryResult.setLastEvaluatedKey(new Key(request.getHashKeyValue()));
+
+        return queryResult;
     }
 
     protected String getKeyValue(AttributeValue value) {

@@ -33,10 +33,10 @@ public class AlternatorQueryTest extends AlternatorTest {
 		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
 		createTable(tableName, schema);
 		AttributeValue hashKey = createStringAttribute();
-		createGenericItem();
-		createGenericItem(hashKey);
-		createGenericItem();
-		createGenericItem();
+		client.putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
+		client.putItem(new PutItemRequest().withItem(createGenericItem(hashKey)).withTableName(tableName));
+		client.putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
+		client.putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
 
 		QueryRequest request = new QueryRequest(tableName, hashKey);
 		QueryResult result = client.query(request);
