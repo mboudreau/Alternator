@@ -39,73 +39,73 @@ public class AlternatorScanTest extends AlternatorTest {
         client.deleteTable(del);
     }
 
-/*
+//    // Test that expected return 10 items
+//    @Test
+//    public void scanWithScanFilterEQTestThatHasReturn() {
+//        ScanRequest request = getBasicReq();
+//        Condition rangeKeyCondition = new Condition();
+//        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
+////        attributeValueList.add(new AttributeValue().withN(rangeKey.getN()));
+//        attributeValueList.add(new AttributeValue().withN("55"));
+//        rangeKeyCondition.setAttributeValueList(attributeValueList);
+//        rangeKeyCondition.setComparisonOperator(ComparisonOperator.EQ);
+//        Map<String, Condition> conditionMap = new HashMap<String, Condition>();
+//        conditionMap.put("range", rangeKeyCondition);
+//        request.setScanFilter(conditionMap);
+//        ScanResult result = client.scan(request);
+//        Assert.assertNotNull(result);
+//        Assert.assertNotNull(result.getItems());
+//        for (Map<String, AttributeValue> item : result.getItems()) {
+////            Assert.assertEquals(item.get("range"), rangeKey);
+//            Assert.assertEquals(item.get("range"), new AttributeValue().withN("55"));
+//        }
+//    }
+//    // Test that expected return 0 items
+//    @Test
+//    public void scanWithScanFilterEQTestThatHasNoReturn() {
+//        ScanRequest request = getBasicReq();
+//        Condition rangeKeyCondition = new Condition();
+//        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
+//        attributeValueList.add(new AttributeValue().withN("30"));
+//        rangeKeyCondition.setAttributeValueList(attributeValueList);
+//        rangeKeyCondition.setComparisonOperator(ComparisonOperator.EQ);
+//        Map<String, Condition> conditionMap = new HashMap<String, Condition>();
+//        conditionMap.put("range", rangeKeyCondition);
+//        request.setScanFilter(conditionMap);
+//        ScanResult result = client.scan(request);
+//        Assert.assertNotNull(result);
+//        Assert.assertNotNull(result.getItems());
+//        Assert.assertEquals(result.getItems().size(),0);
+//    }
 
+
+////////////////////////OK LINE////////////////////////////
     @Test
-    public void basicScanTest() {
-        ScanRequest scanRequest = getBasicReq();
-        ScanResult result = client.scan(scanRequest);
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getCount());
-        Assert.assertTrue(result.getCount().intValue() > 1);
+    public void test() {
+        String str1 = "100";
+        String str2 = "50";
+        Integer integer = -2;
+        Integer int1 = Integer.parseInt(str1);
+
+//        if (str1.compareTo(str2) > 0) {
+//            integer=1;
+//        }
+//        else if (str1.compareTo(str2) == 0) {
+//            integer=0;
+//        }
+//        else
+//            integer=-1;
     }
 
     @Test
-    public void scanWithLimitTest() {
-        ScanRequest scanRequest = getBasicReq();
-        scanRequest.setLimit(5);
-        ScanResult result = client.scan(scanRequest);
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result.getCount().intValue() > 1 && result.getCount().intValue() <= 5);
-    }
-
-
-    @Test
-    public void scanWithAttributesToGetTest() {
-        ScanRequest request = getBasicReq();
-        List<String> attrToGet = new ArrayList<String>();
-        attrToGet.add("date");
-        attrToGet.add("testfield");
-        request.setAttributesToGet(attrToGet);
-        ScanResult result = client.scan(request);
-        Assert.assertNotNull(result);
-        for (Map<String, AttributeValue> item : result.getItems()) {
-            Assert.assertFalse(item.containsKey("id"));
-        }
-    }
-*/
-
-
-    // Test that expected return 10 items
-    @Test
-    public void scanWithScanFilterEQTestThatHasReturn() {
+    public void scanWithScanFilterGTTest() {
         ScanRequest request = getBasicReq();
         Condition rangeKeyCondition = new Condition();
         List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
-//        attributeValueList.add(new AttributeValue().withN(rangeKey.getN()));
-        attributeValueList.add(new AttributeValue().withN("55"));
+//
+        attributeValueList.add(new AttributeValue().withN("50"));
         rangeKeyCondition.setAttributeValueList(attributeValueList);
-        rangeKeyCondition.setComparisonOperator(ComparisonOperator.EQ);
-        Map<String, Condition> conditionMap = new HashMap<String, Condition>();
-        conditionMap.put("range", rangeKeyCondition);
-        request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getItems());
-        for (Map<String, AttributeValue> item : result.getItems()) {
-//            Assert.assertEquals(item.get("range"), rangeKey);
-            Assert.assertEquals(item.get("range"), new AttributeValue().withN("55"));
-        }
-    }
-    // Test that expected return 0 items
-    @Test
-    public void scanWithScanFilterEQTestThatHasNoReturn() {
-        ScanRequest request = getBasicReq();
-        Condition rangeKeyCondition = new Condition();
-        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
-        attributeValueList.add(new AttributeValue().withN("30"));
-        rangeKeyCondition.setAttributeValueList(attributeValueList);
-        rangeKeyCondition.setComparisonOperator(ComparisonOperator.EQ);
+        rangeKeyCondition.setComparisonOperator(ComparisonOperator.GT);
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
@@ -113,9 +113,12 @@ public class AlternatorScanTest extends AlternatorTest {
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         Assert.assertEquals(result.getItems().size(),0);
+        for (Map<String, AttributeValue> item : result.getItems()) {
+//            Assert.assertTrue(new Integer(item.get("range").getN()) > new Integer(rangeKey.getN()));
+            Assert.assertFalse(new Integer(item.get("range").getN()) > new Integer(new AttributeValue().withN("50").getN()));
+        }
     }
 
-//    // TODO: Exception!
 //    @Test
 //    public void scanWithScanFilterGETest() { //Greater or Equal
 //        ScanRequest request = getBasicReq();
@@ -136,25 +139,6 @@ public class AlternatorScanTest extends AlternatorTest {
 //        }
 //    }
 
-//    @Test
-//    public void scanWithScanFilterGTTest() {
-//        ScanRequest request = getBasicReq();
-//        Condition rangeKeyCondition = new Condition();
-//        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
-////
-//        attributeValueList.add(new AttributeValue().withN("9"));
-//        rangeKeyCondition.setAttributeValueList(attributeValueList);
-//        rangeKeyCondition.setComparisonOperator(ComparisonOperator.GT);
-//        Map<String, Condition> conditionMap = new HashMap<String, Condition>();
-//        conditionMap.put("range", rangeKeyCondition);
-//        request.setScanFilter(conditionMap);
-//        ScanResult result = client.scan(request);
-//        Assert.assertNotNull(result);
-//        for (Map<String, AttributeValue> item : result.getItems()) {
-////            Assert.assertTrue(new Integer(item.get("range").getN()) > new Integer(rangeKey.getN()));
-//            Assert.assertTrue(new Integer(item.get("range").getN()) > new Integer(new AttributeValue().withN("9").getN()));
-//        }
-//    }
 
 //    // TODO: Exception!
 //    @Test
@@ -265,6 +249,43 @@ public class AlternatorScanTest extends AlternatorTest {
 //        ScanResult result = client.scan(request);
 //        Assert.assertNull(result.getItems());
 //    }
+
+    /*
+
+    @Test
+    public void basicScanTest() {
+        ScanRequest scanRequest = getBasicReq();
+        ScanResult result = client.scan(scanRequest);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getCount());
+        Assert.assertTrue(result.getCount().intValue() > 1);
+    }
+
+    @Test
+    public void scanWithLimitTest() {
+        ScanRequest scanRequest = getBasicReq();
+        scanRequest.setLimit(5);
+        ScanResult result = client.scan(scanRequest);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.getCount().intValue() > 1 && result.getCount().intValue() <= 5);
+    }
+
+
+    @Test
+    public void scanWithAttributesToGetTest() {
+        ScanRequest request = getBasicReq();
+        List<String> attrToGet = new ArrayList<String>();
+        attrToGet.add("date");
+        attrToGet.add("testfield");
+        request.setAttributesToGet(attrToGet);
+        ScanResult result = client.scan(request);
+        Assert.assertNotNull(result);
+        for (Map<String, AttributeValue> item : result.getItems()) {
+            Assert.assertFalse(item.containsKey("id"));
+        }
+    }
+*/
+
 
     protected ScanRequest getBasicReq() {
         ScanRequest req = new ScanRequest();

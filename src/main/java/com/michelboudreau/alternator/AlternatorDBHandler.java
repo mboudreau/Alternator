@@ -479,10 +479,19 @@ class AlternatorDBHandler {
                     if (cond.getComparisonOperator().equals("GT")) {
                         if (cond.getAttributeValueList().size() == 1) {
                             if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                if (value.compareTo(comp) > 0) {
-                                    items.add(item);
+                                if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
+                                    String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                                    String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                    if (value.compareTo(comp) > 0) {
+                                        items.add(item);
+                                    }
+                                }
+                                else {
+                                    String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                                    String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                    if  (Integer.parseInt(value)>Integer.parseInt(comp)) {
+                                        items.add(item);
+                                    }
                                 }
                             } else {
                                 //TODO to do
