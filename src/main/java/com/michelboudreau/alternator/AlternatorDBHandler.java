@@ -593,8 +593,6 @@ class AlternatorDBHandler {
         }
 
 	    String keyValue = getKeyValue(request.getHashKeyValue());
-
-
 	    // Check existence of table
 	    Table table = this.tables.get(request.getTableName());
 	    if (table == null) {
@@ -610,7 +608,6 @@ class AlternatorDBHandler {
         }
 	    list = new ArrayList<Map<String, AttributeValue>>();
 	    list.add(item);
-        
 		queryResult.setItems(list);
 		queryResult.setCount(list.size());
 	    queryResult.setConsumedCapacityUnits(0.5);
