@@ -11,7 +11,6 @@ import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,28 +93,26 @@ class AlternatorDBHandler {
 			case GET:
 				return new GetItemResultMarshaller().marshall(getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance())));
 
-			case UPDATE:
-				return new UpdateItemResultMarshaller().marshall(updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance())));
-			case DELETE:
-				return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
-			case BATCH_GET_ITEM:
-				return new BatchGetItemResultMarshaller().marshall((batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()))));
-			/*
-																						   ;
-																							  case BATCH_WRITE_ITEM:
-																								  return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
-																								  */
-			// Operations
-			case QUERY:
-				return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
-			case SCAN:
-				return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
-			default:
-				logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
-				break;
-		}
-		return null;
-	}
+            case UPDATE:
+                return new UpdateItemResultMarshaller().marshall(updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance())));
+            case DELETE:
+                return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
+	        case BATCH_GET_ITEM:
+		        return new BatchGetItemResultMarshaller().marshall((batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()))));
+            case BATCH_WRITE_ITEM:
+                return new BatchWriteItemResultMarshaller().marshall((batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()))));
+
+            // Operations
+            case QUERY:
+                return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
+            case SCAN:
+                return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
+            default:
+                logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
+                break;
+        }
+        return null;
+    }
 
 	protected CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
 		// table limit of 256
@@ -427,21 +424,28 @@ class AlternatorDBHandler {
 
 	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
+
 		for (String tableName : request.getRequestItems().keySet()) {
+			BatchResponse batchResponse = new BatchResponse();
+			List<Map<String,AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
 			KeysAndAttributes keysAndAttributes = request.getRequestItems().get(tableName);
 			List<Key> itemKeys = keysAndAttributes.getKeys();
 			List<String> attributeToGet = keysAndAttributes.getAttributesToGet();
 			for (Key itemKey : itemKeys) {
 				Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(itemKey.getHashKeyElement()));
 				item = getItemWithAttributesToGet(item, attributeToGet);
+				items.add(item);
 			}
+			batchResponse.setConsumedCapacityUnits(1.0);
+			batchResponse.setItems(items);
+			batchGetItemResult.getResponses().put(tableName,batchResponse);
 		}
-		return new BatchGetItemResult();
+		return batchGetItemResult;
 	}
 
-	protected Object batchWriteItem(BatchWriteItemRequest request) {
-		return new BatchWriteItemResult();
-	}
+    protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
+        return new BatchWriteItemResult();
+    }
 
 	protected ScanResult scan(ScanRequest request) {
 		ScanResult result = new ScanResult();
