@@ -406,104 +406,21 @@ class AlternatorDBHandler {
                         throw new ResourceNotFoundException("There must be a comparisonOperator");
                     }
                     if (cond.getComparisonOperator().equals("EQ")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            if (item.get(k).equals(cond.getAttributeValueList().get(0))) {
-                                items.add(item);
-                            }
-                        } else {
-                            if (item.get(k).equals(cond.getAttributeValueList())) {
-                                items.add(item);
-                            }
-                        }
+                        EQHandle(items, item, cond, k);
                     }
                     if (cond.getComparisonOperator().equals("LE")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                if (value.compareTo(comp) >= 0) {
-                                    items.add(item);
-                                }
-                            } else {
-                                //TODO to do
-                                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-                            }
-
-                        } else {
-                            //TODO to do
-                            if (item.get(k).equals(cond.getAttributeValueList())) {
-                                items.add(item);
-                            }
-                        }
+                        EQHandle(items, item, cond, k);
+                        LTHandle(items, item, cond, k);
                     }
                     if (cond.getComparisonOperator().equals("LT")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                if (value.compareTo(comp) < 0) {
-                                    items.add(item);
-                                }
-                            } else {
-                                //TODO to do
-                                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-                            }
-
-                        } else {
-                            //TODO to do
-                            if (item.get(k).equals(cond.getAttributeValueList())) {
-                                items.add(item);
-                            }
-                        }
+                        LTHandle(items, item, cond, k);
                     }
                     if (cond.getComparisonOperator().equals("GE")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                if (value.compareTo(comp) <= 0) {
-                                    items.add(item);
-                                }
-                            } else {
-                                //TODO to do
-                                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-                            }
-
-                        } else {
-                            //TODO to do
-                            if (item.get(k).equals(cond.getAttributeValueList())) {
-                                items.add(item);
-                            }
-                        }
+                        EQHandle(items, item, cond, k);
+                        GTHandle(items, item, cond, k);
                     }
                     if (cond.getComparisonOperator().equals("GT")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-                                if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
-                                    String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                                    String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                    if (value.compareTo(comp) > 0) {
-                                        items.add(item);
-                                    }
-                                }
-                                else {
-                                    String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                                    String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                    if  (Integer.parseInt(value)>Integer.parseInt(comp)) {
-                                        items.add(item);
-                                    }
-                                }
-                            } else {
-                                //TODO to do
-                                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-                            }
-
-                        } else {
-                            //TODO to do
-                            if (item.get(k).equals(cond.getAttributeValueList())) {
-                                items.add(item);
-                            }
-                        }
+                        GTHandle(items, item, cond, k);
                     }
                 }
             } else {
@@ -726,4 +643,66 @@ class AlternatorDBHandler {
         return result;
     }
 
+    private void EQHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, Condition cond, String k) {
+        if (cond.getAttributeValueList().size() == 1) {
+            if (item.get(k).equals(cond.getAttributeValueList().get(0))) {
+                items.add(item);
+            }
+        } else {
+            if (item.get(k).equals(cond.getAttributeValueList())) {
+                items.add(item);
+            }
+        }
+    }
+
+    private void GTHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, Condition cond, String k) {
+        if (cond.getAttributeValueList().size() == 1) {
+            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+                if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
+                    String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                    String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                    if (value.compareTo(comp) > 0) {
+                        items.add(item);
+                    }
+                }
+                else {
+                    String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                    String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                    if  (Integer.parseInt(value)>Integer.parseInt(comp)) {
+                        items.add(item);
+                    }
+                }
+            } else {
+                //TODO to do
+                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+            }
+
+        } else {
+            //TODO to do
+            if (item.get(k).equals(cond.getAttributeValueList())) {
+                items.add(item);
+            }
+        }
+    }
+
+    private void LTHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, Condition cond, String k) {
+        if (cond.getAttributeValueList().size() == 1) {
+            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                if (value.compareTo(comp) < 0) {
+                    items.add(item);
+                }
+            } else {
+                //TODO to do
+                //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+            }
+
+        } else {
+            //TODO to do
+            if (item.get(k).equals(cond.getAttributeValueList())) {
+                items.add(item);
+            }
+        }
+    }
 }
