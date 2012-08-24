@@ -21,77 +21,77 @@ import java.util.*;
 
 class AlternatorDBHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(AlternatorDBHandler.class);
+	private final Logger logger = LoggerFactory.getLogger(AlternatorDBHandler.class);
 
-    private Map<String, Table> tables = new HashMap<String, Table>();
-    private List<Table> tableList = new ArrayList<Table>();
+	private Map<String, Table> tables = new HashMap<String, Table>();
+	private List<Table> tableList = new ArrayList<Table>();
 
 	// TODO: create constructor that can handle a file
-    public AlternatorDBHandler() {
-    }
+	public AlternatorDBHandler() {
+	}
 
 	// Maybe save automatically on destroy?
-    public void save(String persistence){
-        try {
-            createObjectMapper().writeValue(new File(persistence), tableList);
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-    }
+	public void save(String persistence) {
+		try {
+			createObjectMapper().writeValue(new File(persistence), tableList);
+		} catch (IOException e) {
+			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		}
+	}
 
-    public void restore(String persistence){
-        try {
-            File dbFile = new File(persistence);
-            if(dbFile.exists()==false) {
-                return;
-            }
+	public void restore(String persistence) {
+		try {
+			File dbFile = new File(persistence);
+			if (dbFile.exists() == false) {
+				return;
+			}
 
-	        ObjectMapper objectMapper = createObjectMapper();
-            tableList = objectMapper.readValue(dbFile, objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, Table.class));
+			ObjectMapper objectMapper = createObjectMapper();
+			tableList = objectMapper.readValue(dbFile, objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, Table.class));
 
-            for (Table table : tableList){
-                tables.put(table.getName(), table);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-    }
+			for (Table table : tableList) {
+				tables.put(table.getName(), table);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		}
+	}
 
 	// Not sure about this.  If correct and only need one, only create one instance
-    public ObjectMapper createObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setVisibility(JsonMethod.FIELD, JsonAutoDetect.Visibility.ANY)
-                .setVisibility(JsonMethod.CREATOR, JsonAutoDetect.Visibility.ANY)
-                .setVisibility(JsonMethod.SETTER, JsonAutoDetect.Visibility.NONE)
-                .setVisibility(JsonMethod.GETTER, JsonAutoDetect.Visibility.NONE)
-                .setVisibility(JsonMethod.IS_GETTER, JsonAutoDetect.Visibility.NONE);
+	public ObjectMapper createObjectMapper() {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setVisibility(JsonMethod.FIELD, JsonAutoDetect.Visibility.ANY)
+				.setVisibility(JsonMethod.CREATOR, JsonAutoDetect.Visibility.ANY)
+				.setVisibility(JsonMethod.SETTER, JsonAutoDetect.Visibility.NONE)
+				.setVisibility(JsonMethod.GETTER, JsonAutoDetect.Visibility.NONE)
+				.setVisibility(JsonMethod.IS_GETTER, JsonAutoDetect.Visibility.NONE);
 
-        mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
+		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
 
-        return mapper;
-    }
+		return mapper;
+	}
 
-    public String handle(HttpServletRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException, ConditionalCheckFailedException {
-        AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
+	public String handle(HttpServletRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException, ConditionalCheckFailedException {
+		AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
 
-        switch (parser.getType()) {
-            // Tables
-            case CREATE_TABLE:
-                return new CreateTableResultMarshaller().marshall(createTable(parser.getData(CreateTableRequest.class, CreateTableRequestJsonUnmarshaller.getInstance())));
-            case DESCRIBE_TABLE:
-                return new DescribeTableResultMarshaller().marshall(describeTable(parser.getData(DescribeTableRequest.class, DescribeTableRequestJsonUnmarshaller.getInstance())));
-            case LIST_TABLES:
-                return new ListTablesResultMarshaller().marshall(listTables(parser.getData(ListTablesRequest.class, ListTablesRequestJsonUnmarshaller.getInstance())));
-            case UPDATE_TABLE:
-                return new UpdateTableResultMarshaller().marshall(updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance())));
-            case DELETE_TABLE:
-                return new DeleteTableResultMarshaller().marshall(deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance())));
+		switch (parser.getType()) {
+			// Tables
+			case CREATE_TABLE:
+				return new CreateTableResultMarshaller().marshall(createTable(parser.getData(CreateTableRequest.class, CreateTableRequestJsonUnmarshaller.getInstance())));
+			case DESCRIBE_TABLE:
+				return new DescribeTableResultMarshaller().marshall(describeTable(parser.getData(DescribeTableRequest.class, DescribeTableRequestJsonUnmarshaller.getInstance())));
+			case LIST_TABLES:
+				return new ListTablesResultMarshaller().marshall(listTables(parser.getData(ListTablesRequest.class, ListTablesRequestJsonUnmarshaller.getInstance())));
+			case UPDATE_TABLE:
+				return new UpdateTableResultMarshaller().marshall(updateTable(parser.getData(UpdateTableRequest.class, UpdateTableRequestJsonUnmarshaller.getInstance())));
+			case DELETE_TABLE:
+				return new DeleteTableResultMarshaller().marshall(deleteTable(parser.getData(DeleteTableRequest.class, DeleteTableRequestJsonUnmarshaller.getInstance())));
 
-            // Items
-            case PUT:
-                return new PutItemResultMarshaller().marshall(putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance())));
-            case GET:
-                return new GetItemResultMarshaller().marshall(getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance())));
+			// Items
+			case PUT:
+				return new PutItemResultMarshaller().marshall(putItem(parser.getData(PutItemRequest.class, PutItemRequestJsonUnmarshaller.getInstance())));
+			case GET:
+				return new GetItemResultMarshaller().marshall(getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance())));
 
             case UPDATE:
                 return new UpdateItemResultMarshaller().marshall(updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance())));
@@ -99,11 +99,9 @@ class AlternatorDBHandler {
                 return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
 	        case BATCH_GET_ITEM:
 		        return new BatchGetItemResultMarshaller().marshall((batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()))));
-            /*
-                                                                               ;
-                                                                                  case BATCH_WRITE_ITEM:
-                                                                                      return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
-                                                                                      */
+            case BATCH_WRITE_ITEM:
+                return new BatchWriteItemResultMarshaller().marshall((batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()))));
+
             // Operations
             case QUERY:
                 return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
@@ -116,322 +114,317 @@ class AlternatorDBHandler {
         return null;
     }
 
-    protected CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
-        // table limit of 256
-        if (this.tables.size() >= Limits.TABLE_MAX) {
-            throw new LimitExceededException("Cannot exceed 256 tables per account.");
-        }
+	protected CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
+		// table limit of 256
+		if (this.tables.size() >= Limits.TABLE_MAX) {
+			throw new LimitExceededException("Cannot exceed 256 tables per account.");
+		}
 
-        // Validate data coming in
-        // TODO: Look into how we're doing validation, maybe implement better solution
-        CreateTableRequestValidator validator = new CreateTableRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+		// Validate data coming in
+		// TODO: Look into how we're doing validation, maybe implement better solution
+		CreateTableRequestValidator validator = new CreateTableRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
-        // get information
-        String tableName = request.getTableName();
+		// get information
+		String tableName = request.getTableName();
 
-        // Check to make sure table with same name doesn't exist
-        if (this.tables.containsKey(tableName)) {
-            throw new ResourceInUseException("The table you're currently trying to create (" + tableName + ") is already available.");
-        }
+		// Check to make sure table with same name doesn't exist
+		if (this.tables.containsKey(tableName)) {
+			throw new ResourceInUseException("The table you're currently trying to create (" + tableName + ") is already available.");
+		}
 
-        // Add table to map, array
-        Table table = new Table(tableName, request.getKeySchema(), request.getProvisionedThroughput());
-        this.tables.put(tableName, table);
-        this.tableList.add(table);
+		// Add table to map, array
+		Table table = new Table(tableName, request.getKeySchema(), request.getProvisionedThroughput());
+		this.tables.put(tableName, table);
+		this.tableList.add(table);
 
-        return new CreateTableResult().withTableDescription(table.getTableDescription());
-    }
+		return new CreateTableResult().withTableDescription(table.getTableDescription());
+	}
 
-    protected DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
-        // Validate data coming in
-        DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+	protected DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+		// Validate data coming in
+		DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
-        // get information
-        String tableName = request.getTableName();
-        DescribeTableResult result = null;
+		// get information
+		String tableName = request.getTableName();
+		DescribeTableResult result = null;
 
-        // Check to make sure table with same name doesn't exist
-        if (this.tables.containsKey(tableName)) {
-            Table table = this.tables.get(tableName);
-            result = new DescribeTableResult().withTable(table.getTableDescription());
-        } else {
-            throw new ResourceNotFoundException("The table '" + tableName + "' does not exist.");
-        }
-        return result;
-    }
+		// Check to make sure table with same name doesn't exist
+		if (this.tables.containsKey(tableName)) {
+			Table table = this.tables.get(tableName);
+			result = new DescribeTableResult().withTable(table.getTableDescription());
+		} else {
+			throw new ResourceNotFoundException("The table '" + tableName + "' does not exist.");
+		}
+		return result;
+	}
 
-    protected ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
-        // Validate data coming in
-        ListTablesRequestValidator validator = new ListTablesRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+	protected ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+		// Validate data coming in
+		ListTablesRequestValidator validator = new ListTablesRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
-        // Create defaults
-        String startTableName = request.getExclusiveStartTableName();
-        Integer limit = request.getLimit();
-        if (limit == null) {
-            limit = 100;
-        }
+		// Create defaults
+		String startTableName = request.getExclusiveStartTableName();
+		Integer limit = request.getLimit();
+		if (limit == null) {
+			limit = 100;
+		}
 
-        // Check if startTableName exists
-        int startIndex = 0;
-        if (startTableName != null) {
-            if (this.tables.containsKey(startTableName)) {
-                for (int i = 0; i < this.tableList.size(); i++) {
-                    if (tableList.get(i).getName().equals(startTableName)) {
-                        startIndex = i;
-                        break;
-                    }
-                }
-            } else {
-                throw new ResourceNotFoundException("The ExclusiveStartTableName '" + startTableName + "' doesn't exist.");
-            }
-        }
+		// Check if startTableName exists
+		int startIndex = 0;
+		if (startTableName != null) {
+			if (this.tables.containsKey(startTableName)) {
+				for (int i = 0; i < this.tableList.size(); i++) {
+					if (tableList.get(i).getName().equals(startTableName)) {
+						startIndex = i;
+						break;
+					}
+				}
+			} else {
+				throw new ResourceNotFoundException("The ExclusiveStartTableName '" + startTableName + "' doesn't exist.");
+			}
+		}
 
-        // Calculate size max. depending on array size and limit
-        int size = this.tableList.size();
-        Boolean setTableName = false;
-        if (size > (startIndex + limit)) {
-            size = startIndex + limit;
-            setTableName = true;
-        }
+		// Calculate size max. depending on array size and limit
+		int size = this.tableList.size();
+		Boolean setTableName = false;
+		if (size > (startIndex + limit)) {
+			size = startIndex + limit;
+			setTableName = true;
+		}
 
-        // Get list
-        List<String> tables = new ArrayList<String>();
-        for (int i = startIndex; i < size; i++) {
-            tables.add(this.tableList.get(i).getName());
-        }
+		// Get list
+		List<String> tables = new ArrayList<String>();
+		for (int i = startIndex; i < size; i++) {
+			tables.add(this.tableList.get(i).getName());
+		}
 
-        // Create result object
-        ListTablesResult result = new ListTablesResult().withTableNames(tables);
-        if (setTableName) {
-            result.setLastEvaluatedTableName(this.tableList.get(size).getName());
-        }
+		// Create result object
+		ListTablesResult result = new ListTablesResult().withTableNames(tables);
+		if (setTableName) {
+			result.setLastEvaluatedTableName(this.tableList.get(size).getName());
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    protected DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
-        // Validate data coming in
-        DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+	protected DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+		// Validate data coming in
+		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
-        // Check existence
-        if (!this.tables.containsKey(request.getTableName())) {
-            throw new ResourceNotFoundException("The table you want to delete '" + request.getTableName() + "' doesn't exist.");
-        }
+		// Check existence
+		if (!this.tables.containsKey(request.getTableName())) {
+			throw new ResourceNotFoundException("The table you want to delete '" + request.getTableName() + "' doesn't exist.");
+		}
 
-        // Delete Table
-        Table table = tables.remove(request.getTableName());
-        tableList.remove(table);
+		// Delete Table
+		Table table = tables.remove(request.getTableName());
+		tableList.remove(table);
 
-        return new DeleteTableResult().withTableDescription(table.getTableDescription().withTableStatus(TableStatus.DELETING));
-    }
+		return new DeleteTableResult().withTableDescription(table.getTableDescription().withTableStatus(TableStatus.DELETING));
+	}
 
-    protected UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
-        // Validate data coming in
-        UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+	protected UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+		// Validate data coming in
+		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
-        // Check existence
-        if (!this.tables.containsKey(request.getTableName())) {
-            throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
-        }
+		// Check existence
+		if (!this.tables.containsKey(request.getTableName())) {
+			throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+		}
 
-        // Update Table
-        Table table = this.tables.get(request.getTableName());
-        table.setProvisionedThroughput(request.getProvisionedThroughput());
+		// Update Table
+		Table table = this.tables.get(request.getTableName());
+		table.setProvisionedThroughput(request.getProvisionedThroughput());
 
-        return new UpdateTableResult().withTableDescription(table.getTableDescription());
-    }
+		return new UpdateTableResult().withTableDescription(table.getTableDescription());
+	}
 
-    protected PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
-        // Validate data coming in
-        PutItemRequestValidator validator = new PutItemRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+	protected PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
+		// Validate data coming in
+		PutItemRequestValidator validator = new PutItemRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
-        // Check existence of table
-        Table table = this.tables.get(request.getTableName());
-        if (table == null) {
-            throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
-        }
+		// Check existence of table
+		Table table = this.tables.get(request.getTableName());
+		if (table == null) {
+			throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+		}
 
-        // Make sure that item specifies hash key and range key (if in schema)
-        KeySchemaElement hashKey = table.getKeySchema().getHashKeyElement();
-        KeySchemaElement rangeKey = table.getKeySchema().getRangeKeyElement();
-        AttributeValue hashItem = request.getItem().get(hashKey.getAttributeName());
-        AttributeValueType hashItemType = getAttributeValueType(hashItem);
-        if (hashItem == null || hashItemType != AttributeValueType.fromString(hashKey.getAttributeType())) {
-            throw new InternalServerErrorException("Missing hash key (" + hashKey.getAttributeName() + ") from item: " + request.getItem());
-        }
-        if (rangeKey != null) {
-            AttributeValue rangeItem = request.getItem().get(rangeKey.getAttributeName());
-            AttributeValueType rangeItemType = getAttributeValueType(rangeItem);
-            if (rangeItem == null || rangeItemType != AttributeValueType.fromString(rangeKey.getAttributeType())) {
-                throw new InternalServerErrorException("Missing range key (" + rangeKey.getAttributeName() + ") from item: " + request.getItem());
-            }
-        }
+		// Make sure that item specifies hash key and range key (if in schema)
+		KeySchemaElement hashKey = table.getKeySchema().getHashKeyElement();
+		KeySchemaElement rangeKey = table.getKeySchema().getRangeKeyElement();
+		AttributeValue hashItem = request.getItem().get(hashKey.getAttributeName());
+		AttributeValueType hashItemType = getAttributeValueType(hashItem);
+		if (hashItem == null || hashItemType != AttributeValueType.fromString(hashKey.getAttributeType())) {
+			throw new InternalServerErrorException("Missing hash key (" + hashKey.getAttributeName() + ") from item: " + request.getItem());
+		}
+		if (rangeKey != null) {
+			AttributeValue rangeItem = request.getItem().get(rangeKey.getAttributeName());
+			AttributeValueType rangeItemType = getAttributeValueType(rangeItem);
+			if (rangeItem == null || rangeItemType != AttributeValueType.fromString(rangeKey.getAttributeType())) {
+				throw new InternalServerErrorException("Missing range key (" + rangeKey.getAttributeName() + ") from item: " + request.getItem());
+			}
+		}
 
-        // Get current item if it exists
-        Map<String, AttributeValue> item = table.getItem(getKeyValue(request.getItem().get(table.getHashKeyName())));
+		// Get current item if it exists
+		Map<String, AttributeValue> item = table.getItem(getKeyValue(request.getItem().get(table.getHashKeyName())));
 
-        // Check conditional put
-        if (request.getExpected() != null) {
-            for (Map.Entry<String, ExpectedAttributeValue> entry : request.getExpected().entrySet()) {
-                String key = entry.getKey();
-                ExpectedAttributeValue value = entry.getValue();
-                value.setExists(value.getValue() != null);
-                if ((value.getExists() && item == null) || (!value.getExists() && item != null)) {
-                    throw new ConditionalCheckFailedException("The exist conditional could not be met.");
-                }
-                if (value.getValue() != null) {
-                    // check to see if value conditional is equal
-                    if (
-                            (value.getValue().getN() != null && !item.get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !item.get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !item.get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !item.get(key).equals(value.getValue().getSS()))
-                            ) {
-                        throw new ConditionalCheckFailedException("The value conditional could is not equal");
-                    }
-                }
-            }
-        }
+		// Check conditional put
+		if (request.getExpected() != null) {
+			for (Map.Entry<String, ExpectedAttributeValue> entry : request.getExpected().entrySet()) {
+				String key = entry.getKey();
+				ExpectedAttributeValue value = entry.getValue();
+				value.setExists(value.getValue() != null);
+				if ((value.getExists() && item == null) || (!value.getExists() && item != null)) {
+					throw new ConditionalCheckFailedException("The exist conditional could not be met.");
+				}
+				if (value.getValue() != null) {
+					// check to see if value conditional is equal
+					if (
+							(value.getValue().getN() != null && !item.get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !item.get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !item.get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !item.get(key).equals(value.getValue().getSS()))
+							) {
+						throw new ConditionalCheckFailedException("The value conditional could is not equal");
+					}
+				}
+			}
+		}
 
-        PutItemResult result = new PutItemResult().withConsumedCapacityUnits(1D);
-        if (item != null && request.getReturnValues() != null && ReturnValue.fromValue(request.getReturnValues()) == ReturnValue.ALL_OLD) {
-            result.setAttributes(item);
-        }
+		PutItemResult result = new PutItemResult().withConsumedCapacityUnits(1D);
+		if (item != null && request.getReturnValues() != null && ReturnValue.fromValue(request.getReturnValues()) == ReturnValue.ALL_OLD) {
+			result.setAttributes(item);
+		}
 
-        // put the item in the table
-        table.putItem(request.getItem());
+		// put the item in the table
+		table.putItem(request.getItem());
 
-        return result;
-    }
+		return result;
+	}
 
-    protected GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
-        // Validate data coming in
-        GetItemRequestValidator validator = new GetItemRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+	protected GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+		// Validate data coming in
+		GetItemRequestValidator validator = new GetItemRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
-        // get information
-        String tableName = request.getTableName();
-        Key key = request.getKey();
-        List<String> attributesToGet = request.getAttributesToGet();
-        Map<String, AttributeValue> response = new HashMap<String, AttributeValue>();
-        GetItemResult result = new GetItemResult();
+		// get information
+		String tableName = request.getTableName();
+		Key key = request.getKey();
+		List<String> attributesToGet = request.getAttributesToGet();
+		Map<String, AttributeValue> response = new HashMap<String, AttributeValue>();
+		GetItemResult result = new GetItemResult();
 
-        // Check to make sure table exists
-        if (!this.tables.containsKey(tableName)) {
-            throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
-        }
-        // Check to make sure Key is valid
-        String keyz = "";
-        if (key.getHashKeyElement().getS() != null) {
-            keyz = key.getHashKeyElement().getS();
-        } else if (key.getHashKeyElement().getN() != null) {
-            keyz = key.getHashKeyElement().getN();
-        }
-        if (this.tables.get(tableName).getItem(keyz) == null) {
-            throw new ResourceNotFoundException("The item with Hash Key (" + getKeyValue(key.getHashKeyElement()) + ") you try to get doesn't exists.");
-        } else {
-            if (attributesToGet == null) {
-                result.setItem(this.tables.get(tableName).getItem(keyz));
-            } else {
-                for (String att : attributesToGet) {
-                    AttributeValue res = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())).get(att);
-                    if (res != null) {
-                        response.put(att, res);
-                    }
-                }
-                result.setItem(response);
-            }
-        }
-        return result;
-    }
+		// Check to make sure table exists
+		if (!this.tables.containsKey(tableName)) {
+			throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
+		}
+		// Check to make sure Key is valid
+		String keyz = "";
+		if (key.getHashKeyElement().getS() != null) {
+			keyz = key.getHashKeyElement().getS();
+		} else if (key.getHashKeyElement().getN() != null) {
+			keyz = key.getHashKeyElement().getN();
+		}
+		if (this.tables.get(tableName).getItem(keyz) == null) {
+			throw new ResourceNotFoundException("The item with Hash Key (" + getKeyValue(key.getHashKeyElement()) + ") you try to get doesn't exists.");
+		} else {
+			if (attributesToGet == null) {
+				result.setItem(this.tables.get(tableName).getItem(keyz));
+			} else {
+				for (String att : attributesToGet) {
+					AttributeValue res = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())).get(att);
+					if (res != null) {
+						response.put(att, res);
+					}
+				}
+				result.setItem(response);
+			}
+		}
+		return result;
+	}
 
-    protected DeleteItemResult deleteItem(DeleteItemRequest request) {
-        // Validate data coming in
-        DeleteItemRequestValidator validator = new DeleteItemRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+	protected DeleteItemResult deleteItem(DeleteItemRequest request) {
+		// Validate data coming in
+		DeleteItemRequestValidator validator = new DeleteItemRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
-        // Check existence of table
-        Table table = this.tables.get(request.getTableName());
-        if (table == null) {
-            throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
-        }
+		// Check existence of table
+		Table table = this.tables.get(request.getTableName());
+		if (table == null) {
+			throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+		}
 
-        // Get hash and range key
-        String hashKey = getKeyValue(request.getKey().getHashKeyElement());
-        String rangeKey = getKeyValue(request.getKey().getRangeKeyElement());
+		// Get hash and range key
+		String hashKey = getKeyValue(request.getKey().getHashKeyElement());
+		String rangeKey = getKeyValue(request.getKey().getRangeKeyElement());
 
-        // Get current item if exist
-        Map<String, AttributeValue> item = table.getItem(hashKey);
+		// Get current item if exist
+		Map<String, AttributeValue> item = table.getItem(hashKey);
 
-        if (item == null) {
-            throw new ResourceNotFoundException("The item with hash key '" + hashKey + "' doesn't exist in table '" + table.getName() + "'");
-        }
+		if (item == null) {
+			throw new ResourceNotFoundException("The item with hash key '" + hashKey + "' doesn't exist in table '" + table.getName() + "'");
+		}
 
-        // Check conditional put
-        if (request.getExpected() != null) {
-            for (Map.Entry<String, ExpectedAttributeValue> entry : request.getExpected().entrySet()) {
-                String key = entry.getKey();
-                ExpectedAttributeValue value = entry.getValue();
-                value.setExists(value.getValue() != null);
-                if ((value.getExists() && item == null) || (!value.getExists() && item != null)) {
-                    throw new ConditionalCheckFailedException("The exist conditional could not be met.");
-                }
-                if (value.getValue() != null) {
-                    // check to see if value conditional is equal
-                    if (
-                            (value.getValue().getN() != null && !item.get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !item.get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !item.get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !item.get(key).equals(value.getValue().getSS()))
-                            ) {
-                        throw new ConditionalCheckFailedException("The value conditional could is not equal");
-                    }
-                }
-            }
-        }
+		// Check conditional put
+		if (request.getExpected() != null) {
+			for (Map.Entry<String, ExpectedAttributeValue> entry : request.getExpected().entrySet()) {
+				String key = entry.getKey();
+				ExpectedAttributeValue value = entry.getValue();
+				value.setExists(value.getValue() != null);
+				if ((value.getExists() && item == null) || (!value.getExists() && item != null)) {
+					throw new ConditionalCheckFailedException("The exist conditional could not be met.");
+				}
+				if (value.getValue() != null) {
+					// check to see if value conditional is equal
+					if (
+							(value.getValue().getN() != null && !item.get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !item.get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !item.get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !item.get(key).equals(value.getValue().getSS()))
+							) {
+						throw new ConditionalCheckFailedException("The value conditional could is not equal");
+					}
+				}
+			}
+		}
 
-        DeleteItemResult result = new DeleteItemResult().withConsumedCapacityUnits(1D);
-        if (item != null && request.getReturnValues() != null && ReturnValue.fromValue(request.getReturnValues()) == ReturnValue.ALL_OLD) {
-            result.setAttributes(item);
-        }
+		DeleteItemResult result = new DeleteItemResult().withConsumedCapacityUnits(1D);
+		if (item != null && request.getReturnValues() != null && ReturnValue.fromValue(request.getReturnValues()) == ReturnValue.ALL_OLD) {
+			result.setAttributes(item);
+		}
 
-        // remove the item from the table
-        table.removeItem(hashKey);
-        return result;
-    }
+		// remove the item from the table
+		table.removeItem(hashKey);
+		return result;
+	}
 
 	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
-
 		for (String tableName : request.getRequestItems().keySet()) {
-			if (!this.tables.containsKey(tableName)) {
-				throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
-			}
-
 			BatchResponse batchResponse = new BatchResponse();
 			List<Map<String,AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
 			KeysAndAttributes keysAndAttributes = request.getRequestItems().get(tableName);
@@ -444,394 +437,367 @@ class AlternatorDBHandler {
 			}
 			batchResponse.setConsumedCapacityUnits(1.0);
 			batchResponse.setItems(items);
+			batchGetItemResult.getResponses().put(tableName,batchResponse);
 		}
-		return new BatchGetItemResult();
+		return batchGetItemResult;
 	}
 
     protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
-        return new BatchWriteItemResult();
-    }
+        BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
+        for (String tableName : request.getRequestItems().keySet()) {
+            BatchWriteResponse batchWriteResponse = new BatchWriteResponse();
+            List<WriteRequest> writeRequests = request.getRequestItems().get(tableName);
+            for (WriteRequest writeRequest : writeRequests) {
+                PutRequest putRequest = writeRequest.getPutRequest();
+                if (putRequest != null) {
+                    this.tables.get(tableName).putItem(putRequest.getItem());
+                }
+                DeleteRequest deleteRequest = writeRequest.getDeleteRequest();
+                if (deleteRequest != null) {
+                    Key key = deleteRequest.getKey();
+                    if (key != null) {
+                        Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
 
-    protected ScanResult scan(ScanRequest request) {
-        ScanResult result = new ScanResult();
-        List<Error> errors = new ScanRequestValidator().validate(request);
-        if (errors.size() > 0) {
-            throw createInternalServerException(errors);
-        }
-        result.setConsumedCapacityUnits(0.5);
-        result.setLastEvaluatedKey(new Key());
-        List<Map<String, AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
-        for (String key : this.tables.get(request.getTableName()).getItems().keySet()) {
-            Map<String, AttributeValue> item = this.tables.get(request.getTableName()).getItem(key);
-            if (request.getScanFilter() != null) {
-                for (String k : request.getScanFilter().keySet()) {
-                    Condition cond = request.getScanFilter().get(k);
-                    if(cond.getComparisonOperator()==null){
-                        throw new ResourceNotFoundException("There must be a comparisonOperator");
-                    }
-                    if (cond.getComparisonOperator().equals("EQ")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            EQHandle(items, item, cond.getAttributeValueList().get(0), k);
-                        }
-                        else {
-                            //TODO: throw Exception
-                        }
-                    }
-                    if (cond.getComparisonOperator().equals("LE")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            LEHandle(items, item, cond.getAttributeValueList().get(0), k);
-                        }
-                        else {
-                            //TODO: throw Exception
-                        }
-                    }
-                    if (cond.getComparisonOperator().equals("LT")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            LTHandle(items, item, cond.getAttributeValueList().get(0), k);
-                        }
-                        else {
-                            //TODO: throw Exception
-                        }
-                    }
-                    if (cond.getComparisonOperator().equals("GE")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            GEHandle(items, item, cond.getAttributeValueList().get(0), k);
-                        }
-                        else {
-                            //TODO: throw Exception
-                        }
-                    }
-                    if (cond.getComparisonOperator().equals("GT")) {
-                        if (cond.getAttributeValueList().size() == 1) {
-                            GTHandle(items, item, cond.getAttributeValueList().get(0), k);
-                        }
-                        else {
-                            //TODO: throw Exception
-                        }
-                    }
-                    if (cond.getComparisonOperator().equals("BETWEEN")) {
-                        if (cond.getAttributeValueList().size() == 2) {
-                            BETWEENHandle(items, item, cond.getAttributeValueList().get(0), cond.getAttributeValueList().get(1), k);
-                        }
-                        else {
-                            //TODO: throw Exception
-                        }
-                    }
-                    if (cond.getComparisonOperator().equals("IN")) {
-                        for (AttributeValue attrivuteValue : cond.getAttributeValueList()) {
-                            EQHandle(items, item, attrivuteValue, k);
-                        }
                     }
                 }
-            } else {
-                items.add(item);
             }
+            batchWriteResponse.setConsumedCapacityUnits(batchWriteResponse.getConsumedCapacityUnits());
+            batchWriteItemResult.getResponses().put(tableName, batchWriteResponse);
         }
-        if (request.getLimit() != null) {
-            items = items.subList(0, request.getLimit() - 1);
-        }
-
-        for (Map<String, AttributeValue> item : items) {
-            result.setLastEvaluatedKey(new Key(item.get(this.tables.get(request.getTableName()).getHashKeyName())));
-        }
-
-        if (request.getAttributesToGet() != null) {
-            List<Map<String,AttributeValue>> copy = new ArrayList<Map<String, AttributeValue>>();
-            for (Map<String, AttributeValue> item : items) {
-                Set<String> keyz = new HashSet<String>(item.keySet());
-                for(String sKey : keyz){
-                   if(!request.getAttributesToGet().contains(sKey)){
-                       item.remove(sKey);
-                   }
-                }
-                copy.add(item);
-            }
-            items = copy;
-        }
-        if(items.size()==0){
-           result.setLastEvaluatedKey(new Key(new AttributeValue().withS(null)));
-        }
-        result.setItems(items);
-        result.setCount(items.size());
-        result.setScannedCount(items.size());
-        return result;
+        return batchWriteItemResult;
     }
 
-    public QueryResult query(QueryRequest request) {
-        // Validate data coming in
-        QueryRequestValidator validator = new QueryRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
+	protected ScanResult scan(ScanRequest request) {
+		ScanResult result = new ScanResult();
+		List<Error> errors = new ScanRequestValidator().validate(request);
+		if (errors.size() > 0) {
+			throw createInternalServerException(errors);
+		}
+		result.setConsumedCapacityUnits(0.5);
+		result.setLastEvaluatedKey(new Key());
+		List<Map<String, AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
+		for (String key : this.tables.get(request.getTableName()).getItems().keySet()) {
+			Map<String, AttributeValue> item = this.tables.get(request.getTableName()).getItem(key);
+			if (request.getScanFilter() != null) {
+				for (String k : request.getScanFilter().keySet()) {
+					Condition cond = request.getScanFilter().get(k);
+					if (cond.getComparisonOperator() == null) {
+						throw new ResourceNotFoundException("There must be a comparisonOperator");
+					}
+					if (cond.getComparisonOperator().equals("EQ")) {
+						if (cond.getAttributeValueList().size() == 1) {
+							if (item.get(k).equals(cond.getAttributeValueList().get(0))) {
+								items.add(item);
+							}
+						} else {
+							if (item.get(k).equals(cond.getAttributeValueList())) {
+								items.add(item);
+							}
+						}
+					}
+					if (cond.getComparisonOperator().equals("LE")) {
+						if (cond.getAttributeValueList().size() == 1) {
+							if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+								String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+								String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+								if (value.compareTo(comp) >= 0) {
+									items.add(item);
+								}
+							} else {
+								//TODO to do
+								//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+							}
 
-	    String keyValue = getKeyValue(request.getHashKeyValue());
-	    // Check existence of table
-	    Table table = this.tables.get(request.getTableName());
-	    if (table == null) {
-		    throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
-	    }
+						} else {
+							//TODO to do
+							if (item.get(k).equals(cond.getAttributeValueList())) {
+								items.add(item);
+							}
+						}
+					}
+					if (cond.getComparisonOperator().equals("LT")) {
+						if (cond.getAttributeValueList().size() == 1) {
+							if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+								String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+								String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+								if (value.compareTo(comp) < 0) {
+									items.add(item);
+								}
+							} else {
+								//TODO to do
+								//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+							}
 
-	    Map<String,AttributeValue> item = table.getItem(keyValue);
+						} else {
+							//TODO to do
+							if (item.get(k).equals(cond.getAttributeValueList())) {
+								items.add(item);
+							}
+						}
+					}
+					if (cond.getComparisonOperator().equals("GE")) {
+						if (cond.getAttributeValueList().size() == 1) {
+							if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+								String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+								String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+								if (value.compareTo(comp) <= 0) {
+									items.add(item);
+								}
+							} else {
+								//TODO to do
+								//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+							}
 
-	    QueryResult queryResult = new QueryResult();
-        List<Map<String,AttributeValue>> list = null;
-        if(item==null)  {
-            item = new HashMap<String, AttributeValue>();
-        }
-	    list = new ArrayList<Map<String, AttributeValue>>();
-	    list.add(item);
+						} else {
+							//TODO to do
+							if (item.get(k).equals(cond.getAttributeValueList())) {
+								items.add(item);
+							}
+						}
+					}
+					if (cond.getComparisonOperator().equals("GT")) {
+						if (cond.getAttributeValueList().size() == 1) {
+							if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
+									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+									if (value.compareTo(comp) > 0) {
+										items.add(item);
+									}
+								} else {
+									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+									if (Integer.parseInt(value) > Integer.parseInt(comp)) {
+										items.add(item);
+									}
+								}
+							} else {
+								//TODO to do
+								//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+							}
+
+						} else {
+							//TODO to do
+							if (item.get(k).equals(cond.getAttributeValueList())) {
+								items.add(item);
+							}
+						}
+					}
+				}
+			} else {
+				items.add(item);
+			}
+		}
+		if (request.getLimit() != null) {
+			items = items.subList(0, request.getLimit() - 1);
+		}
+
+		for (Map<String, AttributeValue> item : items) {
+			result.setLastEvaluatedKey(new Key(item.get(this.tables.get(request.getTableName()).getHashKeyName())));
+		}
+
+		if (request.getAttributesToGet() != null) {
+			List<Map<String, AttributeValue>> copy = getItemWithAttributesToGet(items, request.getAttributesToGet());
+			items = copy;
+		}
+
+		if (items.size() == 0) {
+			result.setLastEvaluatedKey(new Key(new AttributeValue().withS(null)));
+		}
+		result.setItems(items);
+		result.setCount(items.size());
+		result.setScannedCount(items.size());
+		return result;
+	}
+
+	public QueryResult query(QueryRequest request) {
+		// Validate data coming in
+		QueryRequestValidator validator = new QueryRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
+
+		String keyValue = getKeyValue(request.getHashKeyValue());
+		// Check existence of table
+		Table table = this.tables.get(request.getTableName());
+		if (table == null) {
+			throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+		}
+
+		Map<String, AttributeValue> item = table.getItem(keyValue);
+
+		QueryResult queryResult = new QueryResult();
+		List<Map<String, AttributeValue>> list = null;
+		if (item == null) {
+			item = new HashMap<String, AttributeValue>();
+		}
+		list = new ArrayList<Map<String, AttributeValue>>();
+		list.add(item);
 		queryResult.setItems(list);
 		queryResult.setCount(list.size());
-	    queryResult.setConsumedCapacityUnits(0.5);
-	    queryResult.setLastEvaluatedKey(new Key(request.getHashKeyValue()));
+		queryResult.setConsumedCapacityUnits(0.5);
+		queryResult.setLastEvaluatedKey(new Key(request.getHashKeyValue()));
 
-        return queryResult;
-    }
+		return queryResult;
+	}
 
-    protected String getKeyValue(AttributeValue value) {
-        if (value != null) {
-            if (value.getN() != null) {
-                return value.getN();
-            } else if (value.getS() != null) {
-                return value.getS();
-            }
-        }
-        return null;
-    }
+	protected String getKeyValue(AttributeValue value) {
+		if (value != null) {
+			if (value.getN() != null) {
+				return value.getN();
+			} else if (value.getS() != null) {
+				return value.getS();
+			}
+		}
+		return null;
+	}
 
-    protected AttributeValueType getAttributeValueType(AttributeValue value) {
-        if (value != null) {
-            if (value.getN() != null) {
-                return AttributeValueType.N;
-            } else if (value.getS() != null) {
-                return AttributeValueType.S;
-            } else if (value.getNS() != null) {
-                return AttributeValueType.NS;
-            } else if (value.getSS() != null) {
-                return AttributeValueType.SS;
-            }
-        }
-        return AttributeValueType.UNKNOWN;
-    }
+	protected AttributeValueType getAttributeValueType(AttributeValue value) {
+		if (value != null) {
+			if (value.getN() != null) {
+				return AttributeValueType.N;
+			} else if (value.getS() != null) {
+				return AttributeValueType.S;
+			} else if (value.getNS() != null) {
+				return AttributeValueType.NS;
+			} else if (value.getSS() != null) {
+				return AttributeValueType.SS;
+			}
+		}
+		return AttributeValueType.UNKNOWN;
+	}
 
-    protected InternalServerErrorException createInternalServerException(List<Error> errors) {
-        String message = "The following Errors occured: ";
-        for (Error error : errors) {
-            message += error.getMessage() + "\n";
-        }
-        return new InternalServerErrorException(message);
-    }
+	protected InternalServerErrorException createInternalServerException(List<Error> errors) {
+		String message = "The following Errors occured: ";
+		for (Error error : errors) {
+			message += error.getMessage() + "\n";
+		}
+		return new InternalServerErrorException(message);
+	}
 
-    protected UpdateItemResult updateItem(UpdateItemRequest request) {
-        // Validate data coming in
-        // TODO: Look into how we're doing validation, maybe implement better solution
-        UpdateItemRequestValidator validator = new UpdateItemRequestValidator();
-        List<Error> errors = validator.validate(request);
-        if (errors.size() != 0) {
-            throw createInternalServerException(errors);
-        }
-
-
-        // get information
-        String tableName = request.getTableName();
-        Key key = request.getKey();
-        Map<String, ExpectedAttributeValue> expected = request.getExpected();
-        Map<String, AttributeValueUpdate> attributesToUpdate = request.getAttributeUpdates();
-        String returnValues = request.getReturnValues();
+	protected UpdateItemResult updateItem(UpdateItemRequest request) {
+		// Validate data coming in
+		// TODO: Look into how we're doing validation, maybe implement better solution
+		UpdateItemRequestValidator validator = new UpdateItemRequestValidator();
+		List<Error> errors = validator.validate(request);
+		if (errors.size() != 0) {
+			throw createInternalServerException(errors);
+		}
 
 
-        UpdateItemResult result = new UpdateItemResult();
-        result.setConsumedCapacityUnits(0.5);
+		// get information
+		String tableName = request.getTableName();
+		Key key = request.getKey();
+		Map<String, ExpectedAttributeValue> expected = request.getExpected();
+		Map<String, AttributeValueUpdate> attributesToUpdate = request.getAttributeUpdates();
+		String returnValues = request.getReturnValues();
 
-        // Check to make sure table exists
-        if (!this.tables.containsKey(tableName)) {
-            throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
-        }
-        // Check to make sure Key is valid
-        if (this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())) == null) {
-            Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
-            item.put(this.tables.get(tableName).getHashKeyName(), key.getHashKeyElement());
-            if (key.getRangeKeyElement() != null) {
-                item.put(this.tables.get(tableName).getRangeKeyName(), key.getRangeKeyElement());
-            }
-            for (String sKey : attributesToUpdate.keySet()) {
-                if (attributesToUpdate.get(sKey).getValue() != null) {
-                    item.put(sKey, attributesToUpdate.get(sKey).getValue());
-                }
-            }
-            this.tables.get(tableName).putItem(item);
-            result.setAttributes(item);
-        } else {
-            Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
-            Set<String> sKeyz = new HashSet<String>(item.keySet());
-            for (String sKey : sKeyz) {
-                if (attributesToUpdate.containsKey(sKey)) {
-                    if (attributesToUpdate.get(sKey).getAction().equals("PUT")) {
-                        item.remove(sKey);
-                        item.put(sKey, attributesToUpdate.get(sKey).getValue());
-                        attributesToUpdate.remove(sKey);
-                    } else if (attributesToUpdate.get(sKey).getAction().equals("DELETE")) {
-                        if (attributesToUpdate.get(sKey).getValue() != null) {
-                            if (item.get(sKey).getSS() != null) {
-                                if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
-                                    throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + sKey + ") of the item with hash key (" + item.get(sKey) + ")");
-                                } else {
-                                    for (String toDel : attributesToUpdate.get(sKey).getValue().getSS()) {
-                                        if (item.get(sKey).getSS().contains(toDel)) {
-                                            item.get(sKey).getSS().remove(toDel);
-                                            attributesToUpdate.remove(sKey);
-                                        }
-                                    }
-                                }
-                            } else if (item.get(sKey).getNS() != null) {
-                                if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
-                                    throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + sKey + ") of the item with hash key (" + item.get(sKey) + ")");
-                                } else {
-                                    for (String toDel : attributesToUpdate.get(sKey).getValue().getNS()) {
-                                        if (item.get(sKey).getNS().contains(toDel)) {
-                                            item.get(sKey).getNS().remove(toDel);
-                                            attributesToUpdate.remove(sKey);
-                                        }
-                                    }
-                                }
-                            } else if (item.get(sKey).getS().equals(attributesToUpdate.get(sKey).getValue().getS())) {
-                                item.remove(sKey);
-                                attributesToUpdate.remove(sKey);
-                            } else if (item.get(sKey).getN().equals(attributesToUpdate.get(sKey).getValue().getN())) {
-                                item.remove(sKey);
-                                attributesToUpdate.remove(sKey);
-                            }
-                        } else {
-                            item.remove(sKey);
-                            attributesToUpdate.remove(sKey);
-                        }
-                    } else if (attributesToUpdate.get(sKey).getAction().equals("ADD")) {
-                        if (attributesToUpdate.get(sKey).getValue() != null) {
-                            if (item.get(sKey).getSS() != null) {
-                                if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
-                                    throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + sKey + ")");
-                                } else {
-                                    for (String toUp : attributesToUpdate.get(sKey).getValue().getSS()) {
-                                        item.get(sKey).getSS().add(toUp);
-                                    }
-                                }
-                            } else if (item.get(sKey).getNS() != null) {
-                                if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
-                                    throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + sKey + ")");
-                                } else {
-                                    for (String toUp : attributesToUpdate.get(sKey).getValue().getNS()) {
-                                        item.get(sKey).getNS().add(toUp);
-                                    }
-                                }
-                            } else if (item.get(sKey).getS() != null) {
-                                throw new ConditionalCheckFailedException("It's not possible to ADD on an attribute with a String type for the attribute (" + sKey + ")");
-                            } else if (item.get(sKey).getN() != null) {
-                                Double i = new Double(item.get(sKey).getN());
-                                i = i + new Double(attributesToUpdate.get(sKey).getValue().getN());
-                                item.get(sKey).setN(i + "");
-                            }
-                        } else {
-                            throw new ResourceNotFoundException("the provided update item with attribute (" + sKey + ") doesn't have an AttributeValue to perform the ADD");
-                        }
-                    }
-                }
 
-            }
-            for(String sKey : attributesToUpdate.keySet())   {
-                item.put(sKey,attributesToUpdate.get(sKey).getValue());
-            }
-            result.setAttributes(item);
-        }
-        return result;
-    }
+		UpdateItemResult result = new UpdateItemResult();
+		result.setConsumedCapacityUnits(0.5);
 
-    private void EQHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, AttributeValue attributeValue, String k) {
-        if (item.get(k).equals(attributeValue)) {
-             items.add(item);
-        }
-    }
+		// Check to make sure table exists
+		if (!this.tables.containsKey(tableName)) {
+			throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
+		}
+		// Check to make sure Key is valid
+		if (this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())) == null) {
+			Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
+			item.put(this.tables.get(tableName).getHashKeyName(), key.getHashKeyElement());
+			if (key.getRangeKeyElement() != null) {
+				item.put(this.tables.get(tableName).getRangeKeyName(), key.getRangeKeyElement());
+			}
+			for (String sKey : attributesToUpdate.keySet()) {
+				if (attributesToUpdate.get(sKey).getValue() != null) {
+					item.put(sKey, attributesToUpdate.get(sKey).getValue());
+				}
+			}
+			this.tables.get(tableName).putItem(item);
+			result.setAttributes(item);
+		} else {
+			Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
+			Set<String> sKeyz = new HashSet<String>(item.keySet());
+			for (String sKey : sKeyz) {
+				if (attributesToUpdate.containsKey(sKey)) {
+					if (attributesToUpdate.get(sKey).getAction().equals("PUT")) {
+						item.remove(sKey);
+						item.put(sKey, attributesToUpdate.get(sKey).getValue());
+						attributesToUpdate.remove(sKey);
+					} else if (attributesToUpdate.get(sKey).getAction().equals("DELETE")) {
+						if (attributesToUpdate.get(sKey).getValue() != null) {
+							if (item.get(sKey).getSS() != null) {
+								if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
+									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + sKey + ") of the item with hash key (" + item.get(sKey) + ")");
+								} else {
+									for (String toDel : attributesToUpdate.get(sKey).getValue().getSS()) {
+										if (item.get(sKey).getSS().contains(toDel)) {
+											item.get(sKey).getSS().remove(toDel);
+											attributesToUpdate.remove(sKey);
+										}
+									}
+								}
+							} else if (item.get(sKey).getNS() != null) {
+								if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
+									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + sKey + ") of the item with hash key (" + item.get(sKey) + ")");
+								} else {
+									for (String toDel : attributesToUpdate.get(sKey).getValue().getNS()) {
+										if (item.get(sKey).getNS().contains(toDel)) {
+											item.get(sKey).getNS().remove(toDel);
+											attributesToUpdate.remove(sKey);
+										}
+									}
+								}
+							} else if (item.get(sKey).getS().equals(attributesToUpdate.get(sKey).getValue().getS())) {
+								item.remove(sKey);
+								attributesToUpdate.remove(sKey);
+							} else if (item.get(sKey).getN().equals(attributesToUpdate.get(sKey).getValue().getN())) {
+								item.remove(sKey);
+								attributesToUpdate.remove(sKey);
+							}
+						} else {
+							item.remove(sKey);
+							attributesToUpdate.remove(sKey);
+						}
+					} else if (attributesToUpdate.get(sKey).getAction().equals("ADD")) {
+						if (attributesToUpdate.get(sKey).getValue() != null) {
+							if (item.get(sKey).getSS() != null) {
+								if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
+									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + sKey + ")");
+								} else {
+									for (String toUp : attributesToUpdate.get(sKey).getValue().getSS()) {
+										item.get(sKey).getSS().add(toUp);
+									}
+								}
+							} else if (item.get(sKey).getNS() != null) {
+								if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
+									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + sKey + ")");
+								} else {
+									for (String toUp : attributesToUpdate.get(sKey).getValue().getNS()) {
+										item.get(sKey).getNS().add(toUp);
+									}
+								}
+							} else if (item.get(sKey).getS() != null) {
+								throw new ConditionalCheckFailedException("It's not possible to ADD on an attribute with a String type for the attribute (" + sKey + ")");
+							} else if (item.get(sKey).getN() != null) {
+								Double i = new Double(item.get(sKey).getN());
+								i = i + new Double(attributesToUpdate.get(sKey).getValue().getN());
+								item.get(sKey).setN(i + "");
+							}
+						} else {
+							throw new ResourceNotFoundException("the provided update item with attribute (" + sKey + ") doesn't have an AttributeValue to perform the ADD");
+						}
+					}
+				}
 
-    private void GTHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, AttributeValue attributeValue, String k) {
-        if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
-                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                String comp = (getAttributeValueType(attributeValue).equals(AttributeValueType.S)) ? attributeValue.getS() : attributeValue.getN();
-                if (value.compareTo(comp) > 0) {
-                    items.add(item);
-                }
-            }
-            else {
-                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                String comp = (getAttributeValueType(attributeValue).equals(AttributeValueType.S)) ? attributeValue.getS() : attributeValue.getN();
-                if  (Integer.parseInt(value)>Integer.parseInt(comp)) {
-                    items.add(item);
-                }
-            }
-        } else {
-            //TODO to do
-            //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-        }
-    }
-
-    private void LTHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, AttributeValue attributeValue, String k) {
-        if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
-                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                String comp = (getAttributeValueType(attributeValue).equals(AttributeValueType.S)) ? attributeValue.getS() : attributeValue.getN();
-                if (value.compareTo(comp) < 0) {
-                    items.add(item);
-                }
-            }
-            else {
-                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                String comp = (getAttributeValueType(attributeValue).equals(AttributeValueType.S)) ? attributeValue.getS() : attributeValue.getN();
-                if  (Integer.parseInt(value) < Integer.parseInt(comp)) {
-                    items.add(item);
-                }
-            }
-        } else {
-            //TODO to do
-            //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-        }
-    }
-
-    private void GEHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, AttributeValue attributeValue, String k) {
-        EQHandle(items, item, attributeValue, k);
-        GTHandle(items, item, attributeValue, k);
-    }
-
-    private void LEHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, AttributeValue attributeValue, String k) {
-        EQHandle(items, item, attributeValue, k);
-        LTHandle(items, item, attributeValue, k);
-    }
-
-    private void BETWEENHandle (List<Map<String, AttributeValue>> items, Map<String, AttributeValue> item, AttributeValue attributeValue1, AttributeValue attributeValue2, String k) {
-        if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-            if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
-                String value1 = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                String comp1 = (getAttributeValueType(attributeValue1).equals(AttributeValueType.S)) ? attributeValue1.getS() : attributeValue1.getN();
-                String value2 = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                String comp2 = (getAttributeValueType(attributeValue2).equals(AttributeValueType.S)) ? attributeValue2.getS() : attributeValue2.getN();
-                if (value1.compareTo(comp1) >= 0 && value2.compareTo(comp2) <= 0) {
-                    items.add(item);
-                }
-            }
-            else {
-                String value1 = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                String comp1 = (getAttributeValueType(attributeValue1).equals(AttributeValueType.S)) ? attributeValue1.getS() : attributeValue1.getN();
-                String value2 = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                String comp2 = (getAttributeValueType(attributeValue2).equals(AttributeValueType.S)) ? attributeValue2.getS() : attributeValue2.getN();
-                if  (Integer.parseInt(value1) >= Integer.parseInt(comp1) && Integer.parseInt(value2) <= Integer.parseInt(comp2)) {
-                    items.add(item);
-                }
-            }
-        } else {
-            //TODO to do
-            //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-        }
-    }
-
+			}
+			for (String sKey : attributesToUpdate.keySet()) {
+				item.put(sKey, attributesToUpdate.get(sKey).getValue());
+			}
+			result.setAttributes(item);
+		}
+		return result;
+	}
 
 	protected Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
 		if (attributesToGet == null) {
@@ -853,4 +819,5 @@ class AlternatorDBHandler {
 		}
 		return copy;
 	}
+
 }
