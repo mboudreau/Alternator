@@ -620,7 +620,7 @@ class AlternatorDBHandler {
 		queryResult.setConsumedCapacityUnits(0.5);
 		queryResult.setLastEvaluatedKey(new Key(request.getHashKeyValue()));
 
-		return queryResult;
+		return queryResult;                       git
 	}
 
 	protected String getKeyValue(AttributeValue value) {
