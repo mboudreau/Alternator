@@ -548,8 +548,13 @@ class AlternatorDBHandler {
 	    Map<String,AttributeValue> item = table.getItem(keyValue);
 
 	    QueryResult queryResult = new QueryResult();
-	    List<Map<String,AttributeValue>> list = new ArrayList<Map<String, AttributeValue>>();
+        List<Map<String,AttributeValue>> list = null;
+        if(item==null)  {
+            item = new HashMap<String, AttributeValue>();
+        }
+	    list = new ArrayList<Map<String, AttributeValue>>();
 	    list.add(item);
+        
 		queryResult.setItems(list);
 		queryResult.setCount(list.size());
 	    queryResult.setConsumedCapacityUnits(0.5);

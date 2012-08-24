@@ -64,6 +64,19 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
 
+    //What will the table like after over write the same hash key? will the previous one been overlapped?
+    @Test
+    public void putItemWithHashKeyOverwriteItem_err() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
+        PutItemResult res1 = client.putItem(request); // put item beforehand
+        PutItemResult res = client.putItem(request); // Add another
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+        Assert.assertNotNull(res1.getAttributes().get("id"));
+    }
+
     @Test
     public void putItemWithHashKeyWithoutItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
