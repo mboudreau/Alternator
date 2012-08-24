@@ -217,6 +217,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
+
         ScanResult result = client.scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
