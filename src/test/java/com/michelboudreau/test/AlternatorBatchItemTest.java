@@ -1,6 +1,7 @@
 package com.michelboudreau.test;
 
 import com.amazonaws.services.dynamodb.model.*;
+import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -10,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -72,7 +76,16 @@ public class AlternatorBatchItemTest extends AlternatorTest {
             System.out.println("Unprocessed Put and Delete requests: \n" + result.getUnprocessedItems());
             requestItems = result.getUnprocessedItems();
         } while (result.getUnprocessedItems().size() > 0);
+
+    /*
+    @Test
+    public void batchGetItemInTableTest() {
+        BatchGetItemResult result = client.batchGetItem(new BatchGetItemRequest());
+        Assert.assertNotNull(result);
+>>>>>>> faa37598a99d659e8db521049130d600e03df7fb
     }
+    */
 
 
+    }
 }

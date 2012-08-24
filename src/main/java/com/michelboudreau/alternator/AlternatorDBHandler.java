@@ -11,7 +11,6 @@ import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -429,6 +428,10 @@ class AlternatorDBHandler {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
 
 		for (String tableName : request.getRequestItems().keySet()) {
+			if (!this.tables.containsKey(tableName)) {
+				throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
+			}
+
 			BatchResponse batchResponse = new BatchResponse();
 			List<Map<String,AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
 			KeysAndAttributes keysAndAttributes = request.getRequestItems().get(tableName);
@@ -445,7 +448,7 @@ class AlternatorDBHandler {
 		return new BatchGetItemResult();
 	}
 
-    protected Object batchWriteItem(BatchWriteItemRequest request) {
+    protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
         return new BatchWriteItemResult();
     }
 
