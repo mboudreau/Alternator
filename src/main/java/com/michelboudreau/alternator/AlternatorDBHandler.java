@@ -105,8 +105,8 @@ class AlternatorDBHandler {
                                                                                       return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
                                                                                       */
             // Operations
-            /*case QUERY:
-                   return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));*/
+            case QUERY:
+                return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
             case SCAN:
                 return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
             default:
@@ -523,10 +523,19 @@ class AlternatorDBHandler {
                     if (cond.getComparisonOperator().equals("GT")) {
                         if (cond.getAttributeValueList().size() == 1) {
                             if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-                                String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-                                String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                if (value.compareTo(comp) > 0) {
-                                    items.add(item);
+                                if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
+                                    String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                                    String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                    if (value.compareTo(comp) > 0) {
+                                        items.add(item);
+                                    }
+                                }
+                                else {
+                                    String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+                                    String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                    if  (Integer.parseInt(value)>Integer.parseInt(comp)) {
+                                        items.add(item);
+                                    }
                                 }
                             } else {
                                 //TODO to do
@@ -566,7 +575,9 @@ class AlternatorDBHandler {
             }
             items = copy;
         }
-
+        if(items.size()==0){
+           result.setLastEvaluatedKey(new Key(new AttributeValue().withS(null)));
+        }
         result.setItems(items);
         result.setCount(items.size());
         result.setScannedCount(items.size());
@@ -581,8 +592,25 @@ class AlternatorDBHandler {
             throw createInternalServerException(errors);
         }
 
+	    String keyValue = getKeyValue(request.getHashKeyValue());
 
-        return new QueryResult();
+	    // Check existence of table
+	    Table table = this.tables.get(request.getTableName());
+	    if (table == null) {
+		    throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
+	    }
+
+	    Map<String,AttributeValue> item = table.getItem(keyValue);
+
+	    QueryResult queryResult = new QueryResult();
+	    List<Map<String,AttributeValue>> list = new ArrayList<Map<String, AttributeValue>>();
+	    list.add(item);
+		queryResult.setItems(list);
+		queryResult.setCount(list.size());
+	    queryResult.setConsumedCapacityUnits(0.5);
+	    queryResult.setLastEvaluatedKey(new Key(request.getHashKeyValue()));
+
+        return queryResult;
     }
 
     protected String getKeyValue(AttributeValue value) {
@@ -618,7 +646,6 @@ class AlternatorDBHandler {
         }
         return new InternalServerErrorException(message);
     }
-
 
     protected UpdateItemResult updateItem(UpdateItemRequest request) {
         // Validate data coming in
@@ -742,6 +769,5 @@ class AlternatorDBHandler {
         }
         return result;
     }
-
 
 }
