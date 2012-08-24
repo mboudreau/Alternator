@@ -424,7 +424,6 @@ class AlternatorDBHandler {
 
 	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
-
 		for (String tableName : request.getRequestItems().keySet()) {
 			BatchResponse batchResponse = new BatchResponse();
 			List<Map<String,AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
@@ -444,7 +443,27 @@ class AlternatorDBHandler {
 	}
 
     protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
-        return new BatchWriteItemResult();
+        BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
+        for (String tableName : request.getRequestItems().keySet()) {
+            BatchWriteResponse batchWriteResponse = new BatchWriteResponse();
+            List<WriteRequest> writeRequests = request.getRequestItems().get(tableName);
+            for (WriteRequest writeRequest : writeRequests) {
+                PutRequest putRequest = writeRequest.getPutRequest();
+                if (putRequest != null) {
+                    this.tables.get(tableName).putItem(putRequest.getItem());
+                }
+                DeleteRequest deleteRequest = writeRequest.getDeleteRequest();
+                if (deleteRequest != null) {
+                    Key key = deleteRequest.getKey();
+                    if (key != null) {
+                        this.tables.get(tableName).removeItem(getKeyValue(key.getHashKeyElement()));
+                    }
+                }
+            }
+            batchWriteResponse.setConsumedCapacityUnits(batchWriteResponse.getConsumedCapacityUnits());
+            batchWriteItemResult.getResponses().put(tableName, batchWriteResponse);
+        }
+        return batchWriteItemResult;
     }
 
 	protected ScanResult scan(ScanRequest request) {
