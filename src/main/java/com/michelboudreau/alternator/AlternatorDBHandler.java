@@ -11,7 +11,6 @@ import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,11 +99,9 @@ class AlternatorDBHandler {
                 return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
 	        case BATCH_GET_ITEM:
 		        return new BatchGetItemResultMarshaller().marshall((batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()))));
-            /*
-                                                                               ;
-                                                                                  case BATCH_WRITE_ITEM:
-                                                                                      return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
-                                                                                      */
+            case BATCH_WRITE_ITEM:
+                return new BatchWriteItemResultMarshaller().marshall((batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()))));
+
             // Operations
             case QUERY:
                 return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
@@ -429,7 +426,7 @@ class AlternatorDBHandler {
         return new BatchGetItemResult();
     }
 
-    protected Object batchWriteItem(BatchWriteItemRequest request) {
+    protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
         return new BatchWriteItemResult();
     }
 

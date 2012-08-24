@@ -1,27 +1,13 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.AmazonWebServiceRequest;
-import com.amazonaws.services.dynamodb.model.*;
-import com.amazonaws.services.dynamodb.model.transform.UpdateItemRequestJsonUnmarshaller;
-import com.amazonaws.transform.JsonUnmarshallerContext;
-import com.amazonaws.transform.Unmarshaller;
-import com.michelboudreau.alternator.enums.AttributeValueType;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
+import com.amazonaws.services.dynamodb.model.BatchGetItemResult;
+import com.amazonaws.services.dynamodb.model.BatchWriteItemRequest;
+import com.amazonaws.services.dynamodb.model.BatchWriteItemResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -43,5 +29,11 @@ public class AlternatorBatchItemTest extends AlternatorTest {
 	public void vanillaBatchGetItemTest(){
 		BatchGetItemResult result  = client.batchGetItem(new BatchGetItemRequest());
 	}
+
+    @Test
+    public void vanillaBatchWriteItemTest(){
+        BatchWriteItemResult result  = client.batchWriteItem(new BatchWriteItemRequest());
+    }
+
 
 }
