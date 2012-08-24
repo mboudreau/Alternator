@@ -54,7 +54,6 @@ public class BatchGetItemResultMarshaller implements Marshaller<String, BatchGet
 				}
 
 			}
-			jsonWriter.key("UnprocessedKeys").value("");
 			jsonWriter.endObject();
 			jsonWriter.endObject();
 
