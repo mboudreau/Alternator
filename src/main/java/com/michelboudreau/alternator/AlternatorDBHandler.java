@@ -98,9 +98,10 @@ class AlternatorDBHandler {
                 return new UpdateItemResultMarshaller().marshall(updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance())));
             case DELETE:
                 return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
+	        case BATCH_GET_ITEM:
+		        return new BatchGetItemResultMarshaller().marshall((batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()))));
             /*
-                                                                                  case BATCH_GET_ITEM:
-                                                                                      return batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()));
+                                                                               ;
                                                                                   case BATCH_WRITE_ITEM:
                                                                                       return batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()));
                                                                                       */
@@ -424,7 +425,7 @@ class AlternatorDBHandler {
         return result;
     }
 
-    protected Object batchGetItem(BatchGetItemRequest request) {
+    protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
         return new BatchGetItemResult();
     }
 
