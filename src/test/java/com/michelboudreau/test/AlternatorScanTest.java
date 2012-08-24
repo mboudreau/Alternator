@@ -202,32 +202,30 @@ public class AlternatorScanTest extends AlternatorTest {
 //            Assert.assertTrue(new Integer(item.get("range").getN()) == 102 || new Integer(item.get("range").getN()) == 101 || new Integer(item.get("range").getN()) == 100);
 //        }
 //    }
+    ////////////////////////OK LINE////////////////////////////
 
     // TODO: Exception!
-//    @Test
-//    public void scanWithScanFilterBETWEENTest() {
-//        ScanRequest request = getBasicReq();
-//        Condition rangeKeyCondition = new Condition();
-//        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
-//        attributeValueList.add(new AttributeValue().withN("120"));
-//        attributeValueList.add(new AttributeValue().withN("131"));
-//        rangeKeyCondition.setAttributeValueList(attributeValueList);
-//        rangeKeyCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
-//        Map<String, Condition> conditionMap = new HashMap<String, Condition>();
-//        conditionMap.put("range", rangeKeyCondition);
-//        request.setScanFilter(conditionMap);
-//        ScanResult result = client.scan(request);
-//        Assert.assertNotNull(result);
-//        Assert.assertNotNull(result.getItems());
-//        Assert.assertEquals(result.getItems().size(), 0);
+    @Test
+    public void scanWithScanFilterBETWEENTest() {
+        ScanRequest request = getBasicReq();
+        Condition rangeKeyCondition = new Condition();
+        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
+        attributeValueList.add(new AttributeValue().withN("120"));
+        attributeValueList.add(new AttributeValue().withN("131"));
+        rangeKeyCondition.setAttributeValueList(attributeValueList);
+        rangeKeyCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
+        Map<String, Condition> conditionMap = new HashMap<String, Condition>();
+        conditionMap.put("range", rangeKeyCondition);
+        request.setScanFilter(conditionMap);
+        ScanResult result = client.scan(request);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getItems());
+        Assert.assertEquals(result.getItems().size(), 0);
 //        for (Map<String, AttributeValue> item : result.getItems()) {
 //            Assert.assertTrue(new Integer(item.get("range").getN()) <= 120 && new Integer(item.get("range").getN()) >= 131);
 //        }
-//    }
-
-
-
-//        ////////////////////////OK LINE////////////////////////////
+    }
+//
 //    // TODO: Exception!
 //    @Test
 //    public void scanPaginationTest() {
