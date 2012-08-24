@@ -17,6 +17,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -35,6 +37,10 @@ public class AlternatorItemTest extends AlternatorTest {
         deleteAllTables();
     }
 
+
+
+
+
     //Test: put item with HashKey
     @Test
     public void putItemWithHashKey() {
@@ -45,6 +51,7 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
+
 
     @Test
     public void putItemWithHashKeyOverwriteItem() {
@@ -57,8 +64,21 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
 
+    //What will the table like after over write the same hash key? will the previous one been overlapped?
     @Test
-    public void putItemWithHashKeyWithoutTableName() {
+    public void putItemWithHashKeyOverwriteItem_err() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
+        PutItemResult res1 = client.putItem(request); // put item beforehand
+        PutItemResult res = client.putItem(request); // Add another
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+        Assert.assertNotNull(res1.getAttributes().get("id"));
+    }
+
+    @Test
+    public void putItemWithHashKeyWithoutItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName);
@@ -67,7 +87,7 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyWithoutItem() {
+    public void putItemWithHashKeyWithoutTableName() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
@@ -75,10 +95,11 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
 
-    //Test: put item with HashKey and RangeKey@Test
+    //Test: put item with HashKey and RangeKey
+    @Test
     public void putItemWithHashKeyAndRangeKey() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("name").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
         PutItemResult res = client.putItem(request);
@@ -89,7 +110,7 @@ public class AlternatorItemTest extends AlternatorTest {
     @Test
     public void putItemWithHashKeyAndRangeKeyOverwriteItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("name").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
         client.putItem(request); // put item beforehand
@@ -99,9 +120,9 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyAndRangeKeyWithoutTableName() {
+    public void putItemWithHashKeyAndRangeKeyWithoutItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("name").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName);
         PutItemResult res = client.putItem(request);
@@ -109,9 +130,9 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyAndRangeKeyWithoutItem() {
+    public void putItemWithHashKeyAndRangeKeyWithoutTableName() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("name").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
         PutItemResult res = client.putItem(request);
