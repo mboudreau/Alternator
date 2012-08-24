@@ -428,7 +428,12 @@ class AlternatorDBHandler {
 	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
 
+
 		for (String tableName : request.getRequestItems().keySet()) {
+			if (!this.tables.containsKey(tableName)) {
+				throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
+			}
+
 			BatchResponse batchResponse = new BatchResponse();
 			List<Map<String,AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
 			KeysAndAttributes keysAndAttributes = request.getRequestItems().get(tableName);
