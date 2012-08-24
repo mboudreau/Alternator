@@ -425,9 +425,25 @@ class AlternatorDBHandler {
         return result;
     }
 
-    protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
-        return new BatchGetItemResult();
-    }
+	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
+		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
+
+		for (String tableName : request.getRequestItems().keySet()) {
+			BatchResponse batchResponse = new BatchResponse();
+			List<Map<String,AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
+			KeysAndAttributes keysAndAttributes = request.getRequestItems().get(tableName);
+			List<Key> itemKeys = keysAndAttributes.getKeys();
+			List<String> attributeToGet = keysAndAttributes.getAttributesToGet();
+			for (Key itemKey : itemKeys) {
+				Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(itemKey.getHashKeyElement()));
+				item = getItemWithAttributesToGet(item, attributeToGet);
+				items.add(item);
+			}
+			batchResponse.setConsumedCapacityUnits(1.0);
+			batchResponse.setItems(items);
+		}
+		return new BatchGetItemResult();
+	}
 
     protected Object batchWriteItem(BatchWriteItemRequest request) {
         return new BatchWriteItemResult();
@@ -812,4 +828,26 @@ class AlternatorDBHandler {
             //List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
         }
     }
+
+
+	protected Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
+		if (attributesToGet == null) {
+			return item;
+		}
+		Set<String> attributes = new HashSet<String>(item.keySet());
+		for (String attribute : attributes) {
+			if (!attributesToGet.contains(attribute)) {
+				item.remove(attribute);
+			}
+		}
+		return item;
+	}
+
+	protected List<Map<String, AttributeValue>> getItemWithAttributesToGet(List<Map<String, AttributeValue>> items, List<String> attributesToGet) {
+		List<Map<String, AttributeValue>> copy = new ArrayList<Map<String, AttributeValue>>();
+		for (Map<String, AttributeValue> item : items) {
+			copy.add(getItemWithAttributesToGet(item, attributesToGet));
+		}
+		return copy;
+	}
 }
