@@ -457,11 +457,13 @@ class AlternatorDBHandler {
                     Key key = deleteRequest.getKey();
                     if (key != null) {
                         Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
-
                     }
                 }
             }
-            batchWriteResponse.setConsumedCapacityUnits(batchWriteResponse.getConsumedCapacityUnits());
+            batchWriteResponse.setConsumedCapacityUnits(1.0);
+            HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
+            responses.put(tableName, batchWriteResponse);
+            batchWriteItemResult.setResponses(responses);
             batchWriteItemResult.getResponses().put(tableName, batchWriteResponse);
         }
         return batchWriteItemResult;

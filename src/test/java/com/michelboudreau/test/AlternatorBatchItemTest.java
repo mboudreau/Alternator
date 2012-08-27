@@ -23,6 +23,8 @@ public class AlternatorBatchItemTest extends AlternatorTest {
     @Before
     public void setUp() throws Exception {
         tableName = createTableName();
+        TableDescription tableDescription = createTable(tableName);
+        tableDescription.setKeySchema(createKeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType("N"), new KeySchemaElement().withAttributeName("range").withAttributeType("N")));
     }
 
     @After
@@ -46,10 +48,10 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         // Create a PutRequest for a new Forum item
         Map<String, AttributeValue> forumItem = new HashMap<String, AttributeValue>();
         forumItem.put("range", new AttributeValue().withN("1"));
+        forumItem.put("range2", new AttributeValue().withN("2"));
 
         List<WriteRequest> forumList = new ArrayList<WriteRequest>();
         forumList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(forumItem)));
-
         requestItems.put(tableName, forumList);
 
         do {
