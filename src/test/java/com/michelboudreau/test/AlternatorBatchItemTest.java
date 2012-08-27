@@ -2,6 +2,8 @@ package com.michelboudreau.test;
 
 import com.amazonaws.services.dynamodb.model.*;
 import junit.framework.Assert;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -11,9 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -21,7 +20,7 @@ public class AlternatorBatchItemTest extends AlternatorTest {
 
     private String tableName;
 
-  /*  @Before
+    @Before
     public void setUp() throws Exception {
         tableName = createTableName();
     }
@@ -29,7 +28,7 @@ public class AlternatorBatchItemTest extends AlternatorTest {
     @After
     public void tearDown() throws Exception {
         deleteAllTables();
-    }*/
+    }
 
 //	@Test
 //	public void vanillaBatchGetItemTest() {
@@ -55,9 +54,10 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         forumItem.put("range", new AttributeValue().withN("7"));
         forumItem.put("range", new AttributeValue().withN("8"));
 
-
         List<WriteRequest> forumList = new ArrayList<WriteRequest>();
         forumList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(forumItem)));
+
+        requestItems.put(tableName, forumList);
 
         do {
             System.out.println("Making the request.");
@@ -82,7 +82,6 @@ public class AlternatorBatchItemTest extends AlternatorTest {
     public void batchGetItemInTableTest() {
         BatchGetItemResult result = client.batchGetItem(new BatchGetItemRequest());
         Assert.assertNotNull(result);
->>>>>>> faa37598a99d659e8db521049130d600e03df7fb
     }
     */
 

@@ -37,10 +37,6 @@ public class AlternatorItemTest extends AlternatorTest {
         deleteAllTables();
     }
 
-
-
-
-
     //Test: put item with HashKey
     @Test
     public void putItemWithHashKey() {
