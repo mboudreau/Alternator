@@ -46,13 +46,6 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         // Create a PutRequest for a new Forum item
         Map<String, AttributeValue> forumItem = new HashMap<String, AttributeValue>();
         forumItem.put("range", new AttributeValue().withN("1"));
-        forumItem.put("range", new AttributeValue().withN("2"));
-        forumItem.put("range", new AttributeValue().withN("3"));
-        forumItem.put("range", new AttributeValue().withN("4"));
-        forumItem.put("range", new AttributeValue().withN("5"));
-        forumItem.put("range", new AttributeValue().withN("6"));
-        forumItem.put("range", new AttributeValue().withN("7"));
-        forumItem.put("range", new AttributeValue().withN("8"));
 
         List<WriteRequest> forumList = new ArrayList<WriteRequest>();
         forumList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(forumItem)));
