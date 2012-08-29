@@ -53,13 +53,17 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         keysAndAttributes.setAttributesToGet(attributesToGet);
         List<Key> keys = new ArrayList<Key>();
 
+        KeysAndAttributes keysAndAttributes1 = new KeysAndAttributes();
+        List<String> attributesToGet1 = new ArrayList<String>();
+        attributesToGet1.add(hashKeyValue2);
+        keysAndAttributes1.setAttributesToGet(attributesToGet1);
         //Test case 1: Every request has matches.
 //        keys.add(new Key(new AttributeValue("4")));
 //        keys.add(new Key(new AttributeValue("5")));
 //        keys.add(new Key(new AttributeValue("3")));
 
         //Test case 2: Requests has no match.
-        keys.add(new Key(new AttributeValue("7")));
+        keys.add(new Key(new AttributeValue("1")));
 
         //Test case 3: Complicated test, some requests has matches, some doesn't.
 //        keys.add(new Key(new AttributeValue("7")));
@@ -73,12 +77,13 @@ public class AlternatorBatchItemTest extends AlternatorTest {
 //        keys.add(new Key(new AttributeValue("4")));
 
         keysAndAttributes.setKeys(keys);
+        keysAndAttributes1.setKeys(keys);
         //Test case for Exception: Table doesn't exist.
-        requestItems.put("Vito's Table", keysAndAttributes);
+//        requestItems.put("Vito's Table", keysAndAttributes);
 
         //Normal test
 //        requestItems.put(tableName1, keysAndAttributes);
-        requestItems.put(tableName2, keysAndAttributes);
+        requestItems.put(tableName2, keysAndAttributes1);
 
         batchGetItemRequest.withRequestItems(requestItems);
 		BatchGetItemResult result  = client.batchGetItem(batchGetItemRequest);
@@ -140,7 +145,7 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         //Test case: Duplicated delete request
 //        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(new Key(new AttributeValue("7")))));
 
-
+        //Test on Table 2
         Map<String, AttributeValue> forumItemT2 = new HashMap<String, AttributeValue>();
         forumItemT2.put(hashKeyValue2, new AttributeValue().withN("1"));
         forumItemT2.put("range", new AttributeValue().withS("a"));
