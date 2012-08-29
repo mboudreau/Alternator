@@ -38,14 +38,10 @@ public class Table {
 	}
 
 	public void putItem(Map<String, AttributeValue> items) {
-        Map<String , AttributeValue> hashItems = new HashMap<String, AttributeValue>();
-        for (Map.Entry<String, AttributeValue> item : items.entrySet()) {
-            String hashKeyValue = getHashKeyValue(item);
-            if(hashKeyValue != null) {
-                hashItems.put(hashKeyValue, item.getValue());
-            }
+        String hashKeyValue = getHashKeyValue(items);
+        if(hashKeyValue != null) {
+            this.items.put(hashKeyValue, items);
         }
-        this.items.put(this.name ,hashItems);
 	}
 
 	public void removeItem(String hashKey) {
@@ -134,12 +130,14 @@ public class Table {
 		return desc;
 	}
 
-	protected String getHashKeyValue(Map.Entry<String, AttributeValue> item) {
-        AttributeValue value = item.getValue();
-        if (value.getN() != null) {
-            return value.getN();
-        } else if (value.getS() != null) {
-            return value.getS();
+	protected String getHashKeyValue(Map<String, AttributeValue> item) {
+        AttributeValue value = item.get(hashKeyName);
+        if (value != null) {
+            if (value.getN() != null) {
+                return value.getN();
+            } else if (value.getS() != null) {
+                return value.getS();
+            }
         }
         return null;
 	}

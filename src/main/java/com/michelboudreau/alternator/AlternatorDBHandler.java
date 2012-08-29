@@ -424,26 +424,41 @@ class AlternatorDBHandler {
 
 	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
+        Map<String, BatchResponse> response = new HashMap<String, BatchResponse>();
 		for (String tableName : request.getRequestItems().keySet()) {
 			BatchResponse batchResponse = new BatchResponse();
 			List<Map<String,AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
 			KeysAndAttributes keysAndAttributes = request.getRequestItems().get(tableName);
 			List<Key> itemKeys = keysAndAttributes.getKeys();
 			List<String> attributeToGet = keysAndAttributes.getAttributesToGet();
-			for (Key itemKey : itemKeys) {
-				Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(itemKey.getHashKeyElement()));
-				item = getItemWithAttributesToGet(item, attributeToGet);
-				items.add(item);
-			}
-			batchResponse.setConsumedCapacityUnits(1.0);
-			batchResponse.setItems(items);
-			batchGetItemResult.getResponses().put(tableName,batchResponse);
+            try {
+                for (Key itemKey : itemKeys) {
+                    try {
+                        Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(itemKey.getHashKeyElement()));
+                        item = getItemWithAttributesToGet(item, attributeToGet);
+                        if (item != null)
+                            items.add(item);
+                    } catch (NullPointerException e) {
+                        System.err.println("Caught NullPointerException: " + e.getMessage());
+                    }
+                }
+            } catch (NullPointerException e) {
+                System.err.println("Caught NullPointerException: " + e.getMessage());
+            }
+            batchResponse.setConsumedCapacityUnits(1.0);
+            if (items.size() != 0) {
+                batchResponse.setItems(items);
+                response.put(tableName, batchResponse);
+                batchGetItemResult.setResponses(response);
+                batchGetItemResult.getResponses().put(tableName, batchResponse);
+            }
 		}
 		return batchGetItemResult;
 	}
 
     protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
         BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
+        HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
         for (String tableName : request.getRequestItems().keySet()) {
             BatchWriteResponse batchWriteResponse = new BatchWriteResponse();
             List<WriteRequest> writeRequests = request.getRequestItems().get(tableName);
@@ -456,12 +471,11 @@ class AlternatorDBHandler {
                 if (deleteRequest != null) {
                     Key key = deleteRequest.getKey();
                     if (key != null) {
-                        Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
+                        this.tables.get(tableName).removeItem(key.getHashKeyElement().getS());
                     }
                 }
             }
             batchWriteResponse.setConsumedCapacityUnits(1.0);
-            HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
             responses.put(tableName, batchWriteResponse);
             batchWriteItemResult.setResponses(responses);
             batchWriteItemResult.getResponses().put(tableName, batchWriteResponse);
