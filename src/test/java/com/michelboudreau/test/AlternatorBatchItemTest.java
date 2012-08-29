@@ -81,9 +81,10 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         //Test case for Exception: Table doesn't exist.
 //        requestItems.put("Vito's Table", keysAndAttributes);
 
-        //Normal test
-//        requestItems.put(tableName1, keysAndAttributes);
-        requestItems.put(tableName2, keysAndAttributes1);
+        // Normal test
+        // TODO: Multi table test failed. Need to be fix.
+        requestItems.put(tableName1, keysAndAttributes);
+//        requestItems.put(tableName2, keysAndAttributes1);
 
         batchGetItemRequest.withRequestItems(requestItems);
 		BatchGetItemResult result  = client.batchGetItem(batchGetItemRequest);
