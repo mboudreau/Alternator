@@ -85,7 +85,7 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		JsonResponseHandler<BatchWriteItemResult> responseHandler = new JsonResponseHandler<BatchWriteItemResult>(unmarshaller);
 
 		return invoke(request, responseHandler);
-	}
+}
 
 	public UpdateItemResult updateItem(UpdateItemRequest updateItemRequest)
 			throws AmazonServiceException, AmazonClientException {

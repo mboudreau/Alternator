@@ -9,16 +9,16 @@ import com.michelboudreau.alternator.enums.AttributeValueType;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -36,10 +36,6 @@ public class AlternatorItemTest extends AlternatorTest {
     public void tearDown() throws Exception {
         deleteAllTables();
     }
-
-
-
-
 
     //Test: put item with HashKey
     @Test
@@ -62,19 +58,6 @@ public class AlternatorItemTest extends AlternatorTest {
         PutItemResult res = client.putItem(request); // Add another
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getConsumedCapacityUnits());
-    }
-
-    //What will the table like after over write the same hash key? will the previous one been overlapped?
-    @Test
-    public void putItemWithHashKeyOverwriteItem_err() {
-        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
-        createTable(tableName, schema);
-        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
-        PutItemResult res1 = client.putItem(request); // put item beforehand
-        PutItemResult res = client.putItem(request); // Add another
-        Assert.assertNotNull(res);
-        Assert.assertNotNull(res.getConsumedCapacityUnits());
-        Assert.assertNotNull(res1.getAttributes().get("id"));
     }
 
     @Test
@@ -279,6 +262,22 @@ public class AlternatorItemTest extends AlternatorTest {
 
     // TODO: test out delete item expected and return value
 
+    /*@Test
+    public void batchWriteItemInTableTest() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        BatchWriteItemRequest batchWriteItemRequest = new BatchWriteItemRequest();
+        Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
+        WriteRequest writeRequest = new WriteRequest();
+        writeRequest.setPutRequest(new PutRequest());
+        writeRequest.setDeleteRequest(new DeleteRequest());
+        List<WriteRequest> writeRequests = new ArrayList<WriteRequest>();
+        writeRequests.add(writeRequest);
+        requestItems.put(tableName, writeRequests);
+        batchWriteItemRequest.setRequestItems(requestItems);
+        BatchWriteItemResult result = client.batchWriteItem(batchWriteItemRequest);
+        Assert.assertNotNull(result);
+    }*/
 /*
 	@Test
 	public void batchWriteItemInTableTest() {
