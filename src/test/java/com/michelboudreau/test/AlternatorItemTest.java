@@ -2,7 +2,6 @@ package com.michelboudreau.test;
 
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.services.dynamodb.model.*;
-import com.amazonaws.services.dynamodb.model.transform.UpdateItemRequestJsonUnmarshaller;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.Unmarshaller;
 import com.michelboudreau.alternator.enums.AttributeValueType;
@@ -19,7 +18,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -197,38 +198,6 @@ public class AlternatorItemTest extends AlternatorTest {
         UpdateItemResult res = client.updateItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
-
-    @Test
-    public void updateItemWithCustomRequestTest() throws Exception {
-        String json = readFileAsString("customUpdateItemRequest.json");
-        UpdateItemRequest request = getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance(), json);
-        String tableName = request.getTableName();
-        KeySchema schema = new KeySchema();
-        KeySchemaElement hk = new KeySchemaElement();
-        hk.setAttributeName("id");
-        hk.setAttributeType(getAttributeValueType(request.getKey().getHashKeyElement()).toString());
-        if(request.getKey().getRangeKeyElement()!=null){
-            KeySchemaElement rk = new KeySchemaElement();
-            rk.setAttributeName("range");
-            rk.setAttributeType(getAttributeValueType(request.getKey().getRangeKeyElement()).toString());
-            schema.setRangeKeyElement(rk);
-        }
-        schema.setHashKeyElement(hk);
-        CreateTableRequest createTableRequest = new CreateTableRequest(tableName,schema );
-        ProvisionedThroughput pv = new ProvisionedThroughput();
-        pv.setReadCapacityUnits(5L);
-        pv.setWriteCapacityUnits(5L);
-        createTableRequest.setProvisionedThroughput(pv);
-        client.createTable(createTableRequest);
-        UpdateItemResult res = client.updateItem(request);
-
-
-
-        Assert.assertNotNull(res.getConsumedCapacityUnits());
-    }
-
-
-
 
      @Test
     public void deleteItem() {
