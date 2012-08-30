@@ -37,11 +37,11 @@ public class Table {
 		}
 	}
 
-	public void putItem(Map<String, AttributeValue> item) {
-		String hashKeyValue = getHashKeyValue(item);
-		if(hashKeyValue != null) {
-			items.put(hashKeyValue, item);
-		}
+	public void putItem(Map<String, AttributeValue> items) {
+        String hashKeyValue = getHashKeyValue(items);
+        if(hashKeyValue != null) {
+            this.items.put(hashKeyValue, items);
+        }
 	}
 
 	public void removeItem(String hashKey) {
@@ -131,12 +131,14 @@ public class Table {
 	}
 
 	protected String getHashKeyValue(Map<String, AttributeValue> item) {
-		AttributeValue value = item.get(getHashKeyName());
-		if (value.getN() != null) {
-			return value.getN();
-		} else if (value.getS() != null) {
-			return value.getS();
-		}
-		return null;
+        AttributeValue value = item.get(hashKeyName);
+        if (value != null) {
+            if (value.getN() != null) {
+                return value.getN();
+            } else if (value.getS() != null) {
+                return value.getS();
+            }
+        }
+        return null;
 	}
 }
