@@ -262,7 +262,7 @@ public class AlternatorItemTest extends AlternatorTest {
 
     // TODO: test out delete item expected and return value
 
-    @Test
+    /*@Test
     public void batchWriteItemInTableTest() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
@@ -277,7 +277,7 @@ public class AlternatorItemTest extends AlternatorTest {
         batchWriteItemRequest.setRequestItems(requestItems);
         BatchWriteItemResult result = client.batchWriteItem(batchWriteItemRequest);
         Assert.assertNotNull(result);
-    }
+    }*/
 /*
 	@Test
 	public void batchWriteItemInTableTest() {

@@ -82,9 +82,9 @@ public class AlternatorBatchItemTest extends AlternatorTest {
 //        requestItems.put("Vito's Table", keysAndAttributes);
 
         // Normal test
-        // TODO: Multi table test failed. Need to be fix.
+        // TODO: Multi table test failed. Need to be fixed.
         requestItems.put(tableName1, keysAndAttributes);
-//        requestItems.put(tableName2, keysAndAttributes1);
+        requestItems.put(tableName2, keysAndAttributes1);
 
         batchGetItemRequest.withRequestItems(requestItems);
 		BatchGetItemResult result  = client.batchGetItem(batchGetItemRequest);
