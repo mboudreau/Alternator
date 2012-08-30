@@ -9,13 +9,15 @@ import com.michelboudreau.alternator.enums.AttributeValueType;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.util.*;
 
@@ -35,8 +37,7 @@ public class AlternatorItemTest extends AlternatorTest {
         deleteAllTables();
     }
 
-    // TODO: need to test for different schemas
-
+    //Test: put item with HashKey
     @Test
     public void putItemWithHashKey() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
@@ -46,6 +47,7 @@ public class AlternatorItemTest extends AlternatorTest {
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
+
 
     @Test
     public void putItemWithHashKeyOverwriteItem() {
@@ -59,7 +61,7 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyWithoutTableName() {
+    public void putItemWithHashKeyWithoutItem() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName);
@@ -68,13 +70,59 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
-    public void putItemWithHashKeyWithoutItem() {
+    public void putItemWithHashKeyWithoutTableName() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
         PutItemResult res = client.putItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
+
+    //Test: put item with HashKey and RangeKey
+    @Test
+    public void putItemWithHashKeyAndRangeKey() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
+        PutItemResult res = client.putItem(request);
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+    }
+
+    @Test
+    public void putItemWithHashKeyAndRangeKeyOverwriteItem() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
+        client.putItem(request); // put item beforehand
+        PutItemResult res = client.putItem(request); // Add another
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getConsumedCapacityUnits());
+    }
+
+    @Test
+    public void putItemWithHashKeyAndRangeKeyWithoutItem() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withTableName(tableName);
+        PutItemResult res = client.putItem(request);
+        Assert.assertNull(res.getConsumedCapacityUnits());
+    }
+
+    @Test
+    public void putItemWithHashKeyAndRangeKeyWithoutTableName() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
+        PutItemResult res = client.putItem(request);
+        Assert.assertNull(res.getConsumedCapacityUnits());
+    }
+
+    //---------------------------------------------------------------------------
 
     // TODO: test out put item expected and return value
     @Test
@@ -214,6 +262,22 @@ public class AlternatorItemTest extends AlternatorTest {
 
     // TODO: test out delete item expected and return value
 
+    /*@Test
+    public void batchWriteItemInTableTest() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        BatchWriteItemRequest batchWriteItemRequest = new BatchWriteItemRequest();
+        Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
+        WriteRequest writeRequest = new WriteRequest();
+        writeRequest.setPutRequest(new PutRequest());
+        writeRequest.setDeleteRequest(new DeleteRequest());
+        List<WriteRequest> writeRequests = new ArrayList<WriteRequest>();
+        writeRequests.add(writeRequest);
+        requestItems.put(tableName, writeRequests);
+        batchWriteItemRequest.setRequestItems(requestItems);
+        BatchWriteItemResult result = client.batchWriteItem(batchWriteItemRequest);
+        Assert.assertNotNull(result);
+    }*/
 /*
 	@Test
 	public void batchWriteItemInTableTest() {
