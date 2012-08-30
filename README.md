@@ -14,6 +14,7 @@ You can now add the dependency into your maven project with:
 			<groupId>com.michelboudreau</groupId>
 			<artifactId>alternator</artifactId>
 			<version><!-- ALTERNATOR VERSION (look in pom.xml to find version) --></version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<repositories>
