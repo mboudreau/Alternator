@@ -15,20 +15,25 @@ import java.io.File;
 public class AlternatorDB {
 
 	public static final String PERSISTENCE_LOCATION = "persistence-location";
+	public static final String SANDBOX_STATUS = "sandbox-status";
 
 	private final Logger logger = LoggerFactory.getLogger(AlternatorDB.class);
 	private Server server;
 	private ServletContextHandler context;
 
 	public AlternatorDB() {
-		this(9090, null);
+		this(9090, null, true);
 	}
 
 	public AlternatorDB(int port) {
-		this(port, null);
+		this(port, null, true);
 	}
 
 	public AlternatorDB(int port, File persistence) {
+		this(port, null, true);
+	}
+
+	public AlternatorDB(int port, File persistence, Boolean sanboxStatus) {
 		if (port == 0) {
 			port = 9090;
 		}
@@ -47,6 +52,7 @@ public class AlternatorDB {
 		if (persistence != null) {
 			this.context.setInitParameter(PERSISTENCE_LOCATION, persistence.getAbsolutePath());
 		}
+		this.context.setInitParameter(SANDBOX_STATUS, sanboxStatus + "");
 
 		// Add listener
 		ContextLoaderListener listener = new ContextLoaderListener();

@@ -42,7 +42,8 @@ class AlternatorDBController {
     @PreDestroy
     public void destroy() {
         String persistenceLocation = servletContext.getInitParameter(AlternatorDB.PERSISTENCE_LOCATION);
-        if (persistenceLocation != null) {
+	    String sandboxStatus = servletContext.getInitParameter(AlternatorDB.SANDBOX_STATUS);
+        if (persistenceLocation != null && sandboxStatus.equals("false")) {
             handler.save(persistenceLocation);
         }
     }
