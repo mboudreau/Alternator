@@ -29,6 +29,7 @@ public class AlternatorScanTest extends AlternatorTest {
             putItemInDb(createIntegerAttribute(i/10+11,i/10+11));   //11~19
             putItemInDb(createIntegerAttribute(i/10+51,i/10+51));   //51~59
             putItemInDb(createIntegerAttribute(i/10+101,i/10+101)); //101~109
+	        
         }
     }
 
