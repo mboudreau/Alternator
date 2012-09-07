@@ -30,7 +30,7 @@ public class AlternatorDB {
 	}
 
 	public AlternatorDB(int port, File persistence) {
-		this(port, null, true);
+		this(port, persistence, true);
 	}
 
 	public AlternatorDB(int port, File persistence, Boolean sanboxStatus) {
