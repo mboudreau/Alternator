@@ -93,26 +93,26 @@ class AlternatorDBHandler {
 			case GET:
 				return new GetItemResultMarshaller().marshall(getItem(parser.getData(GetItemRequest.class, GetItemRequestJsonUnmarshaller.getInstance())));
 
-            case UPDATE:
-                return new UpdateItemResultMarshaller().marshall(updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance())));
-            case DELETE:
-                return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
-	        case BATCH_GET_ITEM:
-		        return new BatchGetItemResultMarshaller().marshall((batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()))));
-            case BATCH_WRITE_ITEM:
-                return new BatchWriteItemResultMarshaller().marshall((batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()))));
+			case UPDATE:
+				return new UpdateItemResultMarshaller().marshall(updateItem(parser.getData(UpdateItemRequest.class, UpdateItemRequestJsonUnmarshaller.getInstance())));
+			case DELETE:
+				return new DeleteItemResultMarshaller().marshall(deleteItem(parser.getData(DeleteItemRequest.class, DeleteItemRequestJsonUnmarshaller.getInstance())));
+			case BATCH_GET_ITEM:
+				return new BatchGetItemResultMarshaller().marshall((batchGetItem(parser.getData(BatchGetItemRequest.class, BatchGetItemRequestJsonUnmarshaller.getInstance()))));
+			case BATCH_WRITE_ITEM:
+				return new BatchWriteItemResultMarshaller().marshall((batchWriteItem(parser.getData(BatchWriteItemRequest.class, BatchWriteItemRequestJsonUnmarshaller.getInstance()))));
 
-            // Operations
-            case QUERY:
-                return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
-            case SCAN:
-                return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
-            default:
-                logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
-                break;
-        }
-        return null;
-    }
+			// Operations
+			case QUERY:
+				return new QueryResultMarshaller().marshall(query(parser.getData(QueryRequest.class, QueryRequestJsonUnmarshaller.getInstance())));
+			case SCAN:
+				return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
+			default:
+				logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
+				break;
+		}
+		return null;
+	}
 
 	protected CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
 		// table limit of 256
@@ -424,64 +424,64 @@ class AlternatorDBHandler {
 
 	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
-        Map<String, BatchResponse> response = new HashMap<String, BatchResponse>();
+		Map<String, BatchResponse> response = new HashMap<String, BatchResponse>();
 		for (String tableName : request.getRequestItems().keySet()) {
 			BatchResponse batchResponse = new BatchResponse();
-			List<Map<String,AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
+			List<Map<String, AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
 			KeysAndAttributes keysAndAttributes = request.getRequestItems().get(tableName);
 			List<Key> itemKeys = keysAndAttributes.getKeys();
 			List<String> attributeToGet = keysAndAttributes.getAttributesToGet();
-            try {
-                for (Key itemKey : itemKeys) {
-                    try {
-                        Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(itemKey.getHashKeyElement()));
-                        item = getItemWithAttributesToGet(item, attributeToGet);
-                        if (item != null)
-                            items.add(item);
-                    } catch (NullPointerException e) {
-                        System.err.println("Caught NullPointerException: " + e.getMessage());
-                    }
-                }
-            } catch (NullPointerException e) {
-                System.err.println("Caught NullPointerException: " + e.getMessage());
-            }
-            batchResponse.setConsumedCapacityUnits(1.0);
-            if (items.size() != 0) {
-                batchResponse.setItems(items);
-                response.put(tableName, batchResponse);
-                batchGetItemResult.setResponses(response);
-                batchGetItemResult.getResponses().put(tableName, batchResponse);
-            }
+			try {
+				for (Key itemKey : itemKeys) {
+					try {
+						Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(itemKey.getHashKeyElement()));
+						item = getItemWithAttributesToGet(item, attributeToGet);
+						if (item != null)
+							items.add(item);
+					} catch (NullPointerException e) {
+						System.err.println("Caught NullPointerException: " + e.getMessage());
+					}
+				}
+			} catch (NullPointerException e) {
+				System.err.println("Caught NullPointerException: " + e.getMessage());
+			}
+			batchResponse.setConsumedCapacityUnits(1.0);
+			if (items.size() != 0) {
+				batchResponse.setItems(items);
+				response.put(tableName, batchResponse);
+				batchGetItemResult.setResponses(response);
+				batchGetItemResult.getResponses().put(tableName, batchResponse);
+			}
 		}
 		return batchGetItemResult;
 	}
 
-    protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
-        BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
-        HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
-        for (String tableName : request.getRequestItems().keySet()) {
-            BatchWriteResponse batchWriteResponse = new BatchWriteResponse();
-            List<WriteRequest> writeRequests = request.getRequestItems().get(tableName);
-            for (WriteRequest writeRequest : writeRequests) {
-                PutRequest putRequest = writeRequest.getPutRequest();
-                if (putRequest != null) {
-                    this.tables.get(tableName).putItem(putRequest.getItem());
-                }
-                DeleteRequest deleteRequest = writeRequest.getDeleteRequest();
-                if (deleteRequest != null) {
-                    Key key = deleteRequest.getKey();
-                    if (key != null) {
-                        this.tables.get(tableName).removeItem(key.getHashKeyElement().getS());
-                    }
-                }
-            }
-            batchWriteResponse.setConsumedCapacityUnits(1.0);
-            responses.put(tableName, batchWriteResponse);
-            batchWriteItemResult.setResponses(responses);
-            batchWriteItemResult.getResponses().put(tableName, batchWriteResponse);
-        }
-        return batchWriteItemResult;
-    }
+	protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
+		BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
+		HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
+		for (String tableName : request.getRequestItems().keySet()) {
+			BatchWriteResponse batchWriteResponse = new BatchWriteResponse();
+			List<WriteRequest> writeRequests = request.getRequestItems().get(tableName);
+			for (WriteRequest writeRequest : writeRequests) {
+				PutRequest putRequest = writeRequest.getPutRequest();
+				if (putRequest != null) {
+					this.tables.get(tableName).putItem(putRequest.getItem());
+				}
+				DeleteRequest deleteRequest = writeRequest.getDeleteRequest();
+				if (deleteRequest != null) {
+					Key key = deleteRequest.getKey();
+					if (key != null) {
+						this.tables.get(tableName).removeItem(key.getHashKeyElement().getS());
+					}
+				}
+			}
+			batchWriteResponse.setConsumedCapacityUnits(1.0);
+			responses.put(tableName, batchWriteResponse);
+			batchWriteItemResult.setResponses(responses);
+			batchWriteItemResult.getResponses().put(tableName, batchWriteResponse);
+		}
+		return batchWriteItemResult;
+	}
 
 	protected ScanResult scan(ScanRequest request) {
 		ScanResult result = new ScanResult();
@@ -496,106 +496,108 @@ class AlternatorDBHandler {
 			Map<String, AttributeValue> item = this.tables.get(request.getTableName()).getItem(key);
 			if (request.getScanFilter() != null) {
 				for (String k : request.getScanFilter().keySet()) {
-					Condition cond = request.getScanFilter().get(k);
-					if (cond.getComparisonOperator() == null) {
-						throw new ResourceNotFoundException("There must be a comparisonOperator");
-					}
-					if (cond.getComparisonOperator().equals("EQ")) {
-						if (cond.getAttributeValueList().size() == 1) {
-							if (item.get(k).equals(cond.getAttributeValueList().get(0))) {
-								items.add(item);
-							}
-						} else {
-							if (item.get(k).equals(cond.getAttributeValueList())) {
-								items.add(item);
-							}
+					if (item.get(k) != null) {
+						Condition cond = request.getScanFilter().get(k);
+						if (cond.getComparisonOperator() == null) {
+							throw new ResourceNotFoundException("There must be a comparisonOperator");
 						}
-					}
-					if (cond.getComparisonOperator().equals("LE")) {
-						if (cond.getAttributeValueList().size() == 1) {
-							if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-								String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-								String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-								if (value.compareTo(comp) >= 0) {
+						if (cond.getComparisonOperator().equals("EQ")) {
+							if (cond.getAttributeValueList().size() == 1) {
+								if (item.get(k).equals(cond.getAttributeValueList().get(0))) {
 									items.add(item);
 								}
 							} else {
-								//TODO to do
-								//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-							}
-
-						} else {
-							//TODO to do
-							if (item.get(k).equals(cond.getAttributeValueList())) {
-								items.add(item);
-							}
-						}
-					}
-					if (cond.getComparisonOperator().equals("LT")) {
-						if (cond.getAttributeValueList().size() == 1) {
-							if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-								String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-								String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-								if (value.compareTo(comp) < 0) {
+								if (item.get(k).equals(cond.getAttributeValueList())) {
 									items.add(item);
 								}
-							} else {
-								//TODO to do
-								//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-							}
-
-						} else {
-							//TODO to do
-							if (item.get(k).equals(cond.getAttributeValueList())) {
-								items.add(item);
 							}
 						}
-					}
-					if (cond.getComparisonOperator().equals("GE")) {
-						if (cond.getAttributeValueList().size() == 1) {
-							if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-								String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-								String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-								if (value.compareTo(comp) <= 0) {
-									items.add(item);
-								}
-							} else {
-								//TODO to do
-								//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-							}
-
-						} else {
-							//TODO to do
-							if (item.get(k).equals(cond.getAttributeValueList())) {
-								items.add(item);
-							}
-						}
-					}
-					if (cond.getComparisonOperator().equals("GT")) {
-						if (cond.getAttributeValueList().size() == 1) {
-							if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
+						if (cond.getComparisonOperator().equals("LE")) {
+							if (cond.getAttributeValueList().size() == 1) {
+								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
 									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
 									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-									if (value.compareTo(comp) > 0) {
+									if (value.compareTo(comp) >= 0) {
 										items.add(item);
 									}
 								} else {
-									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-									if (Integer.parseInt(value) > Integer.parseInt(comp)) {
-										items.add(item);
-									}
+									//TODO to do
+									//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
 								}
+
 							} else {
 								//TODO to do
-								//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+								if (item.get(k).equals(cond.getAttributeValueList())) {
+									items.add(item);
+								}
 							}
+						}
+						if (cond.getComparisonOperator().equals("LT")) {
+							if (cond.getAttributeValueList().size() == 1) {
+								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+									if (value.compareTo(comp) < 0) {
+										items.add(item);
+									}
+								} else {
+									//TODO to do
+									//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+								}
 
-						} else {
-							//TODO to do
-							if (item.get(k).equals(cond.getAttributeValueList())) {
-								items.add(item);
+							} else {
+								//TODO to do
+								if (item.get(k).equals(cond.getAttributeValueList())) {
+									items.add(item);
+								}
+							}
+						}
+						if (cond.getComparisonOperator().equals("GE")) {
+							if (cond.getAttributeValueList().size() == 1) {
+								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+									if (value.compareTo(comp) <= 0) {
+										items.add(item);
+									}
+								} else {
+									//TODO to do
+									//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+								}
+
+							} else {
+								//TODO to do
+								if (item.get(k).equals(cond.getAttributeValueList())) {
+									items.add(item);
+								}
+							}
+						}
+						if (cond.getComparisonOperator().equals("GT")) {
+							if (cond.getAttributeValueList().size() == 1) {
+								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+									if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
+										String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+										String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+										if (value.compareTo(comp) > 0) {
+											items.add(item);
+										}
+									} else {
+										String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+										String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+										if (Integer.parseInt(value) > Integer.parseInt(comp)) {
+											items.add(item);
+										}
+									}
+								} else {
+									//TODO to do
+									//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
+								}
+
+							} else {
+								//TODO to do
+								if (item.get(k).equals(cond.getAttributeValueList())) {
+									items.add(item);
+								}
 							}
 						}
 					}
