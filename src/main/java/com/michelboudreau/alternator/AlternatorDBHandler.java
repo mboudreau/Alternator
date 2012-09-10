@@ -619,9 +619,6 @@ class AlternatorDBHandler {
 			items = copy;
 		}
 
-		if (items.size() == 0) {
-			result.setLastEvaluatedKey(null);
-		}
 		result.setItems(items);
 		result.setCount(items.size());
 		result.setScannedCount(items.size());
