@@ -609,10 +609,6 @@ class AlternatorDBHandler {
 			items = items.subList(0, request.getLimit() - 1);
 		}
 
-		for (Map<String, AttributeValue> item : items) {
-			result.setLastEvaluatedKey(new Key(item.get(this.tables.get(request.getTableName()).getHashKeyName())));
-		}
-
 		if (request.getAttributesToGet() != null) {
 			List<Map<String, AttributeValue>> copy = getItemWithAttributesToGet(items, request.getAttributesToGet());
 			items = copy;
