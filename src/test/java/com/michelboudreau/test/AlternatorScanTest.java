@@ -40,6 +40,9 @@ public class AlternatorScanTest extends AlternatorTest {
         client.deleteTable(del);
     }
 
+
+	//TODO : tests using the DynamoDBMapper instead of the Client.
+
     @Test
     public void scanWithScanFilterEQTestThatHasReturn() {
         ScanRequest request = getBasicReq();

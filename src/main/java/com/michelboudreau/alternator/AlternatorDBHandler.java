@@ -490,7 +490,6 @@ class AlternatorDBHandler {
 			throw createInternalServerException(errors);
 		}
 		result.setConsumedCapacityUnits(0.5);
-		result.setLastEvaluatedKey(new Key());
 		List<Map<String, AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
 		for (String key : this.tables.get(request.getTableName()).getItems().keySet()) {
 			Map<String, AttributeValue> item = this.tables.get(request.getTableName()).getItem(key);
