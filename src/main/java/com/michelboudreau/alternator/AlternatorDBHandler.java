@@ -620,7 +620,7 @@ class AlternatorDBHandler {
 		}
 
 		if (items.size() == 0) {
-			result.setLastEvaluatedKey(new Key(new AttributeValue().withS(null)));
+			result.setLastEvaluatedKey(null);
 		}
 		result.setItems(items);
 		result.setCount(items.size());
