@@ -25,17 +25,19 @@ public class ScanResultMarshaller implements Marshaller<String, ScanResult> {
 			for (Map<String, AttributeValue> item : scanResult.getItems()) {
 				jsonWriter.object();
 				for (String k : item.keySet()) {
-					jsonWriter.key(k).object();
-					if (item.get(k).getS() != null) {
-						jsonWriter.key("S").value(item.get(k).getS());
-					} else if (item.get(k).getN() != null) {
-						jsonWriter.key("N").value(item.get(k).getN());
-					} else if (item.get(k).getSS() != null) {
-						jsonWriter.key("SS").value(item.get(k).getSS());
-					} else if (item.get(k).getNS() != null) {
-						jsonWriter.key("NS").value(item.get(k).getNS());
+					if (item.get(k) != null) {
+						jsonWriter.key(k).object();
+						if (item.get(k).getS() != null) {
+							jsonWriter.key("S").value(item.get(k).getS());
+						} else if (item.get(k).getN() != null) {
+							jsonWriter.key("N").value(item.get(k).getN());
+						} else if (item.get(k).getSS() != null) {
+							jsonWriter.key("SS").value(item.get(k).getSS());
+						} else if (item.get(k).getNS() != null) {
+							jsonWriter.key("NS").value(item.get(k).getNS());
+						}
+						jsonWriter.endObject();
 					}
-					jsonWriter.endObject();
 				}
 				jsonWriter.endObject();
 			}
