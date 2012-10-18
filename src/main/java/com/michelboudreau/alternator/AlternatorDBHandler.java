@@ -599,6 +599,13 @@ class AlternatorDBHandler {
 								}
 							}
 						}
+						if (cond.getComparisonOperator().equals("IN")) {
+							for(AttributeValue value : cond.getAttributeValueList()){
+								if(item.get(k).equals(value)){
+									items.add(item);
+								}
+							}
+						}
 					}
 				}
 			} else {
