@@ -31,7 +31,7 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         tableName1 = createTableName();
         TableDescription tableDescription1 = createTable(tableName1);
         hashKeyValue1 = tableDescription1.getKeySchema().getHashKeyElement().getAttributeName();
-        
+
         tableName2 = createTableName();
         TableDescription tableDescription2 = createTable(tableName2);
         hashKeyValue2 = tableDescription2.getKeySchema().getHashKeyElement().getAttributeName();
@@ -87,7 +87,7 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         requestItems.put(tableName2, keysAndAttributes1);
 
         batchGetItemRequest.withRequestItems(requestItems);
-		BatchGetItemResult result  = client.batchGetItem(batchGetItemRequest);
+		BatchGetItemResult result  = getClient().batchGetItem(batchGetItemRequest);
 
 	}
 
@@ -159,7 +159,7 @@ public class AlternatorBatchItemTest extends AlternatorTest {
             System.out.println("Making the request.");
 
             batchWriteItemRequest.withRequestItems(requestItems);
-            result = client.batchWriteItem(batchWriteItemRequest);
+            result = getClient().batchWriteItem(batchWriteItemRequest);
 
             // Print consumed capacity units
             for(Map.Entry<String, BatchWriteResponse> entry : result.getResponses().entrySet()) {

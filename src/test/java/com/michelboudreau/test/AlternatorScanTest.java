@@ -37,7 +37,7 @@ public class AlternatorScanTest extends AlternatorTest {
     public void tearDown() throws Exception {
         DeleteTableRequest del = new DeleteTableRequest();
         del.setTableName("Testing");
-        client.deleteTable(del);
+        getClient().deleteTable(del);
     }
 
 
@@ -55,7 +55,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         for (Map<String, AttributeValue> item : result.getItems()) {
@@ -75,7 +75,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         Assert.assertEquals(result.getItems().size(),0);
@@ -94,7 +94,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         for (Map<String, AttributeValue> item : result.getItems()) {
@@ -114,7 +114,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         Assert.assertEquals(result.getItems().size(),0);
@@ -132,7 +132,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
 //        Assert.assertEquals(result.getItems().size(),0);
@@ -155,7 +155,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         for (Map<String, AttributeValue> item : result.getItems()) {
@@ -175,7 +175,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         for (Map<String, AttributeValue> item : result.getItems()) {
@@ -199,7 +199,7 @@ public class AlternatorScanTest extends AlternatorTest {
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         for (Map<String, AttributeValue> item : result.getItems()) {
@@ -222,7 +222,7 @@ public class AlternatorScanTest extends AlternatorTest {
         conditionMap.put("range", rangeKeyCondition);
         request.setScanFilter(conditionMap);
 
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
 //        Assert.assertEquals(result.getItems().size(), 0);
@@ -242,7 +242,7 @@ public class AlternatorScanTest extends AlternatorTest {
 //                    .withLimit(10)
 //                    .withExclusiveStartKey(lastKeyEvaluated);
 //
-//            ScanResult result = client.scan(scanRequest);
+//            ScanResult result = getClient().scan(scanRequest);
 //            for (Map<String, AttributeValue> item : result.getItems()) {
 //                Assert.assertNotNull(result.getLastEvaluatedKey());
 //            }
@@ -255,7 +255,7 @@ public class AlternatorScanTest extends AlternatorTest {
 //    public void scanWithoutTableNameTest() {
 //        ScanRequest request = getBasicReq();
 //        request.setTableName(null);
-//        ScanResult result = client.scan(request);
+//        ScanResult result = getClient().scan(request);
 //        Assert.assertNull(result.getItems());
 //    }
 
@@ -264,7 +264,7 @@ public class AlternatorScanTest extends AlternatorTest {
     @Test
     public void basicScanTest() {
         ScanRequest scanRequest = getBasicReq();
-        ScanResult result = client.scan(scanRequest);
+        ScanResult result = getClient().scan(scanRequest);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getCount());
         Assert.assertTrue(result.getCount().intValue() > 1);
@@ -274,7 +274,7 @@ public class AlternatorScanTest extends AlternatorTest {
     public void scanWithLimitTest() {
         ScanRequest scanRequest = getBasicReq();
         scanRequest.setLimit(5);
-        ScanResult result = client.scan(scanRequest);
+        ScanResult result = getClient().scan(scanRequest);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.getCount().intValue() > 1 && result.getCount().intValue() <= 5);
     }
@@ -287,7 +287,7 @@ public class AlternatorScanTest extends AlternatorTest {
         attrToGet.add("date");
         attrToGet.add("testfield");
         request.setAttributesToGet(attrToGet);
-        ScanResult result = client.scan(request);
+        ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         for (Map<String, AttributeValue> item : result.getItems()) {
             Assert.assertFalse(item.containsKey("id"));
@@ -306,7 +306,7 @@ public class AlternatorScanTest extends AlternatorTest {
         AttributeValue hash = createStringAttribute();
         Map<String, AttributeValue> item = createGenericItem(hash);
         PutItemRequest req = new PutItemRequest().withTableName(tableName).withItem(item);
-        client.putItem(req);
+        getClient().putItem(req);
         return hash;
     }
 
@@ -314,7 +314,7 @@ public class AlternatorScanTest extends AlternatorTest {
         AttributeValue hash = createStringAttribute();
         Map<String, AttributeValue> item = createGenericItem(hash, rangeKey);
         PutItemRequest req = new PutItemRequest().withTableName(tableName).withItem(item);
-        client.putItem(req);
+        getClient().putItem(req);
         return hash;
     }
 
