@@ -44,7 +44,7 @@ public class AlternatorItemTest extends AlternatorTest {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
-        PutItemResult res = client.putItem(request);
+        PutItemResult res = getClient().putItem(request);
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
@@ -55,8 +55,8 @@ public class AlternatorItemTest extends AlternatorTest {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
-        client.putItem(request); // put item beforehand
-        PutItemResult res = client.putItem(request); // Add another
+        getClient().putItem(request); // put item beforehand
+        PutItemResult res = getClient().putItem(request); // Add another
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
@@ -66,7 +66,7 @@ public class AlternatorItemTest extends AlternatorTest {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName);
-        PutItemResult res = client.putItem(request);
+        PutItemResult res = getClient().putItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
 
@@ -75,7 +75,7 @@ public class AlternatorItemTest extends AlternatorTest {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
-        PutItemResult res = client.putItem(request);
+        PutItemResult res = getClient().putItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
 
@@ -86,7 +86,7 @@ public class AlternatorItemTest extends AlternatorTest {
         schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
-        PutItemResult res = client.putItem(request);
+        PutItemResult res = getClient().putItem(request);
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
@@ -97,8 +97,8 @@ public class AlternatorItemTest extends AlternatorTest {
         schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName).withItem(createGenericItem());
-        client.putItem(request); // put item beforehand
-        PutItemResult res = client.putItem(request); // Add another
+        getClient().putItem(request); // put item beforehand
+        PutItemResult res = getClient().putItem(request); // Add another
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getConsumedCapacityUnits());
     }
@@ -109,7 +109,7 @@ public class AlternatorItemTest extends AlternatorTest {
         schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withTableName(tableName);
-        PutItemResult res = client.putItem(request);
+        PutItemResult res = getClient().putItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
 
@@ -119,7 +119,7 @@ public class AlternatorItemTest extends AlternatorTest {
         schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         PutItemRequest request = new PutItemRequest().withItem(createGenericItem());
-        PutItemResult res = client.putItem(request);
+        PutItemResult res = getClient().putItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
 
@@ -131,7 +131,7 @@ public class AlternatorItemTest extends AlternatorTest {
         AttributeValue hash = createItem(tableName);
         GetItemRequest request = new GetItemRequest().withTableName(tableName);
         request.setKey(new Key().withHashKeyElement(hash));
-        GetItemResult res = client.getItem(request);
+        GetItemResult res = getClient().getItem(request);
         Assert.assertNotNull(res.getItem());
         Assert.assertEquals(res.getItem().get("id"), hash);
     }
@@ -140,7 +140,7 @@ public class AlternatorItemTest extends AlternatorTest {
     public void getItemWithoutTableNameTest() {
         GetItemRequest request = new GetItemRequest();
         request.setKey(new Key().withHashKeyElement(new AttributeValue().withNS("123")));
-        GetItemResult res = client.getItem(request);
+        GetItemResult res = getClient().getItem(request);
         Assert.assertNull(res.getItem());
     }
 
@@ -148,7 +148,7 @@ public class AlternatorItemTest extends AlternatorTest {
     public void getItemWithoutKeyTest() {
         GetItemRequest request = new GetItemRequest();
         request.setTableName(tableName);
-        GetItemResult res = client.getItem(request);
+        GetItemResult res = getClient().getItem(request);
         Assert.assertNull(res.getItem());
     }
 
@@ -162,7 +162,7 @@ public class AlternatorItemTest extends AlternatorTest {
         attrToUp.put("updated", update);
         Key key = new Key(hash);
         UpdateItemRequest request = new UpdateItemRequest(tableName, key, attrToUp);
-        UpdateItemResult res = client.updateItem(request);
+        UpdateItemResult res = getClient().updateItem(request);
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getAttributes());
     }
@@ -179,7 +179,7 @@ public class AlternatorItemTest extends AlternatorTest {
         UpdateItemRequest request = new UpdateItemRequest();
         request.setKey(key);
         request.setAttributeUpdates(attrToUp);
-        UpdateItemResult res = client.updateItem(request);
+        UpdateItemResult res = getClient().updateItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
 
@@ -195,7 +195,7 @@ public class AlternatorItemTest extends AlternatorTest {
         UpdateItemRequest request = new UpdateItemRequest();
         request.setTableName(tableName);
         request.setAttributeUpdates(attrToUp);
-        UpdateItemResult res = client.updateItem(request);
+        UpdateItemResult res = getClient().updateItem(request);
         Assert.assertNull(res.getConsumedCapacityUnits());
     }
 
@@ -204,9 +204,9 @@ public class AlternatorItemTest extends AlternatorTest {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         AttributeValue hash = new AttributeValue("ad"); //createStringAttribute();
-        client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
+        getClient().putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
         DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(hash));
-        DeleteItemResult result = client.deleteItem(request);
+        DeleteItemResult result = getClient().deleteItem(request);
         Assert.assertNotNull(result.getConsumedCapacityUnits());
     }
 
@@ -215,9 +215,9 @@ public class AlternatorItemTest extends AlternatorTest {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         AttributeValue hash = createStringAttribute();
-        client.putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
+        getClient().putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash)));
         DeleteItemRequest request = new DeleteItemRequest().withKey(new Key(hash));
-        DeleteItemResult result = client.deleteItem(request);
+        DeleteItemResult result = getClient().deleteItem(request);
         Assert.assertNull(result.getConsumedCapacityUnits());
     }
 
@@ -226,7 +226,7 @@ public class AlternatorItemTest extends AlternatorTest {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
         DeleteItemRequest request = new DeleteItemRequest().withTableName(tableName).withKey(new Key(createStringAttribute()));
-        Assert.assertNull(client.deleteItem(request).getConsumedCapacityUnits());
+        Assert.assertNull(getClient().deleteItem(request).getConsumedCapacityUnits());
     }
 
     // TODO: test out delete item expected and return value
@@ -244,19 +244,19 @@ public class AlternatorItemTest extends AlternatorTest {
         writeRequests.add(writeRequest);
         requestItems.put(tableName, writeRequests);
         batchWriteItemRequest.setRequestItems(requestItems);
-        BatchWriteItemResult result = client.batchWriteItem(batchWriteItemRequest);
+        BatchWriteItemResult result = getClient().batchWriteItem(batchWriteItemRequest);
         Assert.assertNotNull(result);
     }*/
 /*
 	@Test
 	public void batchWriteItemInTableTest() {
-		BatchWriteItemResult result = client.batchWriteItem(generateWriteBatchRequest());
+		BatchWriteItemResult result = getClient().batchWriteItem(generateWriteBatchRequest());
 		Assert.assertNotNull(result);
 	}
 
 	@Test
 	public void batchGetItemInTableTest() {
-		BatchGetItemResult result = client.batchGetItem(generateGetBatchRequest());
+		BatchGetItemResult result = getClient().batchGetItem(generateGetBatchRequest());
 		Assert.assertNotNull(result);
 	}
 
@@ -266,7 +266,7 @@ public class AlternatorItemTest extends AlternatorTest {
 		Map<String, KeysAndAttributes> requestItems = new HashMap<String, KeysAndAttributes>();
 		requestItems.put(testTableName, null);
 		batchGetItemRequest.withRequestItems(requestItems);
-		Assert.assertNull(client.batchGetItem(batchGetItemRequest).getResponses());
+		Assert.assertNull(getClient().batchGetItem(batchGetItemRequest).getResponses());
 	}
 
 	@Test
@@ -276,12 +276,12 @@ public class AlternatorItemTest extends AlternatorTest {
 		Key table1key1 = new Key().withHashKeyElement(new AttributeValue().withS("123"));
 		requestItems.put(null, new KeysAndAttributes().withKeys(table1key1));
 		batchGetItemRequest.withRequestItems(requestItems);
-		Assert.assertNull(client.batchGetItem(batchGetItemRequest).getResponses());
+		Assert.assertNull(getClient().batchGetItem(batchGetItemRequest).getResponses());
 	}
 
 	@Test
 	public void batchGetItemInTableWithoutRequestItemsTest() {
-		Assert.assertNull(client.batchGetItem(new BatchGetItemRequest()).getResponses());
+		Assert.assertNull(getClient().batchGetItem(new BatchGetItemRequest()).getResponses());
 	}
 */
 
@@ -391,7 +391,7 @@ public class AlternatorItemTest extends AlternatorTest {
         AttributeValue hash = createStringAttribute();
         Map<String, AttributeValue> item = createGenericItem(hash);
         PutItemRequest req = new PutItemRequest().withTableName(tableName).withItem(item);
-        client.putItem(req);
+        getClient().putItem(req);
         return hash;
     }
 }

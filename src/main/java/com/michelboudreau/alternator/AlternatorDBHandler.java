@@ -3,21 +3,21 @@ package com.michelboudreau.alternator;
 import com.amazonaws.services.dynamodb.model.*;
 import com.amazonaws.services.dynamodb.model.transform.*;
 import com.michelboudreau.alternator.enums.AttributeValueType;
+import com.michelboudreau.alternator.models.ItemRangeGroup;
 import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
 import com.michelboudreau.alternator.validators.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import javax.servlet.http.HttpServletRequest;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
 
 class AlternatorDBHandler {
 
@@ -114,7 +114,7 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	protected CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
+	/* protected */ CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
 		// table limit of 256
 		if (this.tables.size() >= Limits.TABLE_MAX) {
 			throw new LimitExceededException("Cannot exceed 256 tables per account.");
@@ -144,7 +144,7 @@ class AlternatorDBHandler {
 		return new CreateTableResult().withTableDescription(table.getTableDescription());
 	}
 
-	protected DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	/* protected */ DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -166,7 +166,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	/* protected */ ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		ListTablesRequestValidator validator = new ListTablesRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -219,7 +219,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	/* protected */ DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -239,7 +239,7 @@ class AlternatorDBHandler {
 		return new DeleteTableResult().withTableDescription(table.getTableDescription().withTableStatus(TableStatus.DELETING));
 	}
 
-	protected UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	/* protected */ UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -259,7 +259,7 @@ class AlternatorDBHandler {
 		return new UpdateTableResult().withTableDescription(table.getTableDescription());
 	}
 
-	protected PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
+	/* protected */ PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
 		// Validate data coming in
 		PutItemRequestValidator validator = new PutItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -290,7 +290,11 @@ class AlternatorDBHandler {
 		}
 
 		// Get current item if it exists
-		Map<String, AttributeValue> item = table.getItem(getKeyValue(request.getItem().get(table.getHashKeyName())));
+//		Map<String, AttributeValue> item = table.getItem(getKeyValue(request.getItem().get(table.getHashKeyName())));
+        Map<String, AttributeValue> requestItem = request.getItem();
+        String hashKeyValue = getKeyValue(requestItem.get(table.getHashKeyName()));
+        String rangeKeyValue = getKeyValue(requestItem.get(table.getRangeKeyName()));
+		Map<String, AttributeValue> item = table.getItem(hashKeyValue, rangeKeyValue);
 
 		// Check conditional put
 		if (request.getExpected() != null) {
@@ -323,7 +327,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	/* protected */ GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		GetItemRequestValidator validator = new GetItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -335,7 +339,6 @@ class AlternatorDBHandler {
 		String tableName = request.getTableName();
 		Key key = request.getKey();
 		List<String> attributesToGet = request.getAttributesToGet();
-		Map<String, AttributeValue> response = new HashMap<String, AttributeValue>();
 		GetItemResult result = new GetItemResult();
 
 		// Check to make sure table exists
@@ -343,20 +346,24 @@ class AlternatorDBHandler {
 			throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
 		}
 		// Check to make sure Key is valid
-		String keyz = "";
-		if (key.getHashKeyElement().getS() != null) {
-			keyz = key.getHashKeyElement().getS();
-		} else if (key.getHashKeyElement().getN() != null) {
-			keyz = key.getHashKeyElement().getN();
-		}
-		if (this.tables.get(tableName).getItem(keyz) == null) {
-			throw new ResourceNotFoundException("The item with Hash Key (" + getKeyValue(key.getHashKeyElement()) + ") you try to get doesn't exists.");
+		String hashKeyValue = getKeyValue(key.getHashKeyElement());
+        ItemRangeGroup rangeGroup = this.tables.get(tableName).getItemRangeGroup(hashKeyValue);
+
+		if (rangeGroup == null) {
+			throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") exists.");
 		} else {
+            String rangeKeyValue = getKeyValue(key.getRangeKeyElement());
+            Map<String, AttributeValue> item = this.tables.get(tableName).getItem(hashKeyValue, rangeKeyValue);
+            if (item == null) {
+                throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") and Range Key )" + rangeKeyValue + ") exists.");
+            }
+
 			if (attributesToGet == null) {
-				result.setItem(this.tables.get(tableName).getItem(keyz));
+				result.setItem(item);
 			} else {
+                Map<String, AttributeValue> response = new HashMap<String, AttributeValue>();
 				for (String att : attributesToGet) {
-					AttributeValue res = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())).get(att);
+					AttributeValue res = item.get(att);
 					if (res != null) {
 						response.put(att, res);
 					}
@@ -367,7 +374,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected DeleteItemResult deleteItem(DeleteItemRequest request) {
+	/* protected */ DeleteItemResult deleteItem(DeleteItemRequest request) {
 		// Validate data coming in
 		DeleteItemRequestValidator validator = new DeleteItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -386,10 +393,14 @@ class AlternatorDBHandler {
 		String rangeKey = getKeyValue(request.getKey().getRangeKeyElement());
 
 		// Get current item if exist
-		Map<String, AttributeValue> item = table.getItem(hashKey);
+		Map<String, AttributeValue> item = table.getItem(hashKey, rangeKey);
 
 		if (item == null) {
-			throw new ResourceNotFoundException("The item with hash key '" + hashKey + "' doesn't exist in table '" + table.getName() + "'");
+            if (rangeKey == null) {
+                throw new ResourceNotFoundException("The item with hash key '" + hashKey + "' doesn't exist in table '" + table.getName() + "'");
+            } else {
+                throw new ResourceNotFoundException("The item with hash key '" + hashKey + "' and range key '" + rangeKey + "' doesn't exist in table '" + table.getName() + "'");
+            }
 		}
 
 		// Check conditional put
@@ -422,7 +433,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
+	/* protected */ BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
 		Map<String, BatchResponse> response = new HashMap<String, BatchResponse>();
 		for (String tableName : request.getRequestItems().keySet()) {
@@ -434,7 +445,9 @@ class AlternatorDBHandler {
 			try {
 				for (Key itemKey : itemKeys) {
 					try {
-						Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(itemKey.getHashKeyElement()));
+                        String hashKeyValue = getKeyValue(itemKey.getHashKeyElement());
+                        String rangeKeyValue = getKeyValue(itemKey.getRangeKeyElement());
+						Map<String, AttributeValue> item = this.tables.get(tableName).getItem(hashKeyValue, rangeKeyValue);
 						item = getItemWithAttributesToGet(item, attributeToGet);
 						if (item != null)
 							items.add(item);
@@ -456,7 +469,7 @@ class AlternatorDBHandler {
 		return batchGetItemResult;
 	}
 
-	protected BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
+	/* protected */ BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
 		BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
 		HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
 		for (String tableName : request.getRequestItems().keySet()) {
@@ -479,11 +492,12 @@ class AlternatorDBHandler {
 			responses.put(tableName, batchWriteResponse);
 			batchWriteItemResult.setResponses(responses);
 			batchWriteItemResult.getResponses().put(tableName, batchWriteResponse);
+            batchWriteItemResult.setUnprocessedItems(new HashMap<String, List<WriteRequest>>());
 		}
 		return batchWriteItemResult;
 	}
 
-	protected ScanResult scan(ScanRequest request) {
+	/* protected */ ScanResult scan(ScanRequest request) {
 		ScanResult result = new ScanResult();
 		List<Error> errors = new ScanRequestValidator().validate(request);
 		if (errors.size() > 0) {
@@ -491,8 +505,10 @@ class AlternatorDBHandler {
 		}
 		result.setConsumedCapacityUnits(0.5);
 		List<Map<String, AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
-		for (String key : this.tables.get(request.getTableName()).getItems().keySet()) {
-			Map<String, AttributeValue> item = this.tables.get(request.getTableName()).getItem(key);
+		for (String key : this.tables.get(request.getTableName()).getItemRangeGroups().keySet()) {
+          ItemRangeGroup rangeGroup = this.tables.get(request.getTableName()).getItemRangeGroup(key);
+          for (String rangeKey : rangeGroup.getKeySet()) {
+			Map<String, AttributeValue> item = rangeGroup.getItem(rangeKey);
 			if (request.getScanFilter() != null) {
 				for (String k : request.getScanFilter().keySet()) {
 					if (item.get(k) != null) {
@@ -611,6 +627,7 @@ class AlternatorDBHandler {
 			} else {
 				items.add(item);
 			}
+          }
 		}
 		if (request.getLimit() != null) {
 			items = items.subList(0, request.getLimit() - 1);
@@ -635,31 +652,37 @@ class AlternatorDBHandler {
 			throw createInternalServerException(errors);
 		}
 
-		String keyValue = getKeyValue(request.getHashKeyValue());
 		// Check existence of table
 		Table table = this.tables.get(request.getTableName());
 		if (table == null) {
 			throw new ResourceNotFoundException("The table '" + request.getTableName() + "' doesn't exist.");
 		}
 
-		Map<String, AttributeValue> item = table.getItem(keyValue);
+        String hashKeyValue = getKeyValue(request.getHashKeyValue());
+        List<String> attributesToGet = request.getAttributesToGet();
 
 		QueryResult queryResult = new QueryResult();
-		List<Map<String, AttributeValue>> list = null;
-		if (item == null) {
-			item = new HashMap<String, AttributeValue>();
-		}
-		list = new ArrayList<Map<String, AttributeValue>>();
-		list.add(item);
+		List<Map<String, AttributeValue>> list = new ArrayList<Map<String, AttributeValue>>();
+
+        ItemRangeGroup rangeGroup = table.getItemRangeGroup(hashKeyValue);
+        if (rangeGroup != null) {
+            for (Map<String, AttributeValue> item : rangeGroup.getItems(request.getRangeKeyCondition())) {
+                list.add(getItemWithAttributesToGet(item, attributesToGet));
+            }
+        }
+
 		queryResult.setItems(list);
 		queryResult.setCount(list.size());
 		queryResult.setConsumedCapacityUnits(0.5);
-		queryResult.setLastEvaluatedKey(new Key(request.getHashKeyValue()));
+
+        // DynamoDBMapper implements paged query continuations if we return a LastEvaluatedKey value.
+        // Leave this value null to indicate we are returning the full result set.
+		queryResult.setLastEvaluatedKey(null);  // new Key(request.getHashKeyValue()));
 
 		return queryResult;
 	}
 
-	protected String getKeyValue(AttributeValue value) {
+	/* protected */ String getKeyValue(AttributeValue value) {
 		if (value != null) {
 			if (value.getN() != null) {
 				return value.getN();
@@ -670,7 +693,7 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	protected AttributeValueType getAttributeValueType(AttributeValue value) {
+	/* protected */ AttributeValueType getAttributeValueType(AttributeValue value) {
 		if (value != null) {
 			if (value.getN() != null) {
 				return AttributeValueType.N;
@@ -685,7 +708,7 @@ class AlternatorDBHandler {
 		return AttributeValueType.UNKNOWN;
 	}
 
-	protected InternalServerErrorException createInternalServerException(List<Error> errors) {
+	/* protected */ InternalServerErrorException createInternalServerException(List<Error> errors) {
 		String message = "The following Errors occured: ";
 		for (Error error : errors) {
 			message += error.getMessage() + "\n";
@@ -693,7 +716,7 @@ class AlternatorDBHandler {
 		return new InternalServerErrorException(message);
 	}
 
-	protected UpdateItemResult updateItem(UpdateItemRequest request) {
+	/* protected */ UpdateItemResult updateItem(UpdateItemRequest request) {
 		// Validate data coming in
 		// TODO: Look into how we're doing validation, maybe implement better solution
 		UpdateItemRequestValidator validator = new UpdateItemRequestValidator();
@@ -701,7 +724,6 @@ class AlternatorDBHandler {
 		if (errors.size() != 0) {
 			throw createInternalServerException(errors);
 		}
-
 
 		// get information
 		String tableName = request.getTableName();
@@ -719,8 +741,11 @@ class AlternatorDBHandler {
 			throw new ResourceNotFoundException("The table you're currently trying to access (" + tableName + ") doesn't exists.");
 		}
 		// Check to make sure Key is valid
-		if (this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement())) == null) {
-			Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
+        String hashKeyValue = getKeyValue(key.getHashKeyElement());
+        String rangeKeyValue = getKeyValue(key.getRangeKeyElement());
+        Map<String, AttributeValue> item = this.tables.get(tableName).getItem(hashKeyValue, rangeKeyValue);
+		if (item == null) {
+			item = new HashMap<String, AttributeValue>();
 			item.put(this.tables.get(tableName).getHashKeyName(), key.getHashKeyElement());
 			if (key.getRangeKeyElement() != null) {
 				item.put(this.tables.get(tableName).getRangeKeyName(), key.getRangeKeyElement());
@@ -733,7 +758,6 @@ class AlternatorDBHandler {
 			this.tables.get(tableName).putItem(item);
 			result.setAttributes(item);
 		} else {
-			Map<String, AttributeValue> item = this.tables.get(tableName).getItem(getKeyValue(key.getHashKeyElement()));
 			Set<String> sKeyz = new HashSet<String>(item.keySet());
 			for (String sKey : sKeyz) {
 				if (attributesToUpdate.containsKey(sKey)) {
@@ -816,7 +840,10 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	protected Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
+	/* protected */ Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
+		if (item == null) {
+			return item;
+		}
 		if (attributesToGet == null) {
 			return item;
 		}
@@ -829,7 +856,7 @@ class AlternatorDBHandler {
 		return item;
 	}
 
-	protected List<Map<String, AttributeValue>> getItemWithAttributesToGet(List<Map<String, AttributeValue>> items, List<String> attributesToGet) {
+	/* protected */ List<Map<String, AttributeValue>> getItemWithAttributesToGet(List<Map<String, AttributeValue>> items, List<String> attributesToGet) {
 		List<Map<String, AttributeValue>> copy = new ArrayList<Map<String, AttributeValue>>();
 		for (Map<String, AttributeValue> item : items) {
 			copy.add(getItemWithAttributesToGet(item, attributesToGet));

@@ -98,7 +98,7 @@ public class AlternatorTableTest extends AlternatorTest {
 	public void describeTable() {
 		String name = createTableName();
 		createTable(name);
-		DescribeTableResult res = client.describeTable(new DescribeTableRequest().withTableName(name));
+		DescribeTableResult res = getClient().describeTable(new DescribeTableRequest().withTableName(name));
 		Assert.assertNotNull(res.getTable());
 		Assert.assertEquals(res.getTable().getTableName(), name);
 	}
@@ -106,7 +106,7 @@ public class AlternatorTableTest extends AlternatorTest {
 	@Test
 	public void describeTableWithoutTableName() {
 		createTable();
-		DescribeTableResult res = client.describeTable(new DescribeTableRequest());
+		DescribeTableResult res = getClient().describeTable(new DescribeTableRequest());
 		Assert.assertNull(res.getTable());
 	}
 
@@ -114,7 +114,7 @@ public class AlternatorTableTest extends AlternatorTest {
 	public void listTables() {
 		String name = createTableName();
 		createTable(name);
-		ListTablesResult res = client.listTables();
+		ListTablesResult res = getClient().listTables();
 		Assert.assertTrue(res.getTableNames().contains(name));
 	}
 
@@ -122,7 +122,7 @@ public class AlternatorTableTest extends AlternatorTest {
 	public void listTablesWithLimitOverTableCount() {
 		String name = createTableName();
 		createTable(name);
-		ListTablesResult res = client.listTables(new ListTablesRequest().withLimit(5));
+		ListTablesResult res = getClient().listTables(new ListTablesRequest().withLimit(5));
 		Assert.assertTrue(res.getTableNames().contains(name));
 		Assert.assertTrue(res.getTableNames().size() == 1);
 	}
@@ -133,7 +133,7 @@ public class AlternatorTableTest extends AlternatorTest {
 		createTable();
 		createTable(name);
 		createTable();
-		ListTablesResult res = client.listTables(new ListTablesRequest().withLimit(2));
+		ListTablesResult res = getClient().listTables(new ListTablesRequest().withLimit(2));
 		Assert.assertTrue(res.getTableNames().contains(name));
 		Assert.assertTrue(res.getTableNames().size() == 2);
 	}
@@ -144,7 +144,7 @@ public class AlternatorTableTest extends AlternatorTest {
 		createTable();
 		createTable();
 		createTable(name);
-		ListTablesResult res = client.listTables(new ListTablesRequest().withExclusiveStartTableName(name));
+		ListTablesResult res = getClient().listTables(new ListTablesRequest().withExclusiveStartTableName(name));
 		Assert.assertTrue(res.getTableNames().contains(name));
 		Assert.assertTrue(res.getTableNames().size() == 1);
 	}
@@ -157,7 +157,7 @@ public class AlternatorTableTest extends AlternatorTest {
 		createTable(name);
 		createTable();
 		createTable();
-		ListTablesResult res = client.listTables(new ListTablesRequest().withLimit(1).withExclusiveStartTableName(name));
+		ListTablesResult res = getClient().listTables(new ListTablesRequest().withLimit(1).withExclusiveStartTableName(name));
 		Assert.assertTrue(res.getTableNames().contains(name));
 		Assert.assertTrue(res.getTableNames().size() == 1);
 	}
@@ -170,7 +170,7 @@ public class AlternatorTableTest extends AlternatorTest {
 		createTable();
 		createTable();
 		createTable();
-		ListTablesResult res = client.listTables(new ListTablesRequest().withLimit(10).withExclusiveStartTableName(name));
+		ListTablesResult res = getClient().listTables(new ListTablesRequest().withLimit(10).withExclusiveStartTableName(name));
 		Assert.assertTrue(res.getTableNames().contains(name));
 		Assert.assertTrue(res.getTableNames().size() == 4);
 	}
@@ -179,8 +179,8 @@ public class AlternatorTableTest extends AlternatorTest {
 	public void deleteTableTest() {
 		String name = createTableName();
 		createTable(name);
-		client.deleteTable(new DeleteTableRequest(name));
-		ListTablesResult res = client.listTables();
+		getClient().deleteTable(new DeleteTableRequest(name));
+		ListTablesResult res = getClient().listTables();
 		Assert.assertFalse(res.getTableNames().contains(name));
 		Assert.assertTrue(res.getTableNames().size() == 0);
 	}
@@ -189,9 +189,9 @@ public class AlternatorTableTest extends AlternatorTest {
 	public void deleteTableWithoutName() {
 		String name = createTableName();
 		createTable(name);
-		DeleteTableResult res = client.deleteTable(new DeleteTableRequest());
+		DeleteTableResult res = getClient().deleteTable(new DeleteTableRequest());
 		Assert.assertNull(res.getTableDescription());
-		Assert.assertTrue(client.listTables().getTableNames().contains(name));
+		Assert.assertTrue(getClient().listTables().getTableNames().contains(name));
 	}
 
 	@Test
@@ -201,7 +201,7 @@ public class AlternatorTableTest extends AlternatorTest {
 		ProvisionedThroughput throughput = new ProvisionedThroughput().withReadCapacityUnits(50L).withWriteCapacityUnits(50L);
 		UpdateTableRequest req = new UpdateTableRequest().withTableName(name).withProvisionedThroughput(throughput);
 		Date date = new Date();
-		TableDescription desc = client.updateTable(req).getTableDescription();
+		TableDescription desc = getClient().updateTable(req).getTableDescription();
 		Assert.assertNotNull(desc);
 		Assert.assertEquals(name, desc.getTableName());
 		Assert.assertEquals(Math.round(date.getTime() / 1000), Math.round(desc.getProvisionedThroughput().getLastDecreaseDateTime().getTime() / 1000));
@@ -213,7 +213,7 @@ public class AlternatorTableTest extends AlternatorTest {
 		createTable();
 		ProvisionedThroughput throughput = new ProvisionedThroughput().withReadCapacityUnits(50L).withWriteCapacityUnits(50L);
 		UpdateTableRequest req = new UpdateTableRequest().withProvisionedThroughput(throughput);
-		Assert.assertNull(client.updateTable(req).getTableDescription());
+		Assert.assertNull(getClient().updateTable(req).getTableDescription());
 	}
 
 	@Test
@@ -221,12 +221,12 @@ public class AlternatorTableTest extends AlternatorTest {
 		String name = createTableName();
 		createTable(name);
 		UpdateTableRequest req = new UpdateTableRequest().withTableName(name);
-		Assert.assertNull(client.updateTable(req).getTableDescription());
+		Assert.assertNull(getClient().updateTable(req).getTableDescription());
 	}
 
 	@Test
 	public void updateTableWithoutNameOrThroughput() {
 		createTable();
-		Assert.assertNull(client.updateTable(new UpdateTableRequest()).getTableDescription());
+		Assert.assertNull(getClient().updateTable(new UpdateTableRequest()).getTableDescription());
 	}
 }
