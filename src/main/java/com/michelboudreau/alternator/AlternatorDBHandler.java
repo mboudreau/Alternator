@@ -505,11 +505,13 @@ class AlternatorDBHandler {
 		}
 		result.setConsumedCapacityUnits(0.5);
 		List<Map<String, AttributeValue>> items = new ArrayList<Map<String, AttributeValue>>();
-		for (String key : this.tables.get(request.getTableName()).getItemRangeGroups().keySet()) {
-          ItemRangeGroup rangeGroup = this.tables.get(request.getTableName()).getItemRangeGroup(key);
-          for (String rangeKey : rangeGroup.getKeySet()) {
-			Map<String, AttributeValue> item = rangeGroup.getItem(rangeKey);
-			if (request.getScanFilter() != null) {
+        Table tableToScan = this.tables.get(request.getTableName());
+        if (tableToScan != null) {
+		  for (String key : tableToScan.getItemRangeGroups().keySet()) {
+            ItemRangeGroup rangeGroup = tableToScan.getItemRangeGroup(key);
+            for (String rangeKey : rangeGroup.getKeySet()) {
+			  Map<String, AttributeValue> item = rangeGroup.getItem(rangeKey);
+			  if (request.getScanFilter() != null) {
 				for (String k : request.getScanFilter().keySet()) {
 					if (item.get(k) != null) {
 						Condition cond = request.getScanFilter().get(k);
@@ -624,12 +626,13 @@ class AlternatorDBHandler {
 						}
 					}
 				}
-			} else {
+			  } else {
 				items.add(item);
-			}
+			  }
+            }
           }
 		}
-		if (request.getLimit() != null) {
+		if ((request.getLimit() != null) && (items.size() > request.getLimit())) {
 			items = items.subList(0, request.getLimit() - 1);
 		}
 
