@@ -629,7 +629,7 @@ class AlternatorDBHandler {
 			}
           }
 		}
-		if (request.getLimit() != null) {
+		if ((request.getLimit() != null) && (items.size() > request.getLimit())) {
 			items = items.subList(0, request.getLimit() - 1);
 		}
 
