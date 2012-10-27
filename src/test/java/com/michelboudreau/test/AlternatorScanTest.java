@@ -122,6 +122,57 @@ public class AlternatorScanTest extends AlternatorTest {
 
 
     @Test
+    public void scanWithScanFilterGTTestWithLowLimit() {
+        final int limit = 5;
+                
+        ScanRequest request = getBasicReq();
+        Condition rangeKeyCondition = new Condition();
+        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
+//
+        attributeValueList.add(new AttributeValue().withN("50"));
+        rangeKeyCondition.setAttributeValueList(attributeValueList);
+        rangeKeyCondition.setComparisonOperator(ComparisonOperator.GT);
+        Map<String, Condition> conditionMap = new HashMap<String, Condition>();
+        conditionMap.put("range", rangeKeyCondition);
+        request.setScanFilter(conditionMap);
+        request.setLimit(limit);
+        ScanResult result = getClient().scan(request);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getItems());
+        int itemCount = result.getItems().size();
+        Assert.assertTrue(itemCount <= limit);
+        for (Map<String, AttributeValue> item : result.getItems()) {
+            Assert.assertTrue(new Integer(item.get("range").getN()) > new Integer(new AttributeValue().withN("50").getN()));
+        }
+    }
+
+    @Test
+    public void scanWithScanFilterGTTestWithHighLimit() {
+        final int limit = 1000;
+                
+        ScanRequest request = getBasicReq();
+        Condition rangeKeyCondition = new Condition();
+        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
+//
+        attributeValueList.add(new AttributeValue().withN("50"));
+        rangeKeyCondition.setAttributeValueList(attributeValueList);
+        rangeKeyCondition.setComparisonOperator(ComparisonOperator.GT);
+        Map<String, Condition> conditionMap = new HashMap<String, Condition>();
+        conditionMap.put("range", rangeKeyCondition);
+        request.setScanFilter(conditionMap);
+        request.setLimit(limit);
+        ScanResult result = getClient().scan(request);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getItems());
+        int itemCount = result.getItems().size();
+        Assert.assertTrue(itemCount <= limit);
+        for (Map<String, AttributeValue> item : result.getItems()) {
+            Assert.assertTrue(new Integer(item.get("range").getN()) > new Integer(new AttributeValue().withN("50").getN()));
+        }
+    }
+
+
+    @Test
     public void scanWithScanFilterGETest() { //Greater or Equal
         ScanRequest request = getBasicReq();
         Condition rangeKeyCondition = new Condition();
