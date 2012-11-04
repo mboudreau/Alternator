@@ -22,6 +22,12 @@ public class AlternatorTest {
      * to facilitate breakpoint debugging.
      */
     private static final boolean RUN_DB_AS_SERVICE = true;
+    
+    /**
+     * Set to true to spawn the service in a local sub-process.
+     * Set to false if an executable JAR instance of Alternator is running in another process.
+     */
+    private static final boolean SPAWN_LOCAL_DB_SERVICE = true;
 
 	static protected AlternatorDBClient client;
 	static protected DynamoDBMapper mapper;
@@ -41,7 +47,7 @@ public class AlternatorTest {
 
 	@BeforeClass
 	public static void setUpOnce() throws Exception {
-        if (RUN_DB_AS_SERVICE) {
+        if (RUN_DB_AS_SERVICE && SPAWN_LOCAL_DB_SERVICE) {
             db = new AlternatorDB().start();
         }
 	}
