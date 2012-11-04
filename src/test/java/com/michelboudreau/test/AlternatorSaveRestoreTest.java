@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
 public class AlternatorSaveRestoreTest extends AlternatorTest {
 
-    protected final String PERSISTENCE_PATH = "./AlternatorInProcessSaveRestoreTest.db";
+    protected final String PERSISTENCE_PATH = "./AlternatorSaveRestoreTest.db";
     
     private String tableName;
 

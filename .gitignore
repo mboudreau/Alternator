@@ -9,5 +9,5 @@ target
 .project
 .classpath
 alternator.db
-AlternatorTest.db
+AlternatorSaveRestoreTest.db
 >>>>>>> 2df0c02d9e74881e0c1e4a2917367e7923eef7b4
