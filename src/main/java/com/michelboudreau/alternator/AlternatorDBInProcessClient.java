@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 public class AlternatorDBInProcessClient extends AmazonWebServiceClient implements AmazonDynamoDB {
 	private static final Log log = LogFactory.getLog(AlternatorDBInProcessClient.class);
 
-    private AlternatorDBHandler handler = new AlternatorDBHandler();
+	private AlternatorDBHandler handler = new AlternatorDBHandler();
 
 	public AlternatorDBInProcessClient() {
 		this(new ClientConfiguration());
@@ -180,8 +180,16 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 		super.setEndpoint(endpoint);
 	}
 
-    @Override
+	@Override
 	public ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) {
 		return client.getResponseMetadataForRequest(request);
+	}
+        
+	public void save(String persistence) {
+            handler.save(persistence);
+	}
+
+	public void restore(String persistence) {
+            handler.restore(persistence);
 	}
 }
