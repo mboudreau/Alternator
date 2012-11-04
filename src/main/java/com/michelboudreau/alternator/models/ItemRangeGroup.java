@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class ItemRangeGroup {
+    
+    @JsonIgnore()
     private final String DEFAULT_RANGE_KEY_VALUE = "";
 
     private SortedMap<String, Map<String, AttributeValue>> items = new TreeMap<String, Map<String, AttributeValue>>();

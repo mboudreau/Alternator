@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 
 public class AlternatorTest {
     /**
@@ -60,6 +62,11 @@ public class AlternatorTest {
 	public void setClient(AlternatorDBClient value) {
 		client = value;
 	}
+        
+    @Test
+    public void noOpTest() {
+        Assert.isTrue(true);
+    }
 
     protected AmazonDynamoDB getClient() {
         if (RUN_DB_AS_SERVICE) {
