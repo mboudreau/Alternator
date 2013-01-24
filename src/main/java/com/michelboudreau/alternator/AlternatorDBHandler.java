@@ -429,7 +429,7 @@ class AlternatorDBHandler {
 		}
 
 		// remove the item from the table
-		table.removeItem(hashKey);
+		table.removeItem(hashKey, rangeKey);
 		return result;
 	}
 

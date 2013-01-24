@@ -211,6 +211,26 @@ public class AlternatorItemTest extends AlternatorTest {
     }
 
     @Test
+    public void deleteItemWithHashKeyAndRangeKey() {
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("range").withAttributeType(ScalarAttributeType.N));
+        createTable(tableName, schema);
+        AttributeValue hash = new AttributeValue("ad");
+        AttributeValue range1 = new AttributeValue().withN("1");
+        AttributeValue range2 = new AttributeValue().withN("2");
+        getClient().putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash, range1)));
+        getClient().putItem(new PutItemRequest().withTableName(tableName).withItem(createGenericItem(hash, range2)));
+        Key key1 = new Key().withHashKeyElement(hash).withRangeKeyElement(range1);
+        Key key2 = new Key().withHashKeyElement(hash).withRangeKeyElement(range2);
+        DeleteItemRequest request1 = new DeleteItemRequest().withTableName(tableName).withKey(key1).withReturnValues(ReturnValue.ALL_OLD);
+        DeleteItemRequest request2 = new DeleteItemRequest().withTableName(tableName).withKey(key2).withReturnValues(ReturnValue.ALL_OLD);
+        DeleteItemResult result = getClient().deleteItem(request1);
+        Assert.assertNotNull(result.getAttributes());
+        result = getClient().deleteItem(request2);
+        Assert.assertNotNull(result.getAttributes());
+    }
+
+    @Test
     public void deleteItemWithoutTableName() {
         KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
         createTable(tableName, schema);
