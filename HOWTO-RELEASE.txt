@@ -1,0 +1,5 @@
+mvn release:clean
+mvn release:prepare
+-- Change version of pom back 1, remove "SNAPSHOT"
+mvn release:perform
+-- Change version of pom up 1, add "SNAPSHOT"
