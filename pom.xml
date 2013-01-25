@@ -10,7 +10,7 @@
 
 	<groupId>com.michelboudreau</groupId>
 	<artifactId>alternator</artifactId>
-	<version>0.3.3</version>
+	<version>0.3.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Alternator</name>
@@ -51,7 +51,7 @@
 		<url>git@github.com:mboudreau/Alternator.git</url>
 		<connection>scm:git:git@github.com:mboudreau/Alternator.git</connection>
 		<developerConnection>scm:git:git@github.com:mboudreau/Alternator.git</developerConnection>
-    <tag>alternator-0.3.3</tag>
+    <tag>alternator-0.3.2</tag>
   </scm>
 
 	<build>
