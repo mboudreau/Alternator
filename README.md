@@ -99,7 +99,7 @@ as well as in your local Maven repository in this folder tree:
 
       %USERPROFILE%\.m2\repository\com\michelboudreau\alternator\
       
-    Linux and MacOSX:
+    Linux or MacOSX:
     
       ~/.m2/repository/com/michelboudreau/alternator/
     
@@ -158,7 +158,7 @@ Here is an example class to obtain an **AmazonDynamoDB** client reference pointi
       {
         public const String DefaultAlternatorEndpoint = "http://localhost:9090/";
 
-        private AmazonDynamoDB GetEmulatorClient()
+        public AmazonDynamoDB GetEmulatorClient()
         {
           // Divert the web service calls from the real DynamoDB to the Alternator mock server,
           // which must be running in a separate process via the executable JAR file.
