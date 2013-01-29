@@ -10,7 +10,7 @@
 
 	<groupId>com.michelboudreau</groupId>
 	<artifactId>alternator</artifactId>
-	<version>0.3.3.rrutt</version>
+	<version>0.3.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Alternator</name>
@@ -37,6 +37,11 @@
 			<name>Thomas Bredillet</name>
 			<email>tnbredillet@gmail.com</email>
 		</developer>
+		<developer>
+			<id>rrutt</id>
+			<name>Rick Rutt</name>
+			<email>rrutt@live.com</email>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -51,8 +56,8 @@
 		<url>git@github.com:mboudreau/Alternator.git</url>
 		<connection>scm:git:git@github.com:mboudreau/Alternator.git</connection>
 		<developerConnection>scm:git:git@github.com:mboudreau/Alternator.git</developerConnection>
-    <tag>alternator-0.3.2</tag>
-  </scm>
+		<tag>alternator-0.3.2</tag>
+	</scm>
 
 	<build>
 		<resources>
@@ -109,30 +114,7 @@
 					<localCheckout>true</localCheckout>
 				</configuration>
 			</plugin>
-            <plugin>
-              <artifactId>maven-assembly-plugin</artifactId>
-              <configuration>
-                <descriptorRefs>
-                  <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
-                <archive>
-                    <manifest>
-                        <addClasspath>true</addClasspath>
-                        <mainClass>com.michelboudreau.alternator.AlternatorDBServer</mainClass>
-                    </manifest>
-                </archive>
-              </configuration>
-              <executions>
-                <execution>
-                  <id>make-my-jar-with-dependencies</id>
-                  <phase>package</phase>
-                  <goals>
-                    <goal>single</goal>
-                  </goals>
-                </execution>
-              </executions>
-            </plugin>
-        </plugins>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -239,5 +221,41 @@
 			<version>2.2.2</version>
 		</dependency>
 	</dependencies>
+	
+	<profiles>
+		<profile>
+			<id>exejar</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+									<manifest>
+											<addClasspath>true</addClasspath>
+											<mainClass>com.michelboudreau.alternator.AlternatorDBServer</mainClass>
+									</manifest>
+							</archive>
+						</configuration>
+						<executions>
+							<execution>
+								<id>make-my-jar-with-dependencies</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
