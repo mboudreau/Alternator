@@ -664,9 +664,11 @@ class AlternatorDBHandler {
 		QueryResult queryResult = new QueryResult();
 		List<Map<String, AttributeValue>> list = new ArrayList<Map<String, AttributeValue>>();
 
+        KeySchema keySchema = table.getKeySchema();
+        KeySchemaElement rangeKeyElement = keySchema.getRangeKeyElement();
         ItemRangeGroup rangeGroup = table.getItemRangeGroup(hashKeyValue);
         if (rangeGroup != null) {
-            for (Map<String, AttributeValue> item : rangeGroup.getItems(request.getRangeKeyCondition())) {
+            for (Map<String, AttributeValue> item : rangeGroup.getItems(rangeKeyElement, request.getRangeKeyCondition())) {
                 list.add(getItemWithAttributesToGet(item, attributesToGet));
             }
         }
