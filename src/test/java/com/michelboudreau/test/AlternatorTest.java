@@ -22,7 +22,7 @@ public class AlternatorTest {
      * to facilitate breakpoint debugging.
      */
     private static final boolean RUN_DB_AS_SERVICE = true;
-    
+
     /**
      * Set to true to spawn the service in a local sub-process.
      * Set to false if an executable JAR instance of Alternator is running in another process.
@@ -68,7 +68,7 @@ public class AlternatorTest {
 	public void setClient(AlternatorDBClient value) {
 		client = value;
 	}
-        
+
     @Test
     public void noOpTest() {
         Assert.isTrue(true);
@@ -171,6 +171,10 @@ public class AlternatorTest {
 
 	protected AttributeValue createNumberAttribute() {
 		return new AttributeValue().withN(Math.round(Math.random() * 1000)+"");
+	}
+
+	protected AttributeValue createNumberAttribute(Integer value) {
+		return new AttributeValue().withN(value.toString());
 	}
 
 	protected Map<String, AttributeValue> createGenericItem() {
