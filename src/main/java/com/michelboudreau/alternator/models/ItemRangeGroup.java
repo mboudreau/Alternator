@@ -2,7 +2,9 @@ package com.michelboudreau.alternator.models;
 
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
 import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
+import com.michelboudreau.alternator.enums.AttributeValueType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -12,7 +14,7 @@ import java.util.TreeMap;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class ItemRangeGroup {
-    
+
     @JsonIgnore()
     private final String DEFAULT_RANGE_KEY_VALUE = "";
 
@@ -26,15 +28,37 @@ public class ItemRangeGroup {
         return items.keySet();
     }
 
-    public Collection<Map<String, AttributeValue>> getItems(Condition rangeKeyCondition) {
-        if (rangeKeyCondition == null) {
+    public Collection<Map<String, AttributeValue>> getItems(
+            KeySchemaElement rangeKeyElement,
+            Condition rangeKeyCondition) {
+
+        if ((rangeKeyElement == null) || (rangeKeyCondition == null)) {
             return items.values();
         } else {
-            return filterItemsByRangeKeyCondition(rangeKeyCondition);
+            return filterItemsByRangeKeyCondition(rangeKeyElement, rangeKeyCondition);
         }
     }
 
-    private Collection<Map<String, AttributeValue>> filterItemsByRangeKeyCondition(Condition cond) {
+    private AttributeValueType getAttributeValueType(AttributeValue value) {
+		if (value != null) {
+			if (value.getN() != null) {
+				return AttributeValueType.N;
+			} else if (value.getS() != null) {
+				return AttributeValueType.S;
+			} else if (value.getNS() != null) {
+				return AttributeValueType.NS;
+			} else if (value.getSS() != null) {
+				return AttributeValueType.SS;
+			}
+		}
+		return AttributeValueType.UNKNOWN;
+	}
+
+    private Collection<Map<String, AttributeValue>> filterItemsByRangeKeyCondition(
+            KeySchemaElement rangeKeyElement,
+            Condition cond) {
+
+        String rangeKeyName = rangeKeyElement.getAttributeName();
         Collection<Map<String, AttributeValue>> filteredItems = new ArrayList<Map<String, AttributeValue>>();
 
         for (String rangeKey : items.keySet()) {
@@ -45,64 +69,100 @@ public class ItemRangeGroup {
             }
             else if (cond.getComparisonOperator().equals("EQ")) {
                 if (cond.getAttributeValueList().size() == 1) {
-                    if (rangeKey.equals(cond.getAttributeValueList().get(0).getS())) {
+                    AttributeValue valueAttr = item.get(rangeKeyName);
+                    String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                    AttributeValue compAttr = cond.getAttributeValueList().get(0);
+                    String comp = (getAttributeValueType(compAttr).equals(AttributeValueType.S)) ? compAttr.getS() : compAttr.getN();
+                    if (value.compareTo(comp) == 0) {
                         filteredItems.add(item);
                     }
                 }
             }
             else if (cond.getComparisonOperator().equals("LE")) {
                 if (cond.getAttributeValueList().size() == 1) {
-                    if (rangeKey.compareTo(cond.getAttributeValueList().get(0).getS()) <= 0) {
+                    AttributeValue valueAttr = item.get(rangeKeyName);
+                    String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                    AttributeValue compAttr = cond.getAttributeValueList().get(0);
+                    String comp = (getAttributeValueType(compAttr).equals(AttributeValueType.S)) ? compAttr.getS() : compAttr.getN();
+                    if (value.compareTo(comp) <= 0) {
                         filteredItems.add(item);
                     }
                 }
             }
             else if (cond.getComparisonOperator().equals("LT")) {
                 if (cond.getAttributeValueList().size() == 1) {
-                    if (rangeKey.compareTo(cond.getAttributeValueList().get(0).getS()) < 0) {
+                    AttributeValue valueAttr = item.get(rangeKeyName);
+                    String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                    AttributeValue compAttr = cond.getAttributeValueList().get(0);
+                    String comp = (getAttributeValueType(compAttr).equals(AttributeValueType.S)) ? compAttr.getS() : compAttr.getN();
+                    if (value.compareTo(comp) < 0) {
                         filteredItems.add(item);
                     }
                 }
             }
             else if (cond.getComparisonOperator().equals("GE")) {
                 if (cond.getAttributeValueList().size() == 1) {
-                    if (rangeKey.compareTo(cond.getAttributeValueList().get(0).getS()) >= 0) {
+                    AttributeValue valueAttr = item.get(rangeKeyName);
+                    String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                    AttributeValue compAttr = cond.getAttributeValueList().get(0);
+                    String comp = (getAttributeValueType(compAttr).equals(AttributeValueType.S)) ? compAttr.getS() : compAttr.getN();
+                    if (value.compareTo(comp) >= 0) {
                         filteredItems.add(item);
                     }
                 }
             }
             else if (cond.getComparisonOperator().equals("GT")) {
                 if (cond.getAttributeValueList().size() == 1) {
-                    if (rangeKey.compareTo(cond.getAttributeValueList().get(0).getS()) > 0) {
+                    AttributeValue valueAttr = item.get(rangeKeyName);
+                    String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                    AttributeValue compAttr = cond.getAttributeValueList().get(0);
+                    String comp = (getAttributeValueType(compAttr).equals(AttributeValueType.S)) ? compAttr.getS() : compAttr.getN();
+                    if (value.compareTo(comp) > 0) {
                         filteredItems.add(item);
                     }
                 }
             }
             else if (cond.getComparisonOperator().equals("BETWEEN")) {
                 if (cond.getAttributeValueList().size() == 2) {
-                    if ((rangeKey.compareTo(cond.getAttributeValueList().get(0).getS()) >= 0) &&
-                        (rangeKey.compareTo(cond.getAttributeValueList().get(1).getS()) <= 0)) {
+                    AttributeValue valueAttr = item.get(rangeKeyName);
+                    String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                    AttributeValue compAttr0 = cond.getAttributeValueList().get(0);
+                    String comp0 = (getAttributeValueType(compAttr0).equals(AttributeValueType.S)) ? compAttr0.getS() : compAttr0.getN();
+                    AttributeValue compAttr1 = cond.getAttributeValueList().get(1);
+                    String comp1 = (getAttributeValueType(compAttr1).equals(AttributeValueType.S)) ? compAttr1.getS() : compAttr1.getN();
+                    if ((value.compareTo(comp0) >= 0) && (value.compareTo(comp1) <= 0)) {
                         filteredItems.add(item);
                     }
                 }
             }
             else if (cond.getComparisonOperator().equals("BEGINS_WITH")) {
                 if (cond.getAttributeValueList().size() == 1) {
-                    if (rangeKey.startsWith(cond.getAttributeValueList().get(0).getS())) {
+                    AttributeValue valueAttr = item.get(rangeKeyName);
+                    String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                    AttributeValue compAttr = cond.getAttributeValueList().get(0);
+                    String comp = (getAttributeValueType(compAttr).equals(AttributeValueType.S)) ? compAttr.getS() : compAttr.getN();
+                    if (value.startsWith(comp)) {
                         filteredItems.add(item);
                     }
                 }
             }
             else if (cond.getComparisonOperator().equals("CONTAINS")) {
                 if (cond.getAttributeValueList().size() == 1) {
-                    if (rangeKey.contains(cond.getAttributeValueList().get(0).getS())) {
+                    AttributeValue valueAttr = item.get(rangeKeyName);
+                    String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                    AttributeValue compAttr = cond.getAttributeValueList().get(0);
+                    String comp = (getAttributeValueType(compAttr).equals(AttributeValueType.S)) ? compAttr.getS() : compAttr.getN();
+                    if (value.contains(comp)) {
                         filteredItems.add(item);
                     }
                 }
             }
             else if (cond.getComparisonOperator().equals("IN")) {
-                for(AttributeValue value : cond.getAttributeValueList()){
-                    if(rangeKey.equals(value.getS())){
+                AttributeValue valueAttr = item.get(rangeKeyName);
+                String value = (getAttributeValueType(valueAttr).equals(AttributeValueType.S)) ? valueAttr.getS() : valueAttr.getN();
+                for(AttributeValue compAttr : cond.getAttributeValueList()){
+                    String comp = (getAttributeValueType(compAttr).equals(AttributeValueType.S)) ? compAttr.getS() : compAttr.getN();
+                    if (value.compareTo(comp) == 0) {
                         filteredItems.add(item);
                         break; // out of 'for' loop
                     }

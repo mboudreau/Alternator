@@ -160,6 +160,10 @@ public class AlternatorTest {
 		return new AttributeValue().withN(Math.round(Math.random() * 1000)+"");
 	}
 
+	protected AttributeValue createNumberAttribute(Integer value) {
+		return new AttributeValue().withN(value.toString());
+	}
+
 	protected Map<String, AttributeValue> createGenericItem() {
 		return createGenericItem(createStringAttribute(), createStringAttribute());
 	}
