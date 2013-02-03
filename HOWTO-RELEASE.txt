@@ -2,9 +2,10 @@ mvn release:clean
 mvn release:prepare
 -- Change version of pom back 1, remove "SNAPSHOT"
 mvn release:perform
--- Tag version on github
-git tag -a <add version here>
 -- Change version of pom up 1, add "SNAPSHOT"
+git commit
+-- Push Tag version on github
+git push origin master -tags
 
 -- Release in Sonatype repository
 Login to https://oss.sonatype.org/
