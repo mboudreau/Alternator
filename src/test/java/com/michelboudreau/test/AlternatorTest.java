@@ -6,12 +6,13 @@ import com.amazonaws.services.dynamodb.model.*;
 import com.michelboudreau.alternator.AlternatorDB;
 import com.michelboudreau.alternator.AlternatorDBClient;
 import com.michelboudreau.alternator.AlternatorDBInProcessClient;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class AlternatorTest {
     /**
@@ -51,12 +52,12 @@ public class AlternatorTest {
         }
 	}
 
-    @Autowired
+    @Inject
     public void setMapper(DynamoDBMapper value) {
         mapper = value;
     }
 
-	@Autowired
+	@Inject
 	public void setClient(AlternatorDBClient value) {
 		client = value;
 	}
