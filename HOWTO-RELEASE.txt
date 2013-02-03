@@ -5,7 +5,7 @@ mvn release:perform
 -- Change version of pom up 1, add "SNAPSHOT"
 git commit
 -- Push Tag version on github
-git push origin master -tags
+git push origin master --tags
 
 -- Release in Sonatype repository
 Login to https://oss.sonatype.org/
