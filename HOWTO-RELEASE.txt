@@ -3,3 +3,10 @@ mvn release:prepare
 -- Change version of pom back 1, remove "SNAPSHOT"
 mvn release:perform
 -- Change version of pom up 1, add "SNAPSHOT"
+Login to https://oss.sonatype.org/
+Click "Staging Repositories"
+Select artifact to release
+Click "Close"
+Select closed artifact
+Click "Release"
+
