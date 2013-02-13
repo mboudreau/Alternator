@@ -1,11 +1,8 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodb.model.*;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,6 +10,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapperConfig;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.ComparisonOperator;
+import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.ScalarAttributeType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations =
@@ -366,4 +373,29 @@ public class AlternatorMapperTest extends AlternatorTest
         TestClassWithHashRangeKey value2 = mapper.load(TestClassWithHashRangeKey.class, hashCode, rangeCode);
         Assert.assertNull("Value2 should not be found.", value2);
     }
+
+	@Test
+	public void scanIndexForwardFalseTest() {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("hashCode").withAttributeType(ScalarAttributeType.S));
+		schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("rangeCode").withAttributeType(ScalarAttributeType.S));
+		createTable(hashRangeTableName, schema);
+
+		{
+			TestClassWithHashRangeKey c = new TestClassWithHashRangeKey();
+			c.setHashCode("code");
+			c.setRangeCode("1");
+			c.setStringData("first");
+			mapper.save(c);
+		}
+
+		{
+			TestClassWithHashRangeKey c = new TestClassWithHashRangeKey();
+			c.setHashCode("code");
+			c.setRangeCode("2");
+			c.setStringData("second");
+			mapper.save(c);
+		}
+		TestClassWithHashRangeKey res = mapper.query(TestClassWithHashRangeKey.class, new DynamoDBQueryExpression(new AttributeValue("code")).withScanIndexForward(false).withLimit(1)).get(0);
+		Assert.assertEquals("second", res.getStringData());
+	}
 }
