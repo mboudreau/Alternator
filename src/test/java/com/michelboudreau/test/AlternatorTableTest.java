@@ -1,6 +1,7 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.services.dynamodb.model.*;
+import java.util.Date;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,7 +10,16 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Date;
+import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableResult;
+import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
+import com.amazonaws.services.dynamodb.model.DescribeTableResult;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.ListTablesRequest;
+import com.amazonaws.services.dynamodb.model.ListTablesResult;
+import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodb.model.TableDescription;
+import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -106,8 +116,14 @@ public class AlternatorTableTest extends AlternatorTest {
 	@Test
 	public void describeTableWithoutTableName() {
 		createTable();
-		DescribeTableResult res = getClient().describeTable(new DescribeTableRequest());
-		Assert.assertNull(res.getTable());
+		boolean wasError = false;
+		try {
+			DescribeTableResult res = getClient().describeTable(new DescribeTableRequest());
+			wasError = res.getTable() == null;
+		} catch (Exception e) {
+			wasError = true;
+		}
+		Assert.assertTrue(wasError);
 	}
 
 	@Test
