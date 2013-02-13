@@ -176,7 +176,7 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
         try {
             return handler.getItem(getItemRequest);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+			// log.error(e.getMessage(), e);
             return new GetItemResult();
         }
 	}
