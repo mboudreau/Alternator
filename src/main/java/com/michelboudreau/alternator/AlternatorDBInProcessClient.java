@@ -14,6 +14,7 @@ import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
 import com.amazonaws.services.dynamodb.model.BatchGetItemResult;
 import com.amazonaws.services.dynamodb.model.BatchWriteItemRequest;
 import com.amazonaws.services.dynamodb.model.BatchWriteItemResult;
+import com.amazonaws.services.dynamodb.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodb.model.CreateTableRequest;
 import com.amazonaws.services.dynamodb.model.CreateTableResult;
 import com.amazonaws.services.dynamodb.model.DeleteItemRequest;
@@ -101,12 +102,15 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 	public PutItemResult putItem(PutItemRequest putItemRequest)
 			throws AmazonServiceException, AmazonClientException {
 
-        try {
+		try {
             return handler.putItem(putItemRequest);
-	    } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new PutItemResult();
-        }
+		} catch (Exception e) {
+			if (e instanceof ConditionalCheckFailedException) {
+				throw (ConditionalCheckFailedException) e;
+			}
+			log.error(e.getMessage(), e);
+			return new PutItemResult();
+		}
 }
 
 	public DescribeTableResult describeTable(DescribeTableRequest describeTableRequest)
