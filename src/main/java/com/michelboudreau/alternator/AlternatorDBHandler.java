@@ -1,16 +1,13 @@
 package com.michelboudreau.alternator;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.transform.*;
+import com.michelboudreau.alternator.enums.AttributeValueType;
+import com.michelboudreau.alternator.models.ItemRangeGroup;
+import com.michelboudreau.alternator.models.Limits;
+import com.michelboudreau.alternator.models.Table;
+import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
+import com.michelboudreau.alternator.validators.*;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,94 +15,10 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.dynamodb.model.AttributeValue;
-import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
-import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
-import com.amazonaws.services.dynamodb.model.BatchGetItemResult;
-import com.amazonaws.services.dynamodb.model.BatchResponse;
-import com.amazonaws.services.dynamodb.model.BatchWriteItemRequest;
-import com.amazonaws.services.dynamodb.model.BatchWriteItemResult;
-import com.amazonaws.services.dynamodb.model.BatchWriteResponse;
-import com.amazonaws.services.dynamodb.model.Condition;
-import com.amazonaws.services.dynamodb.model.ConditionalCheckFailedException;
-import com.amazonaws.services.dynamodb.model.CreateTableRequest;
-import com.amazonaws.services.dynamodb.model.CreateTableResult;
-import com.amazonaws.services.dynamodb.model.DeleteItemRequest;
-import com.amazonaws.services.dynamodb.model.DeleteItemResult;
-import com.amazonaws.services.dynamodb.model.DeleteRequest;
-import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
-import com.amazonaws.services.dynamodb.model.DeleteTableResult;
-import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
-import com.amazonaws.services.dynamodb.model.DescribeTableResult;
-import com.amazonaws.services.dynamodb.model.ExpectedAttributeValue;
-import com.amazonaws.services.dynamodb.model.GetItemRequest;
-import com.amazonaws.services.dynamodb.model.GetItemResult;
-import com.amazonaws.services.dynamodb.model.InternalServerErrorException;
-import com.amazonaws.services.dynamodb.model.Key;
-import com.amazonaws.services.dynamodb.model.KeySchema;
-import com.amazonaws.services.dynamodb.model.KeySchemaElement;
-import com.amazonaws.services.dynamodb.model.KeysAndAttributes;
-import com.amazonaws.services.dynamodb.model.LimitExceededException;
-import com.amazonaws.services.dynamodb.model.ListTablesRequest;
-import com.amazonaws.services.dynamodb.model.ListTablesResult;
-import com.amazonaws.services.dynamodb.model.PutItemRequest;
-import com.amazonaws.services.dynamodb.model.PutItemResult;
-import com.amazonaws.services.dynamodb.model.PutRequest;
-import com.amazonaws.services.dynamodb.model.QueryRequest;
-import com.amazonaws.services.dynamodb.model.QueryResult;
-import com.amazonaws.services.dynamodb.model.ResourceInUseException;
-import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
-import com.amazonaws.services.dynamodb.model.ReturnValue;
-import com.amazonaws.services.dynamodb.model.ScanRequest;
-import com.amazonaws.services.dynamodb.model.ScanResult;
-import com.amazonaws.services.dynamodb.model.TableStatus;
-import com.amazonaws.services.dynamodb.model.UpdateItemRequest;
-import com.amazonaws.services.dynamodb.model.UpdateItemResult;
-import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
-import com.amazonaws.services.dynamodb.model.UpdateTableResult;
-import com.amazonaws.services.dynamodb.model.WriteRequest;
-import com.amazonaws.services.dynamodb.model.transform.BatchGetItemRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.BatchGetItemResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.BatchWriteItemRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.BatchWriteItemResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.CreateTableRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.CreateTableResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.DeleteItemRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.DeleteItemResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.DeleteTableRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.DeleteTableResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.DescribeTableRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.DescribeTableResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.GetItemRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.GetItemResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.ListTablesRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.ListTablesResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.PutItemRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.PutItemResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.QueryRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.QueryResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.ScanRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.ScanResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.UpdateItemRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.UpdateItemResultMarshaller;
-import com.amazonaws.services.dynamodb.model.transform.UpdateTableRequestJsonUnmarshaller;
-import com.amazonaws.services.dynamodb.model.transform.UpdateTableResultMarshaller;
-import com.michelboudreau.alternator.enums.AttributeValueType;
-import com.michelboudreau.alternator.models.ItemRangeGroup;
-import com.michelboudreau.alternator.models.Limits;
-import com.michelboudreau.alternator.models.Table;
-import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
-import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
-import com.michelboudreau.alternator.validators.DeleteItemRequestValidator;
-import com.michelboudreau.alternator.validators.DeleteTableRequestValidator;
-import com.michelboudreau.alternator.validators.DescribeTableRequestValidator;
-import com.michelboudreau.alternator.validators.GetItemRequestValidator;
-import com.michelboudreau.alternator.validators.ListTablesRequestValidator;
-import com.michelboudreau.alternator.validators.PutItemRequestValidator;
-import com.michelboudreau.alternator.validators.QueryRequestValidator;
-import com.michelboudreau.alternator.validators.ScanRequestValidator;
-import com.michelboudreau.alternator.validators.UpdateItemRequestValidator;
-import com.michelboudreau.alternator.validators.UpdateTableRequestValidator;
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 class AlternatorDBHandler {
 
@@ -202,7 +115,7 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	/* protected */ CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
+	public CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
 		// table limit of 256
 		if (this.tables.size() >= Limits.TABLE_MAX) {
 			throw new LimitExceededException("Cannot exceed 256 tables per account.");
@@ -232,7 +145,7 @@ class AlternatorDBHandler {
 		return new CreateTableResult().withTableDescription(table.getTableDescription());
 	}
 
-	/* protected */ DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -254,7 +167,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		ListTablesRequestValidator validator = new ListTablesRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -307,7 +220,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -327,7 +240,7 @@ class AlternatorDBHandler {
 		return new DeleteTableResult().withTableDescription(table.getTableDescription().withTableStatus(TableStatus.DELETING));
 	}
 
-	/* protected */ UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -347,7 +260,7 @@ class AlternatorDBHandler {
 		return new UpdateTableResult().withTableDescription(table.getTableDescription());
 	}
 
-	/* protected */ PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
+	public PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
 		// Validate data coming in
 		PutItemRequestValidator validator = new PutItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -415,7 +328,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		GetItemRequestValidator validator = new GetItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -462,7 +375,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ DeleteItemResult deleteItem(DeleteItemRequest request) {
+	public DeleteItemResult deleteItem(DeleteItemRequest request) {
 		// Validate data coming in
 		DeleteItemRequestValidator validator = new DeleteItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -521,7 +434,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
+	public BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
 		Map<String, BatchResponse> response = new HashMap<String, BatchResponse>();
 		for (String tableName : request.getRequestItems().keySet()) {
@@ -557,7 +470,7 @@ class AlternatorDBHandler {
 		return batchGetItemResult;
 	}
 
-	/* protected */ BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
+	public BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
 		BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
 		HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
 		for (String tableName : request.getRequestItems().keySet()) {
@@ -585,7 +498,7 @@ class AlternatorDBHandler {
 		return batchWriteItemResult;
 	}
 
-	/* protected */ ScanResult scan(ScanRequest request) {
+	public ScanResult scan(ScanRequest request) {
 		ScanResult result = new ScanResult();
 		List<Error> errors = new ScanRequestValidator().validate(request);
 		if (errors.size() > 0) {
@@ -779,7 +692,7 @@ class AlternatorDBHandler {
 		return queryResult;
 	}
 
-	/* protected */ String getKeyValue(AttributeValue value) {
+	public String getKeyValue(AttributeValue value) {
 		if (value != null) {
 			if (value.getN() != null) {
 				return value.getN();
@@ -790,7 +703,7 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	/* protected */ AttributeValueType getAttributeValueType(AttributeValue value) {
+	public AttributeValueType getAttributeValueType(AttributeValue value) {
 		if (value != null) {
 			if (value.getN() != null) {
 				return AttributeValueType.N;
@@ -805,7 +718,7 @@ class AlternatorDBHandler {
 		return AttributeValueType.UNKNOWN;
 	}
 
-	/* protected */ InternalServerErrorException createInternalServerException(List<Error> errors) {
+	public InternalServerErrorException createInternalServerException(List<Error> errors) {
 		String message = "The following Errors occured: ";
 		for (Error error : errors) {
 			message += error.getMessage() + "\n";
@@ -813,7 +726,7 @@ class AlternatorDBHandler {
 		return new InternalServerErrorException(message);
 	}
 
-	/* protected */ UpdateItemResult updateItem(UpdateItemRequest request) {
+	public UpdateItemResult updateItem(UpdateItemRequest request) {
 		// Validate data coming in
 		// TODO: Look into how we're doing validation, maybe implement better solution
 		UpdateItemRequestValidator validator = new UpdateItemRequestValidator();
@@ -939,7 +852,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
+	public Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
 		if (item == null) {
 			return item;
 		}
@@ -955,7 +868,7 @@ class AlternatorDBHandler {
 		return item;
 	}
 
-	/* protected */ List<Map<String, AttributeValue>> getItemWithAttributesToGet(List<Map<String, AttributeValue>> items, List<String> attributesToGet) {
+	public List<Map<String, AttributeValue>> getItemWithAttributesToGet(List<Map<String, AttributeValue>> items, List<String> attributesToGet) {
 		List<Map<String, AttributeValue>> copy = new ArrayList<Map<String, AttributeValue>>();
 		for (Map<String, AttributeValue> item : items) {
 			copy.add(getItemWithAttributesToGet(item, attributesToGet));
