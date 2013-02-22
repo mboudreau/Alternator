@@ -18,6 +18,7 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
 import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
@@ -213,7 +214,7 @@ class AlternatorDBHandler {
 		CreateTableRequestValidator validator = new CreateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// get information
@@ -237,7 +238,7 @@ class AlternatorDBHandler {
 		DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// get information
@@ -312,7 +313,7 @@ class AlternatorDBHandler {
 		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// Check existence
@@ -332,7 +333,7 @@ class AlternatorDBHandler {
 		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// Check existence
@@ -352,7 +353,8 @@ class AlternatorDBHandler {
 		PutItemRequestValidator validator = new PutItemRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
+
 		}
 
 		// Check existence of table
@@ -420,7 +422,7 @@ class AlternatorDBHandler {
 		GetItemRequestValidator validator = new GetItemRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// get information
@@ -438,12 +440,14 @@ class AlternatorDBHandler {
         ItemRangeGroup rangeGroup = this.tables.get(tableName).getItemRangeGroup(hashKeyValue);
 
 		if (rangeGroup == null) {
-			throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") exists.");
+			return new GetItemResult();
+			// throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") exists.");
 		} else {
             String rangeKeyValue = getKeyValue(key.getRangeKeyElement());
             Map<String, AttributeValue> item = this.tables.get(tableName).getItem(hashKeyValue, rangeKeyValue);
             if (item == null) {
-                throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") and Range Key )" + rangeKeyValue + ") exists.");
+				return new GetItemResult();
+				// throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") and Range Key )" + rangeKeyValue + ") exists.");
             }
 
 			if (attributesToGet == null) {
@@ -467,7 +471,7 @@ class AlternatorDBHandler {
 		DeleteItemRequestValidator validator = new DeleteItemRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// Check existence of table
@@ -819,7 +823,7 @@ class AlternatorDBHandler {
 		UpdateItemRequestValidator validator = new UpdateItemRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// get information

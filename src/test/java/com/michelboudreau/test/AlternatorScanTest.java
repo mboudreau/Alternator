@@ -1,6 +1,11 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.services.dynamodb.model.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,7 +14,17 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.*;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.ComparisonOperator;
+import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.PutItemRequest;
+import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
+import com.amazonaws.services.dynamodb.model.ScalarAttributeType;
+import com.amazonaws.services.dynamodb.model.ScanRequest;
+import com.amazonaws.services.dynamodb.model.ScanResult;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -37,7 +52,11 @@ public class AlternatorScanTest extends AlternatorTest {
     public void tearDown() throws Exception {
         DeleteTableRequest del = new DeleteTableRequest();
         del.setTableName("Testing");
-        getClient().deleteTable(del);
+		try {
+			getClient().deleteTable(del);
+		} catch (ResourceNotFoundException rnfe) {
+
+		}
     }
 
 

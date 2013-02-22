@@ -14,7 +14,6 @@ import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
 import com.amazonaws.services.dynamodb.model.BatchGetItemResult;
 import com.amazonaws.services.dynamodb.model.BatchWriteItemRequest;
 import com.amazonaws.services.dynamodb.model.BatchWriteItemResult;
-import com.amazonaws.services.dynamodb.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodb.model.CreateTableRequest;
 import com.amazonaws.services.dynamodb.model.CreateTableResult;
 import com.amazonaws.services.dynamodb.model.DeleteItemRequest;
@@ -91,26 +90,13 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 	public UpdateItemResult updateItem(UpdateItemRequest updateItemRequest)
 			throws AmazonServiceException, AmazonClientException {
 
-        try {
             return handler.updateItem(updateItemRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new UpdateItemResult();
-        }
 	}
 
 	public PutItemResult putItem(PutItemRequest putItemRequest)
 			throws AmazonServiceException, AmazonClientException {
 
-		try {
             return handler.putItem(putItemRequest);
-		} catch (Exception e) {
-			if (e instanceof ConditionalCheckFailedException) {
-				throw (ConditionalCheckFailedException) e;
-			}
-			log.error(e.getMessage(), e);
-			return new PutItemResult();
-		}
 }
 
 	public DescribeTableResult describeTable(DescribeTableRequest describeTableRequest)
@@ -133,56 +119,31 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 	public CreateTableResult createTable(CreateTableRequest createTableRequest)
 			throws AmazonServiceException, AmazonClientException {
 
-        try {
             return handler.createTable(createTableRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new CreateTableResult();
-        }
 	}
 
 	public UpdateTableResult updateTable(UpdateTableRequest updateTableRequest)
 			throws AmazonServiceException, AmazonClientException {
 
-        try {
             return handler.updateTable(updateTableRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new UpdateTableResult();
-        }
 	}
 
 	public DeleteTableResult deleteTable(DeleteTableRequest deleteTableRequest)
 			throws AmazonServiceException, AmazonClientException {
 
-        try {
             return handler.deleteTable(deleteTableRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new DeleteTableResult();
-        }
 	}
 
 	public DeleteItemResult deleteItem(DeleteItemRequest deleteItemRequest)
 			throws AmazonServiceException, AmazonClientException {
 
-        try {
             return handler.deleteItem(deleteItemRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new DeleteItemResult();
-        }
     }
 
 	public GetItemResult getItem(GetItemRequest getItemRequest)
 			throws AmazonServiceException, AmazonClientException {
 
-        try {
             return handler.getItem(getItemRequest);
-        } catch (Exception e) {
-			// log.error(e.getMessage(), e);
-            return new GetItemResult();
-        }
 	}
 
 	public BatchGetItemResult batchGetItem(BatchGetItemRequest batchGetItemRequest)
