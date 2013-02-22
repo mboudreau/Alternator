@@ -306,7 +306,7 @@ public class AlternatorItemTest extends AlternatorTest {
 
 		AttributeValue value = new AttributeValue("test1");
 		Map<String, ExpectedAttributeValue> expectedMap = new HashMap<String, ExpectedAttributeValue>();
-		expectedMap.put("id", new ExpectedAttributeValue(value));
+		expectedMap.put("id", new ExpectedAttributeValue(false));
 
 		Map<String, AttributeValue> item = createGenericItem(value, null);
 
@@ -315,7 +315,7 @@ public class AlternatorItemTest extends AlternatorTest {
 
 		try {
 			client.putItem(new PutItemRequest(tableName, item).withExpected(expectedMap));
-			//Assert.assertTrue(false);// Should have thrown a ConditionalCheckFailedException
+			Assert.assertTrue(false);// Should have thrown a ConditionalCheckFailedException
 		} catch (ConditionalCheckFailedException ccfe) {
 		}
 	}
