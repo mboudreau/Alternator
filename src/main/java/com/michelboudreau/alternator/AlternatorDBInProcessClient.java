@@ -40,7 +40,7 @@ import com.amazonaws.services.dynamodb.model.UpdateTableResult;
 public class AlternatorDBInProcessClient extends AmazonWebServiceClient implements AmazonDynamoDB {
 	private static final Log log = LogFactory.getLog(AlternatorDBInProcessClient.class);
 
-    private AlternatorDBHandler handler = new AlternatorDBHandler();
+	private AlternatorDBHandler handler = new AlternatorDBHandler();
 
 	public AlternatorDBInProcessClient() {
 		this(new ClientConfiguration());
@@ -56,36 +56,18 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 
 	public ListTablesResult listTables(ListTablesRequest listTablesRequest)
 			throws AmazonServiceException, AmazonClientException {
-
-        try {
-            return handler.listTables(listTablesRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new ListTablesResult();
-        }
+		return handler.listTables(listTablesRequest);
 	}
 
 	public QueryResult query(QueryRequest queryRequest)
 			throws AmazonServiceException, AmazonClientException {
-
-        try {
-            return handler.query(queryRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new QueryResult();
-        }
+		return handler.query(queryRequest);
 	}
 
 	public BatchWriteItemResult batchWriteItem(BatchWriteItemRequest batchWriteItemRequest)
 			throws AmazonServiceException, AmazonClientException {
-
-        try {
-            return handler.batchWriteItem(batchWriteItemRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new BatchWriteItemResult();
-        }
-}
+		return handler.batchWriteItem(batchWriteItemRequest);
+	}
 
 	public UpdateItemResult updateItem(UpdateItemRequest updateItemRequest)
 			throws AmazonServiceException, AmazonClientException {
@@ -101,19 +83,12 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 
 	public DescribeTableResult describeTable(DescribeTableRequest describeTableRequest)
 			throws AmazonServiceException, AmazonClientException {
-
-            return handler.describeTable(describeTableRequest);
+		return handler.describeTable(describeTableRequest);
 	}
 
 	public ScanResult scan(ScanRequest scanRequest)
 			throws AmazonServiceException, AmazonClientException {
-
-        try {
-            return handler.scan(scanRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new ScanResult();
-        }
+		return handler.scan(scanRequest);
 	}
 
 	public CreateTableResult createTable(CreateTableRequest createTableRequest)
@@ -148,22 +123,11 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 
 	public BatchGetItemResult batchGetItem(BatchGetItemRequest batchGetItemRequest)
 			throws AmazonServiceException, AmazonClientException {
-
-        try {
-            return handler.batchGetItem(batchGetItemRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new BatchGetItemResult();
-        }
+		return handler.batchGetItem(batchGetItemRequest);
 	}
 
 	public ListTablesResult listTables() throws AmazonServiceException, AmazonClientException {
-        try {
-            return listTables(new ListTablesRequest());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new ListTablesResult();
-        }
+		return listTables(new ListTablesRequest());
 	}
 
 	@Override
@@ -171,7 +135,7 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 		super.setEndpoint(endpoint);
 	}
 
-    @Override
+	@Override
 	public ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) {
 		return client.getResponseMetadataForRequest(request);
 	}

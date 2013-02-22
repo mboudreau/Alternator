@@ -203,7 +203,7 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	/* protected */ CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
+	public CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
 		// table limit of 256
 		if (this.tables.size() >= Limits.TABLE_MAX) {
 			throw new LimitExceededException("Cannot exceed 256 tables per account.");
@@ -233,7 +233,7 @@ class AlternatorDBHandler {
 		return new CreateTableResult().withTableDescription(table.getTableDescription());
 	}
 
-	/* protected */ DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -255,7 +255,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		ListTablesRequestValidator validator = new ListTablesRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -308,7 +308,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -328,7 +328,7 @@ class AlternatorDBHandler {
 		return new DeleteTableResult().withTableDescription(table.getTableDescription().withTableStatus(TableStatus.DELETING));
 	}
 
-	/* protected */ UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -348,7 +348,7 @@ class AlternatorDBHandler {
 		return new UpdateTableResult().withTableDescription(table.getTableDescription());
 	}
 
-	/* protected */ PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
+	public PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
 		// Validate data coming in
 		PutItemRequestValidator validator = new PutItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -417,7 +417,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
+	public GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		GetItemRequestValidator validator = new GetItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -466,7 +466,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ DeleteItemResult deleteItem(DeleteItemRequest request) {
+	public DeleteItemResult deleteItem(DeleteItemRequest request) {
 		// Validate data coming in
 		DeleteItemRequestValidator validator = new DeleteItemRequestValidator();
 		List<Error> errors = validator.validate(request);
@@ -525,7 +525,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
+	public BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
 		Map<String, BatchResponse> response = new HashMap<String, BatchResponse>();
 		for (String tableName : request.getRequestItems().keySet()) {
@@ -561,7 +561,7 @@ class AlternatorDBHandler {
 		return batchGetItemResult;
 	}
 
-	/* protected */ BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
+	public BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
 		BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
 		HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
 		for (String tableName : request.getRequestItems().keySet()) {
@@ -589,7 +589,7 @@ class AlternatorDBHandler {
 		return batchWriteItemResult;
 	}
 
-	/* protected */ ScanResult scan(ScanRequest request) {
+	public ScanResult scan(ScanRequest request) {
 		ScanResult result = new ScanResult();
 		List<Error> errors = new ScanRequestValidator().validate(request);
 		if (errors.size() > 0) {
@@ -783,7 +783,7 @@ class AlternatorDBHandler {
 		return queryResult;
 	}
 
-	/* protected */ String getKeyValue(AttributeValue value) {
+	public String getKeyValue(AttributeValue value) {
 		if (value != null) {
 			if (value.getN() != null) {
 				return value.getN();
@@ -794,7 +794,7 @@ class AlternatorDBHandler {
 		return null;
 	}
 
-	/* protected */ AttributeValueType getAttributeValueType(AttributeValue value) {
+	public AttributeValueType getAttributeValueType(AttributeValue value) {
 		if (value != null) {
 			if (value.getN() != null) {
 				return AttributeValueType.N;
@@ -809,7 +809,7 @@ class AlternatorDBHandler {
 		return AttributeValueType.UNKNOWN;
 	}
 
-	/* protected */ InternalServerErrorException createInternalServerException(List<Error> errors) {
+	public InternalServerErrorException createInternalServerException(List<Error> errors) {
 		String message = "The following Errors occured: ";
 		for (Error error : errors) {
 			message += error.getMessage() + "\n";
@@ -817,7 +817,7 @@ class AlternatorDBHandler {
 		return new InternalServerErrorException(message);
 	}
 
-	/* protected */ UpdateItemResult updateItem(UpdateItemRequest request) {
+	public UpdateItemResult updateItem(UpdateItemRequest request) {
 		// Validate data coming in
 		// TODO: Look into how we're doing validation, maybe implement better solution
 		UpdateItemRequestValidator validator = new UpdateItemRequestValidator();
@@ -943,7 +943,7 @@ class AlternatorDBHandler {
 		return result;
 	}
 
-	/* protected */ Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
+	public Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
 		if (item == null) {
 			return item;
 		}
@@ -959,7 +959,7 @@ class AlternatorDBHandler {
 		return item;
 	}
 
-	/* protected */ List<Map<String, AttributeValue>> getItemWithAttributesToGet(List<Map<String, AttributeValue>> items, List<String> attributesToGet) {
+	public List<Map<String, AttributeValue>> getItemWithAttributesToGet(List<Map<String, AttributeValue>> items, List<String> attributesToGet) {
 		List<Map<String, AttributeValue>> copy = new ArrayList<Map<String, AttributeValue>>();
 		for (Map<String, AttributeValue> item : items) {
 			copy.add(getItemWithAttributesToGet(item, attributesToGet));

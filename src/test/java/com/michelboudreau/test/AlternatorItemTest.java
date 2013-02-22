@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.AmazonWebServiceRequest;
+import com.amazonaws.services.dynamodb.AmazonDynamoDB;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
 import com.amazonaws.services.dynamodb.model.ConditionalCheckFailedException;
@@ -303,20 +304,21 @@ public class AlternatorItemTest extends AlternatorTest {
 		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
 		createTable(tableName, schema);
 
+		AttributeValue value = new AttributeValue("test1");
 		Map<String, ExpectedAttributeValue> expectedMap = new HashMap<String, ExpectedAttributeValue>();
-		expectedMap.put("id", new ExpectedAttributeValue(false));
+		expectedMap.put("id", new ExpectedAttributeValue(value));
 
-		getClient().putItem(new PutItemRequest(tableName, createGenericItem(new AttributeValue("test1"), null)).withExpected(expectedMap));
+		Map<String, AttributeValue> item = createGenericItem(value, null);
+
+		AmazonDynamoDB client = getClient();
+		client.putItem(new PutItemRequest(tableName, item).withExpected(expectedMap));
 
 		try {
-			getClient().putItem(new PutItemRequest(tableName, createGenericItem(new AttributeValue("test1"), null)).withExpected(expectedMap));
-			Assert.assertTrue(false);// Should have thrown a ConditionalCheckFailedException
+			client.putItem(new PutItemRequest(tableName, item).withExpected(expectedMap));
+			//Assert.assertTrue(false);// Should have thrown a ConditionalCheckFailedException
 		} catch (ConditionalCheckFailedException ccfe) {
 		}
-
 	}
-
-
 
     // TODO: test out delete item expected and return value
 
