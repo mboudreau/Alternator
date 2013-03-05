@@ -1,18 +1,30 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.services.dynamodb.AmazonDynamoDB;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodb.model.*;
-import com.michelboudreau.alternator.AlternatorDB;
-import com.michelboudreau.alternator.AlternatorDBClient;
-import com.michelboudreau.alternator.AlternatorDBInProcessClient;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
+import com.amazonaws.services.dynamodb.AmazonDynamoDB;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.CreateTableRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.ListTablesRequest;
+import com.amazonaws.services.dynamodb.model.ListTablesResult;
+import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodb.model.PutItemRequest;
+import com.amazonaws.services.dynamodb.model.ScalarAttributeType;
+import com.amazonaws.services.dynamodb.model.TableDescription;
+import com.michelboudreau.alternator.AlternatorDB;
+import com.michelboudreau.alternator.AlternatorDBClient;
+import com.michelboudreau.alternator.AlternatorDBInProcessClient;
 
 public class AlternatorTest {
     /**
@@ -20,7 +32,7 @@ public class AlternatorTest {
      * Set to false to invoke AlternatorDBHandler methods in-process
      * to facilitate breakpoint debugging.
      */
-    private static final boolean RUN_DB_AS_SERVICE = true;
+	static boolean									RUN_DB_AS_SERVICE	= true;
 
 	static protected AlternatorDBClient client;
 	static protected DynamoDBMapper mapper;

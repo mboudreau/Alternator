@@ -1,13 +1,16 @@
 package com.michelboudreau.alternator;
 
-import com.amazonaws.services.dynamodb.model.*;
-import com.amazonaws.services.dynamodb.model.transform.*;
-import com.michelboudreau.alternator.enums.AttributeValueType;
-import com.michelboudreau.alternator.models.ItemRangeGroup;
-import com.michelboudreau.alternator.models.Limits;
-import com.michelboudreau.alternator.models.Table;
-import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
-import com.michelboudreau.alternator.validators.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -15,10 +18,95 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
+import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
+import com.amazonaws.services.dynamodb.model.BatchGetItemResult;
+import com.amazonaws.services.dynamodb.model.BatchResponse;
+import com.amazonaws.services.dynamodb.model.BatchWriteItemRequest;
+import com.amazonaws.services.dynamodb.model.BatchWriteItemResult;
+import com.amazonaws.services.dynamodb.model.BatchWriteResponse;
+import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.ConditionalCheckFailedException;
+import com.amazonaws.services.dynamodb.model.CreateTableRequest;
+import com.amazonaws.services.dynamodb.model.CreateTableResult;
+import com.amazonaws.services.dynamodb.model.DeleteItemRequest;
+import com.amazonaws.services.dynamodb.model.DeleteItemResult;
+import com.amazonaws.services.dynamodb.model.DeleteRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableResult;
+import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
+import com.amazonaws.services.dynamodb.model.DescribeTableResult;
+import com.amazonaws.services.dynamodb.model.ExpectedAttributeValue;
+import com.amazonaws.services.dynamodb.model.GetItemRequest;
+import com.amazonaws.services.dynamodb.model.GetItemResult;
+import com.amazonaws.services.dynamodb.model.InternalServerErrorException;
+import com.amazonaws.services.dynamodb.model.Key;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.KeysAndAttributes;
+import com.amazonaws.services.dynamodb.model.LimitExceededException;
+import com.amazonaws.services.dynamodb.model.ListTablesRequest;
+import com.amazonaws.services.dynamodb.model.ListTablesResult;
+import com.amazonaws.services.dynamodb.model.PutItemRequest;
+import com.amazonaws.services.dynamodb.model.PutItemResult;
+import com.amazonaws.services.dynamodb.model.PutRequest;
+import com.amazonaws.services.dynamodb.model.QueryRequest;
+import com.amazonaws.services.dynamodb.model.QueryResult;
+import com.amazonaws.services.dynamodb.model.ResourceInUseException;
+import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
+import com.amazonaws.services.dynamodb.model.ReturnValue;
+import com.amazonaws.services.dynamodb.model.ScanRequest;
+import com.amazonaws.services.dynamodb.model.ScanResult;
+import com.amazonaws.services.dynamodb.model.TableStatus;
+import com.amazonaws.services.dynamodb.model.UpdateItemRequest;
+import com.amazonaws.services.dynamodb.model.UpdateItemResult;
+import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
+import com.amazonaws.services.dynamodb.model.UpdateTableResult;
+import com.amazonaws.services.dynamodb.model.WriteRequest;
+import com.amazonaws.services.dynamodb.model.transform.BatchGetItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.BatchGetItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.BatchWriteItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.BatchWriteItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.CreateTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.CreateTableResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DeleteItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DeleteItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DeleteTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DeleteTableResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DescribeTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DescribeTableResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.GetItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.GetItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.ListTablesRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.ListTablesResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.PutItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.PutItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.QueryRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.QueryResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.ScanRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.ScanResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.UpdateItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.UpdateItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.UpdateTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.UpdateTableResultMarshaller;
+import com.michelboudreau.alternator.enums.AttributeValueType;
+import com.michelboudreau.alternator.models.ItemRangeGroup;
+import com.michelboudreau.alternator.models.Limits;
+import com.michelboudreau.alternator.models.Table;
+import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
+import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
+import com.michelboudreau.alternator.validators.DeleteItemRequestValidator;
+import com.michelboudreau.alternator.validators.DeleteTableRequestValidator;
+import com.michelboudreau.alternator.validators.DescribeTableRequestValidator;
+import com.michelboudreau.alternator.validators.GetItemRequestValidator;
+import com.michelboudreau.alternator.validators.ListTablesRequestValidator;
+import com.michelboudreau.alternator.validators.PutItemRequestValidator;
+import com.michelboudreau.alternator.validators.QueryRequestValidator;
+import com.michelboudreau.alternator.validators.ScanRequestValidator;
+import com.michelboudreau.alternator.validators.UpdateItemRequestValidator;
+import com.michelboudreau.alternator.validators.UpdateTableRequestValidator;
 
 class AlternatorDBHandler {
 
@@ -126,7 +214,7 @@ class AlternatorDBHandler {
 		CreateTableRequestValidator validator = new CreateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// get information
@@ -150,7 +238,7 @@ class AlternatorDBHandler {
 		DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// get information
@@ -225,7 +313,7 @@ class AlternatorDBHandler {
 		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// Check existence
@@ -245,7 +333,7 @@ class AlternatorDBHandler {
 		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// Check existence
@@ -265,7 +353,8 @@ class AlternatorDBHandler {
 		PutItemRequestValidator validator = new PutItemRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
+
 		}
 
 		// Check existence of table
@@ -333,7 +422,7 @@ class AlternatorDBHandler {
 		GetItemRequestValidator validator = new GetItemRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// get information
@@ -351,12 +440,14 @@ class AlternatorDBHandler {
         ItemRangeGroup rangeGroup = this.tables.get(tableName).getItemRangeGroup(hashKeyValue);
 
 		if (rangeGroup == null) {
-			throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") exists.");
+			return new GetItemResult();
+			// throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") exists.");
 		} else {
             String rangeKeyValue = getKeyValue(key.getRangeKeyElement());
             Map<String, AttributeValue> item = this.tables.get(tableName).getItem(hashKeyValue, rangeKeyValue);
             if (item == null) {
-                throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") and Range Key )" + rangeKeyValue + ") exists.");
+				return new GetItemResult();
+				// throw new ResourceNotFoundException("No item with Hash Key (" + hashKeyValue + ") and Range Key )" + rangeKeyValue + ") exists.");
             }
 
 			if (attributesToGet == null) {
@@ -380,7 +471,7 @@ class AlternatorDBHandler {
 		DeleteItemRequestValidator validator = new DeleteItemRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// Check existence of table
@@ -732,7 +823,7 @@ class AlternatorDBHandler {
 		UpdateItemRequestValidator validator = new UpdateItemRequestValidator();
 		List<Error> errors = validator.validate(request);
 		if (errors.size() != 0) {
-			throw createInternalServerException(errors);
+			throw new AmazonServiceException(errors.toString());
 		}
 
 		// get information
