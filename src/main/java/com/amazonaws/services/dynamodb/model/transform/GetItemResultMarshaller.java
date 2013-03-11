@@ -4,6 +4,7 @@ package com.amazonaws.services.dynamodb.model.transform;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.dynamodb.model.*;
 import com.amazonaws.transform.Marshaller;
+import com.amazonaws.util.StringUtils;
 import com.amazonaws.util.json.JSONWriter;
 
 import java.io.StringWriter;
@@ -34,6 +35,8 @@ public class GetItemResultMarshaller implements Marshaller<String, GetItemResult
 							jsonWriter.key("SS").value(value.getSS());
 						} else if (value.getNS() != null) {
 							jsonWriter.key("NS").value(value.getNS());
+						} else if (value.getB() != null) {
+							jsonWriter.key("B").value(StringUtils.fromByteBuffer(value.getB()));
 						}
 						jsonWriter.endObject();
 					}
