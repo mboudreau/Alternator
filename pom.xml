@@ -234,7 +234,7 @@
 	
 	<profiles>
 		<profile>
-			<id>exejar</id>
+			<id>standalone</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>

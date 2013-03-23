@@ -82,7 +82,7 @@ Then you only need to create the AlternatorDB service in your test and you're re
 
 ## Building and Running Alternator as a Standalone Executable JAR File
 
-An optional Maven profile named **"exejar"** includes all third-party dependencies into a self-contained executable JAR file. This allows the Alternator emulator to run in its own process. This is particularly useful when developing DynamoDB client applications in technologies other than Java.
+An optional Maven profile named **"standalone"** includes all third-party dependencies into a self-contained executable JAR file. This allows the Alternator emulator to run in its own process. This is particularly useful when developing DynamoDB client applications in technologies other than Java.
 
 ### Building the Executable JAR File
 
@@ -90,7 +90,7 @@ Clone the Alternator GitHub repository to your local workstation and run the fol
 
     git clone https://github.com/mboudreau/Alternator.git
     cd Alternator
-    mvn clean install -DskipTests -Pexejar
+    mvn clean install -DskipTests -Pstandalone
   
 The desired executable JAR file will be present in the ./target sub-folder,
 as well as in your local Maven repository in this folder tree:
