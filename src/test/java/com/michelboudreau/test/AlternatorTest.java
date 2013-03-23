@@ -34,13 +34,13 @@ public class AlternatorTest {
      * Set to false to invoke AlternatorDBHandler methods in-process
      * to facilitate breakpoint debugging.
      */
-	static boolean									RUN_DB_AS_SERVICE	= true;
+	static boolean RUN_DB_AS_SERVICE = true;
 
     /**
      * Set to true to spawn the service in a local sub-process.
-     * Set to false if an executable JAR instance of Alternator is running in another process.
+     * Set to false if a standalone executable JAR instance of Alternator is running in another process.
      */
-    private static final boolean SPAWN_LOCAL_DB_SERVICE = true;
+    private static final boolean SPAWN_LOCAL_DB_SERVICE = false;
 
 	static protected AlternatorDBClient client;
 	static protected DynamoDBMapper mapper;

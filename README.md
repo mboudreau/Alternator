@@ -108,7 +108,7 @@ These files are intended for local use on a developer workstation.
 
 ### Starting and Stopping the Executable JAR File
 
-To start the Alternator emulator process, use the following commands in a command prompt or terminal window (or save them in *.bat or *.sh script):
+To start the Alternator emulator process, use the following commands in a command prompt or terminal window:
 
     Windows:
     
@@ -122,6 +122,8 @@ To start the Alternator emulator process, use the following commands in a comman
       ALTERNATOR_HOME=~/.m2/repository/com/michelboudreau/alternator/${ALTERNATOR_VERSION}
       java -jar "${ALTERNATOR_HOME}/alternator-${ALTERNATOR_VERSION}-jar-with-dependencies.jar" Alternator.db
 
+These command sequences are available in a *.bat (for Windows) and *.sh (Linux or MacOSX) script in the **scripts** folder beneath the root of this Git repository.
+      
 Note the following message that appears after the program initializes:
 
     Press the Enter key to exit gracefully and save data to file: 
