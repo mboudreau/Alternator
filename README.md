@@ -84,9 +84,12 @@ Then you only need to create the AlternatorDB service in your test and you're re
 
 An optional Maven profile named **"standalone"** includes all third-party dependencies into a self-contained executable JAR file. This allows the Alternator emulator to run in its own process. This is particularly useful when developing DynamoDB client applications in technologies other than Java.
 
+**_Important Caveat:_**
+Currently the Alternator emulator is **_not_** thread-safe for insertions. The internal memory structures are not protected by synchronization locks.  Your own application should serialize its insert operations so they occur one at a time.
+
 ### Building the Executable JAR File
 
-Clone the Alternator GitHub repository to your local workstation and run the following Maven command:
+The standalone executable JAR file is _excluded_ from the default Maven profile **install** target since the file is about 16 MB due to inclusion of the required 3rd-party dependency libraries.  To obtain a copy of this JAR file, clone the Alternator GitHub repository to your local workstation and run the following Maven command:
 
     git clone https://github.com/mboudreau/Alternator.git
     cd Alternator
@@ -192,12 +195,12 @@ Use NPM to install the **aws-sdk** package version **"0.9.1-pre.2"** (or higher)
 
 Here is an example Node JavaScript module to obtain an **AmazonDynamoDB** client reference pointing to the emulator process rather than an actual DynamoDB server. Note that live Amazon credentials are _**not**_ needed for the Node.js client when working with the Alternator emulator process.
 
-
     // AWS client home: http://aws.amazon.com/sdkfornodejs/
     // API doc: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/frames.html
     var awssdk = require('aws-sdk');
 
     var awsDbClient = null;
+    exports.awsDbClient = awsDbClient;
 
     // Configure this module prior to use.
     //   settings (required) A settings object with a .dynamodb
