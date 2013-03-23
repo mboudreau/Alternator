@@ -8,6 +8,8 @@ import javax.inject.Inject;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.util.Assert;
 
 import com.amazonaws.services.dynamodb.AmazonDynamoDB;
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
@@ -32,7 +34,13 @@ public class AlternatorTest {
      * Set to false to invoke AlternatorDBHandler methods in-process
      * to facilitate breakpoint debugging.
      */
-	static boolean									RUN_DB_AS_SERVICE	= true;
+	static boolean RUN_DB_AS_SERVICE = true;
+
+    /**
+     * Set to true to spawn the service in a local sub-process.
+     * Set to false if a standalone executable JAR instance of Alternator is running in another process.
+     */
+    private static final boolean SPAWN_LOCAL_DB_SERVICE = true;
 
 	static protected AlternatorDBClient client;
 	static protected DynamoDBMapper mapper;
@@ -52,7 +60,7 @@ public class AlternatorTest {
 
 	@BeforeClass
 	public static void setUpOnce() throws Exception {
-        if (RUN_DB_AS_SERVICE) {
+        if (RUN_DB_AS_SERVICE && SPAWN_LOCAL_DB_SERVICE) {
             db = new AlternatorDB().start();
         }
 	}
@@ -73,6 +81,11 @@ public class AlternatorTest {
 	public void setClient(AlternatorDBClient value) {
 		client = value;
 	}
+
+    @Test
+    public void noOpTest() {
+        Assert.isTrue(true);
+    }
 
     protected AmazonDynamoDB getClient() {
         if (RUN_DB_AS_SERVICE) {

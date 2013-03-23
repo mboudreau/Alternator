@@ -99,7 +99,7 @@ public class AlternatorQueryTest extends AlternatorTest {
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey2, createStringAttribute("Range4"), "attr1", "value14", "attr2", "value24")).withTableName(tableName));
 
         getClient().putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
-		getClient().putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
+        getClient().putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
 
         return hashKey1;
     }
@@ -130,9 +130,9 @@ public class AlternatorQueryTest extends AlternatorTest {
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey2, createNumberAttribute(3), "attr1", "value13", "attr2", "value23")).withTableName(tableName));
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey2, createNumberAttribute(4), "attr1", "value14", "attr2", "value24")).withTableName(tableName));
 
-		getClient().putItem(new PutItemRequest().withItem(createGenericItem(createStringAttribute(), createNumberAttribute())).withTableName(tableName));
-		getClient().putItem(new PutItemRequest().withItem(createGenericItem(createStringAttribute(), createNumberAttribute())).withTableName(tableName));
-
+        getClient().putItem(new PutItemRequest().withItem(createGenericItem(createStringAttribute(), createNumberAttribute())).withTableName(tableName));
+        getClient().putItem(new PutItemRequest().withItem(createGenericItem(createStringAttribute(), createNumberAttribute())).withTableName(tableName));
+        
         return hashKey1;
     }
 

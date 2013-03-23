@@ -139,4 +139,12 @@ public class AlternatorDBInProcessClient extends AmazonWebServiceClient implemen
 	public ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) {
 		return client.getResponseMetadataForRequest(request);
 	}
+        
+	public void save(String persistence) {
+            handler.save(persistence);
+	}
+
+	public void restore(String persistence) {
+            handler.restore(persistence);
+	}
 }
