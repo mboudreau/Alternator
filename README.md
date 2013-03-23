@@ -13,7 +13,7 @@ You can now add the dependency into your maven project with:
 		<dependency>
 			<groupId>com.michelboudreau</groupId>
 			<artifactId>alternator</artifactId>
-			<version>0.3.3 <!-- subject to change, check sonatype repo --></version>
+			<version>0.3.6 <!-- subject to change, check sonatype repo --></version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -112,13 +112,13 @@ To start the Alternator emulator process, use the following commands in a comman
 
     Windows:
     
-      set ALTERNATOR_VERSION=0.3.4-SNAPSHOT
+      set ALTERNATOR_VERSION=0.3.6-SNAPSHOT
       set ALTERNATOR_HOME=%USERPROFILE%\.m2\repository\com\michelboudreau\alternator\%ALTERNATOR_VERSION%
       java -jar "%ALTERNATOR_HOME%\alternator-%ALTERNATOR_VERSION%-jar-with-dependencies.jar" Alternator.db
       
     Linux or MacOSX:
     
-      ALTERNATOR_VERSION=0.3.4-SNAPSHOT
+      ALTERNATOR_VERSION=0.3.6-SNAPSHOT
       ALTERNATOR_HOME=~/.m2/repository/com/michelboudreau/alternator/${ALTERNATOR_VERSION}
       java -jar "${ALTERNATOR_HOME}/alternator-${ALTERNATOR_VERSION}-jar-with-dependencies.jar" Alternator.db
 
@@ -224,4 +224,3 @@ Here is an example Node JavaScript module to obtain an **AmazonDynamoDB** client
         
         callback(null, endpoint);
     };
-

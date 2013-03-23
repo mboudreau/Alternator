@@ -1,6 +1,9 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.services.dynamodb.model.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,7 +12,15 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.*;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.ComparisonOperator;
+import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.PutItemRequest;
+import com.amazonaws.services.dynamodb.model.QueryRequest;
+import com.amazonaws.services.dynamodb.model.QueryResult;
+import com.amazonaws.services.dynamodb.model.ScalarAttributeType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -87,9 +98,6 @@ public class AlternatorQueryTest extends AlternatorTest {
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey2, createStringAttribute("Range3"), "attr1", "value13", "attr2", "value23")).withTableName(tableName));
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey2, createStringAttribute("Range4"), "attr1", "value14", "attr2", "value24")).withTableName(tableName));
 
-        getClient().putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
-		getClient().putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
-
         return hashKey1;
     }
 
@@ -104,6 +112,7 @@ public class AlternatorQueryTest extends AlternatorTest {
 		AttributeValue hashKey2 = createStringAttribute();
 
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
+		getClient().putItem(new PutItemRequest().withItem(createGenericItem(createStringAttribute(), createNumberAttribute())).withTableName(tableName));
 
         getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey1, createNumberAttribute(4), "attr1", "value14", "attr2", "value24")).withTableName(tableName));
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey1, createNumberAttribute(3), "attr1", "value13", "attr2", "value23")).withTableName(tableName));
@@ -118,9 +127,6 @@ public class AlternatorQueryTest extends AlternatorTest {
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey2, createNumberAttribute(2), "attr1", "value12", "attr2", "value22")).withTableName(tableName));
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey2, createNumberAttribute(3), "attr1", "value13", "attr2", "value23")).withTableName(tableName));
 		getClient().putItem(new PutItemRequest().withItem(createGenericItem(hashKey2, createNumberAttribute(4), "attr1", "value14", "attr2", "value24")).withTableName(tableName));
-
-        getClient().putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
-		getClient().putItem(new PutItemRequest().withItem(createGenericItem()).withTableName(tableName));
 
         return hashKey1;
     }

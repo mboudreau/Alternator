@@ -1,11 +1,8 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodb.model.*;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,6 +10,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapperConfig;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.ComparisonOperator;
+import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.ResourceInUseException;
+import com.amazonaws.services.dynamodb.model.ScalarAttributeType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations =
@@ -75,7 +83,11 @@ public class AlternatorMapperTest extends AlternatorTest
                 new KeySchema(
                     new KeySchemaElement().withAttributeName("code").withAttributeType(ScalarAttributeType.S)
                 );
+		try {
         createTable(hashTableName, schema);
+		} catch (ResourceInUseException riue) {
+			// The table is already created, do nothing
+		}
 
         TestClassWithHashKey value2a = new TestClassWithHashKey();
         value2a.setCode("hash2");
@@ -118,7 +130,11 @@ public class AlternatorMapperTest extends AlternatorTest
                 );
         schema.setRangeKeyElement(new KeySchemaElement().withAttributeName(
                 "rangeCode").withAttributeType(ScalarAttributeType.S));
-        createTable(hashRangeTableName, schema);
+		try {
+			createTable(hashRangeTableName, schema);
+		} catch (ResourceInUseException riue) {
+			// The table is already created
+		}
 
         TestClassWithHashRangeKey value2a = new TestClassWithHashRangeKey();
         value2a.setHashCode("hash2");
@@ -139,7 +155,6 @@ public class AlternatorMapperTest extends AlternatorTest
     public void getHashItemTest()
     {
         putItemWithHashKey();
-        putItemWithHashKeyOverwriteItem();
 
         String code = "hash1";
         TestClassWithHashKey value = mapper.load(TestClassWithHashKey.class, code);
@@ -152,6 +167,9 @@ public class AlternatorMapperTest extends AlternatorTest
     @Test
     public void getUnknownHashItemTest()
     {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("code").withAttributeType(ScalarAttributeType.S));
+		createTable(hashTableName, schema);
+
         String code = "hash1x";
         TestClassWithHashKey value = mapper.load(TestClassWithHashKey.class, code);
         Assert.assertNull("Value should not be found.", value);
@@ -183,6 +201,10 @@ public class AlternatorMapperTest extends AlternatorTest
     @Test
     public void getUnknownHashRangeItemTest()
     {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("hashCode").withAttributeType(ScalarAttributeType.S));
+		schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("rangeCode").withAttributeType(ScalarAttributeType.S));
+		createTable(hashRangeTableName, schema);
+
         String hashCode = "hash2x";
         String rangeCode = "range2";
         TestClassWithHashRangeKey value = mapper.load(TestClassWithHashRangeKey.class, hashCode, rangeCode);
@@ -219,7 +241,6 @@ public class AlternatorMapperTest extends AlternatorTest
 	@Test
 	public void queryWithUnknownHashKey() {
         putItemWithHashKey();
-        putItemWithHashKeyOverwriteItem();
 
         String code = "hash1x";
 
@@ -234,7 +255,6 @@ public class AlternatorMapperTest extends AlternatorTest
 	@Test
 	public void queryWithHashRangeKey() {
         putItemWithHashKeyAndRangeKey();
-        putItemWithHashKeyAndRangeKeyOverwriteItem();
 
         TestClassWithHashRangeKey value2c = new TestClassWithHashRangeKey();
         value2c.setHashCode("hash2");
@@ -292,7 +312,6 @@ public class AlternatorMapperTest extends AlternatorTest
 	@Test
 	public void queryWithUnknownHashRangeKey1() {
         putItemWithHashKeyAndRangeKey();
-        putItemWithHashKeyAndRangeKeyOverwriteItem();
 
         String hashCode = "hash1x";
 
@@ -307,7 +326,6 @@ public class AlternatorMapperTest extends AlternatorTest
 	@Test
 	public void queryWithUnknownHashRangeKey2() {
         putItemWithHashKeyAndRangeKey();
-        putItemWithHashKeyAndRangeKeyOverwriteItem();
 
         String hashCode = "hash2";
 
@@ -330,8 +348,8 @@ public class AlternatorMapperTest extends AlternatorTest
     @Test
     public void deleteHashItemTest()
     {
-        putItemWithHashKey();
-        putItemWithHashKeyOverwriteItem();
+		putItemWithHashKey();
+		putItemWithHashKeyOverwriteItem();
 
         String code = "hash1";
         TestClassWithHashKey value = mapper.load(TestClassWithHashKey.class, code);
@@ -350,7 +368,7 @@ public class AlternatorMapperTest extends AlternatorTest
     public void deleteHashRangeItemTest()
     {
         putItemWithHashKeyAndRangeKey();
-        putItemWithHashKeyAndRangeKeyOverwriteItem();
+		putItemWithHashKeyAndRangeKeyOverwriteItem();
 
         String hashCode = "hash2";
         String rangeCode = "range2";
@@ -366,4 +384,29 @@ public class AlternatorMapperTest extends AlternatorTest
         TestClassWithHashRangeKey value2 = mapper.load(TestClassWithHashRangeKey.class, hashCode, rangeCode);
         Assert.assertNull("Value2 should not be found.", value2);
     }
+
+	@Test
+	public void scanIndexForwardFalseTest() {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("hashCode").withAttributeType(ScalarAttributeType.S));
+		schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("rangeCode").withAttributeType(ScalarAttributeType.S));
+		createTable(hashRangeTableName, schema);
+
+		{
+			TestClassWithHashRangeKey c = new TestClassWithHashRangeKey();
+			c.setHashCode("code");
+			c.setRangeCode("1");
+			c.setStringData("first");
+			mapper.save(c);
+		}
+
+		{
+			TestClassWithHashRangeKey c = new TestClassWithHashRangeKey();
+			c.setHashCode("code");
+			c.setRangeCode("2");
+			c.setStringData("second");
+			mapper.save(c);
+		}
+		TestClassWithHashRangeKey res = mapper.query(TestClassWithHashRangeKey.class, new DynamoDBQueryExpression(new AttributeValue("code")).withScanIndexForward(false).withLimit(1)).get(0);
+		Assert.assertEquals("second", res.getStringData());
+	}
 }

@@ -10,7 +10,7 @@
 
 	<groupId>com.michelboudreau</groupId>
 	<artifactId>alternator</artifactId>
-	<version>0.3.4-SNAPSHOT</version>
+	<version>0.3.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Alternator</name>
@@ -56,8 +56,8 @@
 		<url>git@github.com:mboudreau/Alternator.git</url>
 		<connection>scm:git:git@github.com:mboudreau/Alternator.git</connection>
 		<developerConnection>scm:git:git@github.com:mboudreau/Alternator.git</developerConnection>
-		<tag>alternator-0.3.2</tag>
-	</scm>
+    <tag>alternator-0.3.5</tag>
+  </scm>
 
 	<build>
 		<resources>
@@ -112,6 +112,16 @@
 				<configuration>
 					<pushChanges>false</pushChanges>
 					<localCheckout>true</localCheckout>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.13</version>
+				<configuration>
+					<includes>
+						<include>**/*TestSuite.java</include>
+					</includes>
 				</configuration>
 			</plugin>
 		</plugins>

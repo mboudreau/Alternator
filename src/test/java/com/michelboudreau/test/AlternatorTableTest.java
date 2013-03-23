@@ -1,6 +1,7 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.services.dynamodb.model.*;
+import java.util.Date;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,7 +10,17 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Date;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableResult;
+import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
+import com.amazonaws.services.dynamodb.model.DescribeTableResult;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.ListTablesRequest;
+import com.amazonaws.services.dynamodb.model.ListTablesResult;
+import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodb.model.TableDescription;
+import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -75,23 +86,39 @@ public class AlternatorTableTest extends AlternatorTest {
 
 	@Test
 	public void createTableWithoutHashKey() {
-		Assert.assertNull(createTable(createKeySchema(null, createNumberKeyElement())));
+		try {
+			createTable(createKeySchema(null, createNumberKeyElement()));
+			Assert.assertTrue(false);// Should have thrown an exception
+		} catch (AmazonServiceException ase) {
+		}
 	}
 
 	@Test
 	public void createTableWithoutName() {
-		Assert.assertNull(createTable(null, createKeySchema()));
+		try {
+			createTable(null, createKeySchema());
+			Assert.assertTrue(false);// Should have thrown an exception
+		} catch (AmazonServiceException ase) {
+		}
 	}
 
 	@Test
 	public void createTableWithoutThroughput() {
-		Assert.assertNull(createTable(createTableName(), createKeySchema(), null));
+		try {
+			createTable(createTableName(), createKeySchema(), null);
+			Assert.assertTrue(false);// Should have thrown an exception
+		} catch (AmazonServiceException ase) {
+		}
 	}
 
 	@Test
 	public void createTableWithSameHashAndRangeKey() {
 		KeySchemaElement el = createStringKeyElement();
-		Assert.assertNull(createTable(createKeySchema(el, el)));
+		try {
+			createTable(createKeySchema(el, el));
+			Assert.assertTrue(false);// Should have thrown an exception
+		} catch (AmazonServiceException ase) {
+		}
 	}
 
 	@Test
@@ -106,8 +133,14 @@ public class AlternatorTableTest extends AlternatorTest {
 	@Test
 	public void describeTableWithoutTableName() {
 		createTable();
-		DescribeTableResult res = getClient().describeTable(new DescribeTableRequest());
-		Assert.assertNull(res.getTable());
+		boolean wasError = false;
+		try {
+			DescribeTableResult res = getClient().describeTable(new DescribeTableRequest());
+			wasError = res.getTable() == null;
+		} catch (Exception e) {
+			wasError = true;
+		}
+		Assert.assertTrue(wasError);
 	}
 
 	@Test
@@ -189,8 +222,11 @@ public class AlternatorTableTest extends AlternatorTest {
 	public void deleteTableWithoutName() {
 		String name = createTableName();
 		createTable(name);
-		DeleteTableResult res = getClient().deleteTable(new DeleteTableRequest());
-		Assert.assertNull(res.getTableDescription());
+		try {
+			DeleteTableResult res = getClient().deleteTable(new DeleteTableRequest());
+			Assert.assertTrue(false);// Should have thrown an exception
+		} catch (AmazonServiceException ase) {
+		}
 		Assert.assertTrue(getClient().listTables().getTableNames().contains(name));
 	}
 
@@ -213,7 +249,11 @@ public class AlternatorTableTest extends AlternatorTest {
 		createTable();
 		ProvisionedThroughput throughput = new ProvisionedThroughput().withReadCapacityUnits(50L).withWriteCapacityUnits(50L);
 		UpdateTableRequest req = new UpdateTableRequest().withProvisionedThroughput(throughput);
-		Assert.assertNull(getClient().updateTable(req).getTableDescription());
+		try {
+			getClient().updateTable(req).getTableDescription();
+			Assert.assertTrue(false);// Should have thrown an exception
+		} catch (AmazonServiceException ase) {
+		}
 	}
 
 	@Test
@@ -221,12 +261,20 @@ public class AlternatorTableTest extends AlternatorTest {
 		String name = createTableName();
 		createTable(name);
 		UpdateTableRequest req = new UpdateTableRequest().withTableName(name);
-		Assert.assertNull(getClient().updateTable(req).getTableDescription());
+		try {
+			getClient().updateTable(req).getTableDescription();
+			Assert.assertTrue(false);// Should have thrown an exception
+		} catch (AmazonServiceException ase) {
+		}
 	}
 
 	@Test
 	public void updateTableWithoutNameOrThroughput() {
 		createTable();
-		Assert.assertNull(getClient().updateTable(new UpdateTableRequest()).getTableDescription());
+		try {
+			getClient().updateTable(new UpdateTableRequest()).getTableDescription();
+			Assert.assertTrue(false);// Should have thrown an exception
+		} catch (AmazonServiceException ase) {
+		}
 	}
 }
