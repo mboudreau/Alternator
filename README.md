@@ -122,7 +122,7 @@ To start the Alternator emulator process, use the following commands in a comman
       ALTERNATOR_HOME=~/.m2/repository/com/michelboudreau/alternator/${ALTERNATOR_VERSION}
       java -jar "${ALTERNATOR_HOME}/alternator-${ALTERNATOR_VERSION}-jar-with-dependencies.jar" Alternator.db
 
-These command sequences are available in a *.bat (for Windows) and *.sh (Linux or MacOSX) script in the **scripts** folder beneath the root of this Git repository.
+These command sequences are available in a **.bat** (for Windows) and **.sh** (Linux or MacOSX) script in the **scripts** folder beneath the root of this Git repository.
       
 Note the following message that appears after the program initializes:
 
@@ -138,7 +138,7 @@ If you press Control-C, the process is "hard-killed" and the memory data is disc
 If you elect to save the data to **Alternator.db**, you can examine the JSON text with any text editor (set to word wrap).
 The next time the emulator is started using the executable JAR file it will reload the saved data into memory.
 
-To start an emulator session with an empty database, simply delete the Alternator.db file (or rename it out of the way).
+To start an emulator session with an empty database, simply delete the **Alternator.db** file (or rename it out of the way).  You can also save copies of the **Alternator.db** file for use in repeatable integration testing for your application.
 
 ### Accessing the Alternator Process from non-Java Applications
 
@@ -188,7 +188,7 @@ Here is an example class to obtain an **AmazonDynamoDB** client reference pointi
 
 #### _Node.js Example_:
 
-Use NPM to install the **aws-sdk** package version **"0.9.1-pre.2"**.
+Use NPM to install the **aws-sdk** package version **"0.9.1-pre.2"** (or higher).
 
 Here is an example Node JavaScript module to obtain an **AmazonDynamoDB** client reference pointing to the emulator process rather than an actual DynamoDB server. Note that live Amazon credentials are _**not**_ needed for the Node.js client when working with the Alternator emulator process.
 
@@ -208,12 +208,14 @@ Here is an example Node JavaScript module to obtain an **AmazonDynamoDB** client
     //       or a string indicating the active DynamoDB endpoint on success.
     exports.configure = 
     function (settings, callback) {
+        var defaultAlternatorEndpoint = "http://localhost:9090/";
+
         var credentialsPath = settings.dynamodb.awsCredentialsPath;
         awssdk.config.loadFromPath(credentialsPath);
 
         var options = {};
         if (settings.dynamodb.useEmulator) {
-            options.endpoint = settings.dynamodb.emulatorEndpoint;
+            options.endpoint = defaultAlternatorEndpoint;
         }
 
         var service = new awssdk.DynamoDB(options);
