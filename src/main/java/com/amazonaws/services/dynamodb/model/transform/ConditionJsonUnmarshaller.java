@@ -1,8 +1,13 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.transform.*;
 import org.codehaus.jackson.JsonToken;
-import com.amazonaws.services.dynamodb.model.*;
+
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.ListUnmarshaller;
+import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
+import com.amazonaws.transform.Unmarshaller;
 
 
 public class ConditionJsonUnmarshaller implements Unmarshaller<Condition, JsonUnmarshallerContext> {
@@ -22,7 +27,7 @@ public class ConditionJsonUnmarshaller implements Unmarshaller<Condition, JsonUn
                 if (context.testExpression("AttributeValueList", targetDepth)) {
                     request.setAttributeValueList(new ListUnmarshaller<AttributeValue>(AttributeValueJsonUnmarshaller.getInstance()).unmarshall(context));
                 }
-                if (context.testExpression("ComparisonOperator", originalDepth) || context.testExpression("ComparisonOperator", originalDepth-1)) {
+				if (context.testExpression("ComparisonOperator", targetDepth) || context.testExpression("ComparisonOperator", targetDepth - 1)) {
                     context.nextToken();
                     request.setComparisonOperator(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance().unmarshall(context));
                 }

@@ -760,16 +760,20 @@ class AlternatorDBHandler {
         KeySchemaElement rangeKeyElement = keySchema.getRangeKeyElement();
         ItemRangeGroup rangeGroup = table.getItemRangeGroup(hashKeyValue);
         if (rangeGroup != null) {
-            for (Map<String, AttributeValue> item : rangeGroup.getItems(rangeKeyElement, request.getRangeKeyCondition())) {
-				if (request.getLimit() == null || request.getLimit() <= 0 || list.size() < request.getLimit()) {
-					if (request.getScanIndexForward() == null || request.getScanIndexForward() == false) {
-						list.add(0, getItemWithAttributesToGet(item, attributesToGet));
-					} else {
-						list.add(getItemWithAttributesToGet(item, attributesToGet));
-					}
+			for (Map<String, AttributeValue> item : rangeGroup.getItems(rangeKeyElement, request.getRangeKeyCondition())) {
+				if (request.getScanIndexForward() == null || request.getScanIndexForward() == false) {
+					list.add(0, getItemWithAttributesToGet(item, attributesToGet));
+				} else {
+					list.add(getItemWithAttributesToGet(item, attributesToGet));
 				}
             }
         }
+
+		if (request.getLimit() != null && request.getLimit() > 0) {
+			while (list.size() > request.getLimit()) {
+				list.remove((int) request.getLimit());
+			}
+		}
 
 
 		queryResult.setItems(list);

@@ -409,4 +409,22 @@ public class AlternatorMapperTest extends AlternatorTest
 		TestClassWithHashRangeKey res = mapper.query(TestClassWithHashRangeKey.class, new DynamoDBQueryExpression(new AttributeValue("code")).withScanIndexForward(false).withLimit(1)).get(0);
 		Assert.assertEquals("second", res.getStringData());
 	}
+
+	@Test
+	public void limitTest() {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("hashCode").withAttributeType(ScalarAttributeType.S));
+		schema.setRangeKeyElement(new KeySchemaElement().withAttributeName("rangeCode").withAttributeType(ScalarAttributeType.S));
+		createTable(hashRangeTableName, schema);
+
+		for (int i = 0; i < 10; i++) {
+			TestClassWithHashRangeKey c = new TestClassWithHashRangeKey();
+			c.setHashCode("code");
+			c.setRangeCode(i + "");
+			mapper.save(c);
+		}
+
+		Assert.assertEquals(1, mapper.query(TestClassWithHashRangeKey.class, new DynamoDBQueryExpression(new AttributeValue("code")).withLimit(1)).size());
+		Assert.assertEquals(3, mapper.query(TestClassWithHashRangeKey.class, new DynamoDBQueryExpression(new AttributeValue("code")).withLimit(3)).size());
+		Assert.assertEquals(10, mapper.query(TestClassWithHashRangeKey.class, new DynamoDBQueryExpression(new AttributeValue("code")).withLimit(20)).size());
+	}
 }
