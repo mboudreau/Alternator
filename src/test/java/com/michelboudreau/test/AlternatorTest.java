@@ -40,7 +40,7 @@ public class AlternatorTest {
      * Set to true to spawn the service in a local sub-process.
      * Set to false if a standalone executable JAR instance of Alternator is running in another process.
      */
-    private static final boolean SPAWN_LOCAL_DB_SERVICE = false;
+    private static final boolean SPAWN_LOCAL_DB_SERVICE = true;
 
 	static protected AlternatorDBClient client;
 	static protected DynamoDBMapper mapper;
