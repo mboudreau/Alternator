@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.services.dynamodb.AmazonDynamoDBAsync;
 import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
 import com.amazonaws.services.dynamodb.model.BatchGetItemResult;
@@ -132,5 +133,70 @@ public class AlternatorDBAsyncClient extends AlternatorDBClient implements Amazo
 		public boolean isDone() {
 			return true;
 		}
+	}
+
+	@Override
+	public Future<ListTablesResult> listTablesAsync(ListTablesRequest listTablesRequest, AsyncHandler<ListTablesRequest, ListTablesResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<QueryResult> queryAsync(QueryRequest queryRequest, AsyncHandler<QueryRequest, QueryResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<BatchWriteItemResult> batchWriteItemAsync(BatchWriteItemRequest batchWriteItemRequest, AsyncHandler<BatchWriteItemRequest, BatchWriteItemResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<UpdateItemResult> updateItemAsync(UpdateItemRequest updateItemRequest, AsyncHandler<UpdateItemRequest, UpdateItemResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<PutItemResult> putItemAsync(PutItemRequest putItemRequest, AsyncHandler<PutItemRequest, PutItemResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<DescribeTableResult> describeTableAsync(DescribeTableRequest describeTableRequest, AsyncHandler<DescribeTableRequest, DescribeTableResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<ScanResult> scanAsync(ScanRequest scanRequest, AsyncHandler<ScanRequest, ScanResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<CreateTableResult> createTableAsync(CreateTableRequest createTableRequest, AsyncHandler<CreateTableRequest, CreateTableResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<UpdateTableResult> updateTableAsync(UpdateTableRequest updateTableRequest, AsyncHandler<UpdateTableRequest, UpdateTableResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<DeleteTableResult> deleteTableAsync(DeleteTableRequest deleteTableRequest, AsyncHandler<DeleteTableRequest, DeleteTableResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<DeleteItemResult> deleteItemAsync(DeleteItemRequest deleteItemRequest, AsyncHandler<DeleteItemRequest, DeleteItemResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<GetItemResult> getItemAsync(GetItemRequest getItemRequest, AsyncHandler<GetItemRequest, GetItemResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Future<BatchGetItemResult> batchGetItemAsync(BatchGetItemRequest batchGetItemRequest, AsyncHandler<BatchGetItemRequest, BatchGetItemResult> asyncHandler) throws AmazonServiceException, AmazonClientException {
+		throw new UnsupportedOperationException();
 	}
 }
