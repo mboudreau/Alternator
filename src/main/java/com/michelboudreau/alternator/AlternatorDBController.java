@@ -7,10 +7,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodb.model.InternalServerErrorException;
@@ -45,16 +47,22 @@ class AlternatorDBController {
     }
 
 	@RequestMapping(method = RequestMethod.POST, consumes = "application/x-amz-json-1.0")
-	@ResponseBody
-	public String alternatorDBController(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<String> alternatorDBController(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			return handler.handle(request);
-		} catch (AmazonServiceException e) {
-			response.setStatus(400);
-			if (e instanceof InternalServerErrorException) {
-				response.setStatus(500);
+			try {
+				request.setCharacterEncoding("UTF-8");
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			return new AmazonServiceExceptionMarshaller().marshall(e);
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.add("Content-Type", "application/json; charset=utf-8");
+			return new ResponseEntity<String>(handler.handle(request), responseHeaders, HttpStatus.OK);
+		} catch (AmazonServiceException e) {
+			int statusCode = 400;
+			if (e instanceof InternalServerErrorException) {
+				statusCode = 500;
+			}
+			return new ResponseEntity<String>(new AmazonServiceExceptionMarshaller().marshall(e), new HttpHeaders(), HttpStatus.valueOf(statusCode));
 		}
 	}
 
