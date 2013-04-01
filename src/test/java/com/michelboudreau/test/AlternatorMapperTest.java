@@ -427,4 +427,20 @@ public class AlternatorMapperTest extends AlternatorTest
 		Assert.assertEquals(3, mapper.query(TestClassWithHashRangeKey.class, new DynamoDBQueryExpression(new AttributeValue("code")).withLimit(3)).size());
 		Assert.assertEquals(10, mapper.query(TestClassWithHashRangeKey.class, new DynamoDBQueryExpression(new AttributeValue("code")).withLimit(20)).size());
 	}
+
+	@Test
+	public void utf8Test() {
+		KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("code").withAttributeType(ScalarAttributeType.S));
+		createTable(hashTableName, schema);
+
+		TestClassWithHashKey value = new TestClassWithHashKey();
+		value.setCode("éáűőúöüóí");
+		value.setStringData("űáéúőóüöí");
+		mapper.save(value);
+
+		TestClassWithHashKey readValue = mapper.load(TestClassWithHashKey.class, "éáűőúöüóí");
+		Assert.assertEquals("éáűőúöüóí", readValue.getCode());
+		Assert.assertEquals("űáéúőóüöí", readValue.getStringData());
+
+	}
 }
