@@ -914,29 +914,7 @@ class AlternatorDBHandler {
 							}
 						} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.ADD.name())) {
 							if (attributesToUpdate.get(sKey).getValue() != null) {
-								if (item.get(sKey).getSS() != null) {
-									if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
-										throw new ConditionalCheckFailedException("It's not possible to ADD something else than a List<String> for the attribute (" + sKey + ")");
-									} else {
-										for (String toUp : attributesToUpdate.get(sKey).getValue().getSS()) {
-											item.get(sKey).getSS().add(toUp);
-										}
-									}
-								} else if (item.get(sKey).getNS() != null) {
-									if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
-										throw new ConditionalCheckFailedException("It's not possible to ADD something else than a List<Number> for the attribute (" + sKey + ")");
-									} else {
-										for (String toUp : attributesToUpdate.get(sKey).getValue().getNS()) {
-											item.get(sKey).getNS().add(toUp);
-										}
-									}
-								} else if (item.get(sKey).getS() != null) {
-									throw new ConditionalCheckFailedException("It's not possible to ADD on an attribute with a String type for the attribute (" + sKey + ")");
-								} else if (item.get(sKey).getN() != null) {
-									Double i = new Double(item.get(sKey).getN());
-									i = i + new Double(attributesToUpdate.get(sKey).getValue().getN());
-									item.get(sKey).setN(i + "");
-								}
+								AddAttributeValue(item, sKey, attributesToUpdate.get(sKey));
 							} else {
 								throw new ResourceNotFoundException("the provided update item with attribute (" + sKey + ") doesn't have an AttributeValue to perform the ADD");
 							}
@@ -992,5 +970,39 @@ class AlternatorDBHandler {
 			}
 		}
 		return true;
+	}
+	
+	private void AddAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueUpdate){
+		
+		AttributeValue value = item.get(attributename);
+		if (value==null){
+			//new field
+			value = valueUpdate.getValue();
+			item.put(attributename, value);
+		}else{
+			if (value.getSS() != null) {
+				if (valueUpdate.getValue().getSS() == null) {
+					throw new ConditionalCheckFailedException("It's not possible to ADD something else than a List<String> for the attribute (" + attributename + ")");
+				} else {
+					for (String toUp : valueUpdate.getValue().getSS()) {
+						value.getSS().add(toUp);
+					}
+				}
+			} else if (value.getNS() != null) {
+				if (valueUpdate.getValue().getNS() == null) {
+					throw new ConditionalCheckFailedException("It's not possible to ADD something else than a List<Number> for the attribute (" + attributename + ")");
+				} else {
+					for (String toUp : valueUpdate.getValue().getNS()) {
+						value.getNS().add(toUp);
+					}
+				}
+			} else if (value.getS() != null) {
+				throw new ConditionalCheckFailedException("It's not possible to ADD on an attribute with a String type for the attribute (" + attributename + ")");
+			} else if (value.getN() != null) {
+				Double i = new Double(value.getN());
+				i = i + new Double(valueUpdate.getValue().getN());
+				value.setN(i + "");
+			}
+		}
 	}
 }
