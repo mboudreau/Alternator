@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.dynamodb.model.AttributeAction;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
 import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
@@ -866,11 +867,11 @@ class AlternatorDBHandler {
 			Set<String> sKeyz = new HashSet<String>(item.keySet());
 			for (String sKey : sKeyz) {
 				if (attributesToUpdate.containsKey(sKey)) {
-					if (attributesToUpdate.get(sKey).getAction().equals("PUT")) {
+					if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.PUT.name())) {
 						item.remove(sKey);
 						item.put(sKey, attributesToUpdate.get(sKey).getValue());
 						attributesToUpdate.remove(sKey);
-					} else if (attributesToUpdate.get(sKey).getAction().equals("DELETE")) {
+					} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.DELETE.name())) {
 						if (attributesToUpdate.get(sKey).getValue() != null) {
 							if (item.get(sKey).getSS() != null) {
 								if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
@@ -905,11 +906,11 @@ class AlternatorDBHandler {
 							item.remove(sKey);
 							attributesToUpdate.remove(sKey);
 						}
-					} else if (attributesToUpdate.get(sKey).getAction().equals("ADD")) {
+					} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.ADD.name())) {
 						if (attributesToUpdate.get(sKey).getValue() != null) {
 							if (item.get(sKey).getSS() != null) {
 								if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
-									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + sKey + ")");
+									throw new ConditionalCheckFailedException("It's not possible to ADD something else than a List<String> for the attribute (" + sKey + ")");
 								} else {
 									for (String toUp : attributesToUpdate.get(sKey).getValue().getSS()) {
 										item.get(sKey).getSS().add(toUp);
@@ -917,7 +918,7 @@ class AlternatorDBHandler {
 								}
 							} else if (item.get(sKey).getNS() != null) {
 								if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
-									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + sKey + ")");
+									throw new ConditionalCheckFailedException("It's not possible to ADD something else than a List<Number> for the attribute (" + sKey + ")");
 								} else {
 									for (String toUp : attributesToUpdate.get(sKey).getValue().getNS()) {
 										item.get(sKey).getNS().add(toUp);
@@ -936,11 +937,6 @@ class AlternatorDBHandler {
 					}
 				}
 
-			}
-			for (String sKey : attributesToUpdate.keySet()) {
-				if (attributesToUpdate.get(sKey).getAction().equals("DELETE") == false) {
-					item.put(sKey, attributesToUpdate.get(sKey).getValue());
-				}
 			}
 			result.setAttributes(item);
 		}
