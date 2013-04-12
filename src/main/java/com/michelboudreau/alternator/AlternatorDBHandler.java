@@ -870,6 +870,7 @@ class AlternatorDBHandler {
 		} else {
 			if (isExpectedItem(item, request.getExpected())){			
 				Set<String> sKeyz = new HashSet<String>(item.keySet());
+				sKeyz.addAll(attributesToUpdate.keySet());
 				for (String sKey : sKeyz) {
 					if (attributesToUpdate.containsKey(sKey)) {
 						if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.PUT.name())) {
