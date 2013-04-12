@@ -29,14 +29,7 @@ public class UpdateItemRequestJsonUnmarshaller implements Unmarshaller<UpdateIte
                     request.setKey(KeyJsonUnmarshaller.getInstance().unmarshall(context));
                 }
                 if (context.testExpression("Expected", targetDepth)) {
-                    Map<String, AttributeValue> map = new MapUnmarshaller<String, AttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), AttributeValueJsonUnmarshaller.getInstance()).unmarshall(context);
-                    Map<String, ExpectedAttributeValue> expected = new HashMap<String,ExpectedAttributeValue>();
-                    for(String key : map.keySet()){
-                        ExpectedAttributeValue value = new ExpectedAttributeValue();
-                        value.setValue(map.get(key));
-                        value.setExists(true);
-                        expected.put(key,value);
-                    }
+                	Map<String, ExpectedAttributeValue> expected = new MapUnmarshaller<String, ExpectedAttributeValue>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), ExpectedAttributeValueJsonUnmarshaller.getInstance()).unmarshall(context);
                     request.setExpected(expected);
                 }if (context.testExpression("AttributeUpdates", targetDepth)) {
                     request.setAttributeUpdates(new MapUnmarshaller<String, AttributeValueUpdate>(SimpleTypeJsonUnmarshallers.StringJsonUnmarshaller.getInstance(), AttributeValueUpdateJsonUnmarshaller.getInstance()).unmarshall(context));

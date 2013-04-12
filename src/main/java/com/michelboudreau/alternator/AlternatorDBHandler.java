@@ -865,7 +865,7 @@ class AlternatorDBHandler {
 				this.tables.get(tableName).putItem(item);
 				result.setAttributes(item);
 			}else{
-				//don't do anything. comparing with really dynamodb behavior
+				throw new ConditionalCheckFailedException("The value conditional could is not equal");
 			}
 		} else {
 			if (isExpectedItem(item, request.getExpected())){			
@@ -942,7 +942,9 @@ class AlternatorDBHandler {
 						}
 					}
 				}
-
+				
+			}else{
+				throw new ConditionalCheckFailedException("The value conditional could is not equal");
 			}
 			result.setAttributes(item);
 		}

@@ -15,6 +15,7 @@ import com.amazonaws.services.dynamodb.AmazonDynamoDB;
 import com.amazonaws.services.dynamodb.model.AttributeAction;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
+import com.amazonaws.services.dynamodb.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodb.model.ExpectedAttributeValue;
 import com.amazonaws.services.dynamodb.model.Key;
 import com.amazonaws.services.dynamodb.model.KeySchema;
@@ -182,19 +183,16 @@ public class AlternatorUpdateTest extends AlternatorTest {
         HashMap<String, ExpectedAttributeValue> expectedValues = new HashMap<String, ExpectedAttributeValue> ();
         expectedValues.put("count", new ExpectedAttributeValue().withValue(new AttributeValue().withN("10")));
         
-        update = new UpdateItemRequest().withTableName(tableName).withKey(key).withAttributeUpdates(newValues).withExpected(expectedValues);        
-        getClient().updateItem(update);
-
-        inProcessClient.save(PERSISTENCE_PATH);
-        createNewInProcessClient().restore(PERSISTENCE_PATH);
-
-        AttributeValue hashKey = new AttributeValue().withS("1");
-        QueryRequest request = new QueryRequest(tableName, hashKey);
-        QueryResult result = getClient().query(request);
-        Assert.assertNotNull(result.getItems());
-        Assert.assertNotSame(result.getItems().size(), 0);
-        Map<String, AttributeValue> row = result.getItems().get(0);
-        Assert.assertEquals(row.get("id"), hashKey);
-        Assert.assertEquals(row.get("count").getN(), "100");
+        update = new UpdateItemRequest().withTableName(tableName).withKey(key).withAttributeUpdates(newValues).withExpected(expectedValues);
+        
+        try{
+	        getClient().updateItem(update);
+	
+	        inProcessClient.save(PERSISTENCE_PATH);
+	        createNewInProcessClient().restore(PERSISTENCE_PATH);
+	        Assert.fail("expecting conditional check exception");
+        }catch (ConditionalCheckFailedException e) {
+			//expect this exception
+		}
     }
 }
