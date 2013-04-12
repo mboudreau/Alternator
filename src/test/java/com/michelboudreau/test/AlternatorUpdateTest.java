@@ -277,4 +277,46 @@ public class AlternatorUpdateTest extends AlternatorTest {
 			//expect this exception
 		}
     }
+    
+    @Test
+    public void conditionalDeleteOldFieldUpdateOnHit(){
+    	// Setup table with items
+        KeySchema schema = new KeySchema(new KeySchemaElement().withAttributeName("id").withAttributeType(ScalarAttributeType.S));
+        createTable(tableName, schema);
+        
+        Key key = new Key();
+        key.setHashKeyElement(new AttributeValue().withS("1"));
+        
+        Map<String, AttributeValueUpdate> oldValues = new HashMap<String, AttributeValueUpdate> ();
+        oldValues.put("count", new AttributeValueUpdate(new AttributeValue().withN("100"), AttributeAction.PUT));
+        oldValues.put("ids", new AttributeValueUpdate(new AttributeValue().withS("[er, er]"), AttributeAction.ADD));
+        
+        UpdateItemRequest update = new UpdateItemRequest(tableName, key, oldValues);
+        
+        getClient().updateItem(update);
+        
+        //conditional update
+        HashMap<String, AttributeValueUpdate> newValues = new HashMap<String, AttributeValueUpdate> ();
+        newValues.put("count", new AttributeValueUpdate(new AttributeValue().withN("102"), AttributeAction.PUT));
+        newValues.put("ids", new AttributeValueUpdate(new AttributeValue().withS("[er, er]"), AttributeAction.DELETE));
+        
+        HashMap<String, ExpectedAttributeValue> expectedValues = new HashMap<String, ExpectedAttributeValue> ();
+        expectedValues.put("count", new ExpectedAttributeValue().withValue(new AttributeValue().withN("100")));
+        
+        update = new UpdateItemRequest().withTableName(tableName).withKey(key).withAttributeUpdates(newValues).withExpected(expectedValues);        
+        getClient().updateItem(update);
+
+        inProcessClient.save(PERSISTENCE_PATH);
+        createNewInProcessClient().restore(PERSISTENCE_PATH);
+
+        AttributeValue hashKey = new AttributeValue().withS("1");
+        QueryRequest request = new QueryRequest(tableName, hashKey);
+        QueryResult result = getClient().query(request);
+        Assert.assertNotNull(result.getItems());
+        Assert.assertNotSame(result.getItems().size(), 0);
+        Map<String, AttributeValue> row = result.getItems().get(0);
+        Assert.assertEquals(row.get("id"), hashKey);
+        Assert.assertEquals(row.get("count").getN(), "102");
+        Assert.assertNull(row.get("ids"));
+    }
 }

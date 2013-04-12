@@ -879,42 +879,14 @@ class AlternatorDBHandler {
 							attributesToUpdate.remove(sKey);
 						} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.DELETE.name())) {
 							if (attributesToUpdate.get(sKey).getValue() != null) {
-								if (item.get(sKey).getSS() != null) {
-									if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
-										throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + sKey + ") of the item with hash key (" + item.get(sKey) + ")");
-									} else {
-										for (String toDel : attributesToUpdate.get(sKey).getValue().getSS()) {
-											if (item.get(sKey).getSS().contains(toDel)) {
-												item.get(sKey).getSS().remove(toDel);
-												attributesToUpdate.remove(sKey);
-											}
-										}
-									}
-								} else if (item.get(sKey).getNS() != null) {
-									if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
-										throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + sKey + ") of the item with hash key (" + item.get(sKey) + ")");
-									} else {
-										for (String toDel : attributesToUpdate.get(sKey).getValue().getNS()) {
-											if (item.get(sKey).getNS().contains(toDel)) {
-												item.get(sKey).getNS().remove(toDel);
-												attributesToUpdate.remove(sKey);
-											}
-										}
-									}
-								} else if (item.get(sKey).getS().equals(attributesToUpdate.get(sKey).getValue().getS())) {
-									item.remove(sKey);
-									attributesToUpdate.remove(sKey);
-								} else if (item.get(sKey).getN().equals(attributesToUpdate.get(sKey).getValue().getN())) {
-									item.remove(sKey);
-									attributesToUpdate.remove(sKey);
-								}
+								deleteAttributeValue(item, sKey, attributesToUpdate.get(sKey));
 							} else {
-								item.remove(sKey);
-								attributesToUpdate.remove(sKey);
+								item.remove(sKey);								
 							}
+							attributesToUpdate.remove(sKey);
 						} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.ADD.name())) {
 							if (attributesToUpdate.get(sKey).getValue() != null) {
-								AddAttributeValue(item, sKey, attributesToUpdate.get(sKey));
+								addAttributeValue(item, sKey, attributesToUpdate.get(sKey));
 							} else {
 								throw new ResourceNotFoundException("the provided update item with attribute (" + sKey + ") doesn't have an AttributeValue to perform the ADD");
 							}
@@ -972,7 +944,7 @@ class AlternatorDBHandler {
 		return true;
 	}
 	
-	private void AddAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueUpdate){
+	private void addAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueUpdate){
 		
 		AttributeValue value = item.get(attributename);
 		if (value==null){
@@ -1003,6 +975,38 @@ class AlternatorDBHandler {
 				i = i + new Double(valueUpdate.getValue().getN());
 				value.setN(i + "");
 			}
+		}
+	}
+	
+	private void deleteAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueToDelete){
+		AttributeValue existingValue = item.get(attributename);
+		if (existingValue == null){
+			return; //do nothing. need to confirm with live dynamodb behaviour. 
+		}
+		if (existingValue.getSS() != null) {
+			if (valueToDelete.getValue().getSS() == null) {
+				throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + attributename + ") of the item with hash key (" + existingValue + ")");
+			} else {
+				for (String toDel : valueToDelete.getValue().getSS()) {
+					if (existingValue.getSS().contains(toDel)) {
+						existingValue.getSS().remove(toDel);
+					}
+				}
+			}
+		} else if (existingValue.getNS() != null) {
+			if (valueToDelete.getValue().getNS() == null) {
+				throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + attributename + ") of the item with hash key (" + existingValue + ")");
+			} else {
+				for (String toDel : valueToDelete.getValue().getNS()) {
+					if (existingValue.getNS().contains(toDel)) {
+						existingValue.getNS().remove(toDel);
+					}
+				}
+			}
+		} else if (existingValue.getS()!=null && existingValue.getS().equals(valueToDelete.getValue().getS())) {
+			item.remove(attributename);
+		} else if (existingValue.getN()!=null && existingValue.getN().equals(valueToDelete.getValue().getN())) {
+			item.remove(attributename);
 		}
 	}
 }
