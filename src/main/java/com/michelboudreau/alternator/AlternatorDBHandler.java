@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.dynamodb.model.AttributeAction;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
 import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
@@ -850,97 +851,51 @@ class AlternatorDBHandler {
         String rangeKeyValue = getKeyValue(key.getRangeKeyElement());
         Map<String, AttributeValue> item = this.tables.get(tableName).getItem(hashKeyValue, rangeKeyValue);
 		if (item == null) {
-			item = new HashMap<String, AttributeValue>();
-			item.put(this.tables.get(tableName).getHashKeyName(), key.getHashKeyElement());
-			if (key.getRangeKeyElement() != null) {
-				item.put(this.tables.get(tableName).getRangeKeyName(), key.getRangeKeyElement());
-			}
-			for (String sKey : attributesToUpdate.keySet()) {
-				if (attributesToUpdate.get(sKey).getValue() != null) {
-					item.put(sKey, attributesToUpdate.get(sKey).getValue());
+			if (request.getExpected()==null || request.getExpected().isEmpty()){
+				item = new HashMap<String, AttributeValue>();
+				item.put(this.tables.get(tableName).getHashKeyName(), key.getHashKeyElement());
+				if (key.getRangeKeyElement() != null) {
+					item.put(this.tables.get(tableName).getRangeKeyName(), key.getRangeKeyElement());
 				}
-			}
-			this.tables.get(tableName).putItem(item);
-			result.setAttributes(item);
-		} else {
-			Set<String> sKeyz = new HashSet<String>(item.keySet());
-			for (String sKey : sKeyz) {
-				if (attributesToUpdate.containsKey(sKey)) {
-					if (attributesToUpdate.get(sKey).getAction().equals("PUT")) {
-						item.remove(sKey);
+				for (String sKey : attributesToUpdate.keySet()) {
+					if (attributesToUpdate.get(sKey).getValue() != null) {
 						item.put(sKey, attributesToUpdate.get(sKey).getValue());
-						attributesToUpdate.remove(sKey);
-					} else if (attributesToUpdate.get(sKey).getAction().equals("DELETE")) {
-						if (attributesToUpdate.get(sKey).getValue() != null) {
-							if (item.get(sKey).getSS() != null) {
-								if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
-									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + sKey + ") of the item with hash key (" + item.get(sKey) + ")");
-								} else {
-									for (String toDel : attributesToUpdate.get(sKey).getValue().getSS()) {
-										if (item.get(sKey).getSS().contains(toDel)) {
-											item.get(sKey).getSS().remove(toDel);
-											attributesToUpdate.remove(sKey);
-										}
-									}
-								}
-							} else if (item.get(sKey).getNS() != null) {
-								if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
-									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + sKey + ") of the item with hash key (" + item.get(sKey) + ")");
-								} else {
-									for (String toDel : attributesToUpdate.get(sKey).getValue().getNS()) {
-										if (item.get(sKey).getNS().contains(toDel)) {
-											item.get(sKey).getNS().remove(toDel);
-											attributesToUpdate.remove(sKey);
-										}
-									}
-								}
-							} else if (item.get(sKey).getS().equals(attributesToUpdate.get(sKey).getValue().getS())) {
-								item.remove(sKey);
-								attributesToUpdate.remove(sKey);
-							} else if (item.get(sKey).getN().equals(attributesToUpdate.get(sKey).getValue().getN())) {
-								item.remove(sKey);
-								attributesToUpdate.remove(sKey);
-							}
-						} else {
+					}
+				}
+				this.tables.get(tableName).putItem(item);
+				result.setAttributes(item);
+			}else{
+				throw new ConditionalCheckFailedException("The value conditional could is not equal");
+			}
+		} else {
+			if (isExpectedItem(item, request.getExpected())){			
+				Set<String> sKeyz = new HashSet<String>(item.keySet());
+				sKeyz.addAll(attributesToUpdate.keySet());
+				for (String sKey : sKeyz) {
+					if (attributesToUpdate.containsKey(sKey)) {
+						if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.PUT.name())) {
 							item.remove(sKey);
+							item.put(sKey, attributesToUpdate.get(sKey).getValue());
 							attributesToUpdate.remove(sKey);
-						}
-					} else if (attributesToUpdate.get(sKey).getAction().equals("ADD")) {
-						if (attributesToUpdate.get(sKey).getValue() != null) {
-							if (item.get(sKey).getSS() != null) {
-								if (attributesToUpdate.get(sKey).getValue().getSS() == null) {
-									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + sKey + ")");
-								} else {
-									for (String toUp : attributesToUpdate.get(sKey).getValue().getSS()) {
-										item.get(sKey).getSS().add(toUp);
-									}
-								}
-							} else if (item.get(sKey).getNS() != null) {
-								if (attributesToUpdate.get(sKey).getValue().getNS() == null) {
-									throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + sKey + ")");
-								} else {
-									for (String toUp : attributesToUpdate.get(sKey).getValue().getNS()) {
-										item.get(sKey).getNS().add(toUp);
-									}
-								}
-							} else if (item.get(sKey).getS() != null) {
-								throw new ConditionalCheckFailedException("It's not possible to ADD on an attribute with a String type for the attribute (" + sKey + ")");
-							} else if (item.get(sKey).getN() != null) {
-								Double i = new Double(item.get(sKey).getN());
-								i = i + new Double(attributesToUpdate.get(sKey).getValue().getN());
-								item.get(sKey).setN(i + "");
+						} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.DELETE.name())) {
+							if (attributesToUpdate.get(sKey).getValue() != null) {
+								deleteAttributeValue(item, sKey, attributesToUpdate.get(sKey));
+							} else {
+								item.remove(sKey);								
 							}
-						} else {
-							throw new ResourceNotFoundException("the provided update item with attribute (" + sKey + ") doesn't have an AttributeValue to perform the ADD");
+							attributesToUpdate.remove(sKey);
+						} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.ADD.name())) {
+							if (attributesToUpdate.get(sKey).getValue() != null) {
+								addAttributeValue(item, sKey, attributesToUpdate.get(sKey));
+							} else {
+								throw new ResourceNotFoundException("the provided update item with attribute (" + sKey + ") doesn't have an AttributeValue to perform the ADD");
+							}
 						}
 					}
 				}
-
-			}
-			for (String sKey : attributesToUpdate.keySet()) {
-				if (attributesToUpdate.get(sKey).getAction().equals("DELETE") == false) {
-					item.put(sKey, attributesToUpdate.get(sKey).getValue());
-				}
+				
+			}else{
+				throw new ConditionalCheckFailedException("The value conditional could is not equal");
 			}
 			result.setAttributes(item);
 		}
@@ -971,4 +926,87 @@ class AlternatorDBHandler {
 		return copy;
 	}
 
+	private boolean isExpectedItem(Map<String, AttributeValue> item, Map<String, ExpectedAttributeValue> expected){
+		if (expected==null || expected.isEmpty()){
+			return true;
+		}
+		for (String expectedFieldName: expected.keySet()){
+			ExpectedAttributeValue expectedValue = expected.get(expectedFieldName);
+			AttributeValue currentValue = item.get(expectedFieldName);
+			if (currentValue==null) {
+				//field is missing
+				return false;
+			}
+			if (!expectedValue.getValue().equals(currentValue)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private void addAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueUpdate){
+		
+		AttributeValue value = item.get(attributename);
+		if (value==null){
+			//new field
+			value = valueUpdate.getValue();
+			item.put(attributename, value);
+		}else{
+			if (value.getSS() != null) {
+				if (valueUpdate.getValue().getSS() == null) {
+					throw new ConditionalCheckFailedException("It's not possible to ADD something else than a List<String> for the attribute (" + attributename + ")");
+				} else {
+					for (String toUp : valueUpdate.getValue().getSS()) {
+						value.getSS().add(toUp);
+					}
+				}
+			} else if (value.getNS() != null) {
+				if (valueUpdate.getValue().getNS() == null) {
+					throw new ConditionalCheckFailedException("It's not possible to ADD something else than a List<Number> for the attribute (" + attributename + ")");
+				} else {
+					for (String toUp : valueUpdate.getValue().getNS()) {
+						value.getNS().add(toUp);
+					}
+				}
+			} else if (value.getS() != null) {
+				throw new ConditionalCheckFailedException("It's not possible to ADD on an attribute with a String type for the attribute (" + attributename + ")");
+			} else if (value.getN() != null) {
+				Double i = new Double(value.getN());
+				i = i + new Double(valueUpdate.getValue().getN());
+				value.setN(i + "");
+			}
+		}
+	}
+	
+	private void deleteAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueToDelete){
+		AttributeValue existingValue = item.get(attributename);
+		if (existingValue == null){
+			return; //do nothing. need to confirm with live dynamodb behaviour. 
+		}
+		if (existingValue.getSS() != null) {
+			if (valueToDelete.getValue().getSS() == null) {
+				throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<String> for the attribute (" + attributename + ") of the item with hash key (" + existingValue + ")");
+			} else {
+				for (String toDel : valueToDelete.getValue().getSS()) {
+					if (existingValue.getSS().contains(toDel)) {
+						existingValue.getSS().remove(toDel);
+					}
+				}
+			}
+		} else if (existingValue.getNS() != null) {
+			if (valueToDelete.getValue().getNS() == null) {
+				throw new ConditionalCheckFailedException("It's not possible to delete something else than a List<Number> for the attribute (" + attributename + ") of the item with hash key (" + existingValue + ")");
+			} else {
+				for (String toDel : valueToDelete.getValue().getNS()) {
+					if (existingValue.getNS().contains(toDel)) {
+						existingValue.getNS().remove(toDel);
+					}
+				}
+			}
+		} else if (existingValue.getS()!=null && existingValue.getS().equals(valueToDelete.getValue().getS())) {
+			item.remove(attributename);
+		} else if (existingValue.getN()!=null && existingValue.getN().equals(valueToDelete.getValue().getN())) {
+			item.remove(attributename);
+		}
+	}
 }
