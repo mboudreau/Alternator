@@ -1,7 +1,7 @@
 Alternator - A DynamoDB Mock Server
 ==========
 
-THIS IS A WORK IN PROGRESS - ALPHA VERSION - SOME THINGS ARE NOT 100%
+THIS IS A WORK IN PROGRESS - BETA VERSION - SOME THINGS ARE NOT 100%
 
 While working on a new startup called [Tivity](http://www.tivity.us), my co-worker, [Thomas](https://github.com/tnbredillet), and I found that testing simple functions with DynamoDB was a pain because it would take time to create testing tables and tear them back down.  This would slow down our BDD approach to this project.  Another nuisance was the cost that would incur when using DynamoDB from our local webapp or that we would hit our throughput limit and cause an error.  Of course, this also means that you couldn't code things on the road because you needed an internet connect for Amazon Web Services.
 
@@ -13,7 +13,7 @@ You can now add the dependency into your maven project with:
 		<dependency>
 			<groupId>com.michelboudreau</groupId>
 			<artifactId>alternator</artifactId>
-			<version>0.4.0 <!-- subject to change, check sonatype repo --></version>
+			<version>0.5.0 <!-- subject to change, check sonatype repo --></version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
