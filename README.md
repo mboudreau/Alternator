@@ -175,14 +175,7 @@ Here is an example class to obtain an **AmazonDynamoDB** client reference pointi
           var accessKey = ConfigurationManager.AppSettings["AWSAccessKey"];
           var secretKey = ConfigurationManager.AppSettings["AWSSecretKey"];
 
-          var stsClient = new AmazonSecurityTokenServiceClient(accessKey, secretKey);
-          var sessionCredentials = new RefreshingSessionAWSCredentials(stsClient);
-
-          // NOTE: This will throw an Amazon.SecurityToken.AmazonSecurityTokenServiceException
-          //       if our accessKey and/or secretKey are invalid.
-          var credentials = sessionCredentials.GetCredentials();
-
-          var mockClient = new AmazonDynamoDBClient(sessionCredentials, config);
+          var mockClient = new AmazonDynamoDBClient(accessKey, secretKey, config);
 
           return mockClient;
         }
