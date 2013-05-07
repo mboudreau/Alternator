@@ -124,6 +124,14 @@
 					</includes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1</version>
+				<configuration>
+					<mainClass>com.michelboudreau.alternator.AlternatorDBServer</mainClass>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
