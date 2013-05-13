@@ -1,35 +1,43 @@
 package com.michelboudreau.alternator.parsers;
 
 import com.amazonaws.AmazonWebServiceRequest;
-import com.amazonaws.AmazonWebServiceResponse;
-import com.amazonaws.ResponseMetadata;
-import com.amazonaws.http.JsonResponseHandler;
-import com.amazonaws.services.dynamodb.model.CreateTableResult;
-import com.amazonaws.services.dynamodb.model.transform.CreateTableResultJsonUnmarshaller;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.Unmarshaller;
 import com.michelboudreau.alternator.enums.RequestType;
+import java.io.BufferedReader;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
 import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Map;
-
 public class AmazonWebServiceRequestParser {
 	private final Logger logger = LoggerFactory.getLogger(AmazonWebServiceRequestParser.class);
 	private final JsonFactory jsonFactory = new JsonFactory();
 	private HttpServletRequest request;
+    private String apiVersion;
 	private RequestType type;
 	private AmazonWebServiceRequest data;
 
 	public AmazonWebServiceRequestParser(HttpServletRequest request) {
 		this.request = request;
+	}
+
+	public String getApiVersion() {
+		if (this.apiVersion == null) {
+			String str = null;
+			String header = request.getHeader("x-amz-target");
+			if (header != null) {
+				String[] array = header.split("[.]"); //  header comes back as DynamoDB_<apiversion as YYYYMMDD>.<request string>
+				if (array.length > 0) {
+					str = array[0];
+				}
+			}
+			this.apiVersion = str;
+		}
+		return this.apiVersion;
 	}
 
 	public RequestType getType() {

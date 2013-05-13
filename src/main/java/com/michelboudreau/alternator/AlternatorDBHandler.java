@@ -1,23 +1,5 @@
 package com.michelboudreau.alternator;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonMethod;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodb.model.AttributeAction;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
@@ -93,6 +75,7 @@ import com.amazonaws.services.dynamodb.model.transform.UpdateItemResultMarshalle
 import com.amazonaws.services.dynamodb.model.transform.UpdateTableRequestJsonUnmarshaller;
 import com.amazonaws.services.dynamodb.model.transform.UpdateTableResultMarshaller;
 import com.michelboudreau.alternator.enums.AttributeValueType;
+import com.michelboudreau.alternator.enums.RequestType;
 import com.michelboudreau.alternator.models.ItemRangeGroup;
 import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
@@ -108,8 +91,26 @@ import com.michelboudreau.alternator.validators.QueryRequestValidator;
 import com.michelboudreau.alternator.validators.ScanRequestValidator;
 import com.michelboudreau.alternator.validators.UpdateItemRequestValidator;
 import com.michelboudreau.alternator.validators.UpdateTableRequestValidator;
+import com.michelboudreau.alternatorv2.AlternatorDBApiVersion2Mapper;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class AlternatorDBHandler {
+public class AlternatorDBHandler {
+    public final String API_VERSION_20111205 = "DynamoDB_20111205";
+    public final String API_VERSION_20120810 = "DynamoDB_20120810";
 
 	private final Logger logger = LoggerFactory.getLogger(AlternatorDBHandler.class);
 
@@ -162,9 +163,35 @@ class AlternatorDBHandler {
 	}
 
 	public String handle(HttpServletRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException, ConditionalCheckFailedException {
-		AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
+        try {
+            AmazonWebServiceRequestParser parser = new AmazonWebServiceRequestParser(request);
 
-		switch (parser.getType()) {
+            String apiVersion = parser.getApiVersion();
+            if (API_VERSION_20111205.equals(apiVersion)) {
+                return handle20111205(request, parser);
+            } else if (API_VERSION_20120810.equals(apiVersion)) {
+                return handle20120810(request, parser);
+            } else {
+                String logMessage = "The API Version " + apiVersion + " is not supported.";
+                logger.warn(logMessage);
+                throw new AmazonServiceException(logMessage);
+            }
+        } catch (NullPointerException ex) {
+            StackTraceElement[] stackTrace = ex.getStackTrace();
+            StackTraceElement exceptionSource = stackTrace[0];
+            String errorMessage = "Caught " + ex.getClass().getName() +
+                    " (" + ex.getMessage() +
+                    ") at " + exceptionSource.getClassName() +
+                    "." + exceptionSource.getMethodName() +
+                    " line " + exceptionSource.getLineNumber();
+            logger.error(errorMessage);
+            throw new AmazonServiceException(errorMessage);
+        }
+	}
+
+	private String handle20111205(HttpServletRequest request, AmazonWebServiceRequestParser parser) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException, ConditionalCheckFailedException {
+        RequestType requestType = parser.getType();
+		switch (requestType) {
 			// Tables
 			case CREATE_TABLE:
 				return new CreateTableResultMarshaller().marshall(createTable(parser.getData(CreateTableRequest.class, CreateTableRequestJsonUnmarshaller.getInstance())));
@@ -198,10 +225,52 @@ class AlternatorDBHandler {
 			case SCAN:
 				return new ScanResultMarshaller().marshall(scan(parser.getData(ScanRequest.class, ScanRequestJsonUnmarshaller.getInstance())));
 			default:
-				logger.warn("The Request Type '" + parser.getType() + "' does not exist.");
-				break;
+                String logMessage = "The Request Type '" + parser.getType() + "' does not exist.";
+                logger.warn(logMessage);
+                throw new AmazonServiceException(logMessage);
 		}
-		return null;
+	}
+
+	private String handle20120810(HttpServletRequest request, AmazonWebServiceRequestParser parser) throws LimitExceededException, InternalServerErrorException, ResourceInUseException, ResourceNotFoundException, ConditionalCheckFailedException {
+        RequestType requestType = parser.getType();
+		switch (requestType) {
+			// Tables
+			case CREATE_TABLE:
+				return new com.amazonaws.services.dynamodbv2.model.transform.CreateTableResultMarshaller().marshall(createTableV2(parser.getData(com.amazonaws.services.dynamodbv2.model.CreateTableRequest.class, com.amazonaws.services.dynamodbv2.model.transform.CreateTableRequestJsonUnmarshaller.getInstance())));
+			case DESCRIBE_TABLE:
+				return new com.amazonaws.services.dynamodbv2.model.transform.DescribeTableResultMarshaller().marshall(describeTableV2(parser.getData(com.amazonaws.services.dynamodbv2.model.DescribeTableRequest.class, com.amazonaws.services.dynamodbv2.model.transform.DescribeTableRequestJsonUnmarshaller.getInstance())));
+			case LIST_TABLES:
+				return new com.amazonaws.services.dynamodbv2.model.transform.ListTablesResultMarshaller().marshall(listTablesV2(parser.getData(com.amazonaws.services.dynamodbv2.model.ListTablesRequest.class, com.amazonaws.services.dynamodbv2.model.transform.ListTablesRequestJsonUnmarshaller.getInstance())));
+			case UPDATE_TABLE:
+				return new com.amazonaws.services.dynamodbv2.model.transform.UpdateTableResultMarshaller().marshall(updateTableV2(parser.getData(com.amazonaws.services.dynamodbv2.model.UpdateTableRequest.class, com.amazonaws.services.dynamodbv2.model.transform.UpdateTableRequestJsonUnmarshaller.getInstance())));
+			case DELETE_TABLE:
+				return new com.amazonaws.services.dynamodbv2.model.transform.DeleteTableResultMarshaller().marshall(deleteTableV2(parser.getData(com.amazonaws.services.dynamodbv2.model.DeleteTableRequest.class, com.amazonaws.services.dynamodbv2.model.transform.DeleteTableRequestJsonUnmarshaller.getInstance())));
+
+			// Items
+			case PUT:
+				return new com.amazonaws.services.dynamodbv2.model.transform.PutItemResultMarshaller().marshall(putItemV2(parser.getData(com.amazonaws.services.dynamodbv2.model.PutItemRequest.class, com.amazonaws.services.dynamodbv2.model.transform.PutItemRequestJsonUnmarshaller.getInstance())));
+			case GET:
+				return new com.amazonaws.services.dynamodbv2.model.transform.GetItemResultMarshaller().marshall(getItemV2(parser.getData(com.amazonaws.services.dynamodbv2.model.GetItemRequest.class, com.amazonaws.services.dynamodbv2.model.transform.GetItemRequestJsonUnmarshaller.getInstance())));
+
+			case UPDATE:
+				return new com.amazonaws.services.dynamodbv2.model.transform.UpdateItemResultMarshaller().marshall(updateItemV2(parser.getData(com.amazonaws.services.dynamodbv2.model.UpdateItemRequest.class, com.amazonaws.services.dynamodbv2.model.transform.UpdateItemRequestJsonUnmarshaller.getInstance())));
+			case DELETE:
+				return new com.amazonaws.services.dynamodbv2.model.transform.DeleteItemResultMarshaller().marshall(deleteItemV2(parser.getData(com.amazonaws.services.dynamodbv2.model.DeleteItemRequest.class, com.amazonaws.services.dynamodbv2.model.transform.DeleteItemRequestJsonUnmarshaller.getInstance())));
+			case BATCH_GET_ITEM:
+				return new com.amazonaws.services.dynamodbv2.model.transform.BatchGetItemResultMarshaller().marshall(batchGetItemV2(parser.getData(com.amazonaws.services.dynamodbv2.model.BatchGetItemRequest.class, com.amazonaws.services.dynamodbv2.model.transform.BatchGetItemRequestJsonUnmarshaller.getInstance())));
+			case BATCH_WRITE_ITEM:
+				return new com.amazonaws.services.dynamodbv2.model.transform.BatchWriteItemResultMarshaller().marshall(batchWriteItemV2(parser.getData(com.amazonaws.services.dynamodbv2.model.BatchWriteItemRequest.class, com.amazonaws.services.dynamodbv2.model.transform.BatchWriteItemRequestJsonUnmarshaller.getInstance())));
+
+			// Operations
+			case QUERY:
+				return new com.amazonaws.services.dynamodbv2.model.transform.QueryResultMarshaller().marshall(queryV2(parser.getData(com.amazonaws.services.dynamodbv2.model.QueryRequest.class, com.amazonaws.services.dynamodbv2.model.transform.QueryRequestJsonUnmarshaller.getInstance())));
+			case SCAN:
+				return new com.amazonaws.services.dynamodbv2.model.transform.ScanResultMarshaller().marshall(scanV2(parser.getData(com.amazonaws.services.dynamodbv2.model.ScanRequest.class, com.amazonaws.services.dynamodbv2.model.transform.ScanRequestJsonUnmarshaller.getInstance())));
+			default:
+                String logMessage = "The Request Type '" + parser.getType() + "' does not exist.";
+                logger.warn(logMessage);
+                throw new AmazonServiceException(logMessage);
+		}
 	}
 
 	public synchronized CreateTableResult createTable(CreateTableRequest request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
@@ -234,6 +303,16 @@ class AlternatorDBHandler {
 		return new CreateTableResult().withTableDescription(table.getTableDescription());
 	}
 
+	public com.amazonaws.services.dynamodbv2.model.CreateTableResult createTableV2(com.amazonaws.services.dynamodbv2.model.CreateTableRequest v2Request) throws LimitExceededException, InternalServerErrorException, ResourceInUseException {
+        CreateTableRequest request = AlternatorDBApiVersion2Mapper.MapV2CreateTableRequestToV1(v2Request);
+        try {
+            CreateTableResult result = createTable(request);
+            return AlternatorDBApiVersion2Mapper.MapV1CreateTableResultToV2(result);
+        } catch (ResourceInUseException ex) {
+            throw new com.amazonaws.services.dynamodbv2.model.ResourceInUseException(ex.getMessage());
+        }
+	}
+
 	public synchronized DescribeTableResult describeTable(DescribeTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DescribeTableRequestValidator validator = new DescribeTableRequestValidator();
@@ -254,6 +333,12 @@ class AlternatorDBHandler {
 			throw new ResourceNotFoundException("The table '" + tableName + "' does not exist.");
 		}
 		return result;
+	}
+
+	public com.amazonaws.services.dynamodbv2.model.DescribeTableResult describeTableV2(com.amazonaws.services.dynamodbv2.model.DescribeTableRequest v2Request) throws InternalServerErrorException, ResourceNotFoundException {
+        DescribeTableRequest request = AlternatorDBApiVersion2Mapper.MapV2DescribeTableRequestToV1(v2Request);
+        DescribeTableResult result = describeTable(request);
+        return AlternatorDBApiVersion2Mapper.MapV1DescribeTableResultToV2(result);
 	}
 
 	public synchronized ListTablesResult listTables(ListTablesRequest request) throws InternalServerErrorException, ResourceNotFoundException {
@@ -309,6 +394,12 @@ class AlternatorDBHandler {
 		return result;
 	}
 
+	public com.amazonaws.services.dynamodbv2.model.ListTablesResult listTablesV2(com.amazonaws.services.dynamodbv2.model.ListTablesRequest v2Request) throws InternalServerErrorException, ResourceNotFoundException {
+        ListTablesRequest request = AlternatorDBApiVersion2Mapper.MapV2ListTablesRequestToV1(v2Request);
+        ListTablesResult result = listTables(request);
+        return AlternatorDBApiVersion2Mapper.MapV1ListTablesResultToV2(result);
+	}
+
 	public synchronized DeleteTableResult deleteTable(DeleteTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		DeleteTableRequestValidator validator = new DeleteTableRequestValidator();
@@ -329,6 +420,16 @@ class AlternatorDBHandler {
 		return new DeleteTableResult().withTableDescription(table.getTableDescription().withTableStatus(TableStatus.DELETING));
 	}
 
+	public com.amazonaws.services.dynamodbv2.model.DeleteTableResult deleteTableV2(com.amazonaws.services.dynamodbv2.model.DeleteTableRequest v2Request) throws InternalServerErrorException, ResourceNotFoundException {
+        DeleteTableRequest request = AlternatorDBApiVersion2Mapper.MapV2DeleteTableRequestToV1(v2Request);
+        try {
+            DeleteTableResult result = deleteTable(request);
+            return AlternatorDBApiVersion2Mapper.MapV1DeleteTableResultToV2(result);
+        } catch (ResourceNotFoundException ex) {
+            throw new com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException(ex.getMessage());
+        }
+	}
+
 	public synchronized UpdateTableResult updateTable(UpdateTableRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		UpdateTableRequestValidator validator = new UpdateTableRequestValidator();
@@ -347,6 +448,12 @@ class AlternatorDBHandler {
 		table.setProvisionedThroughput(request.getProvisionedThroughput());
 
 		return new UpdateTableResult().withTableDescription(table.getTableDescription());
+	}
+
+	public com.amazonaws.services.dynamodbv2.model.UpdateTableResult updateTableV2(com.amazonaws.services.dynamodbv2.model.UpdateTableRequest v2Request) throws InternalServerErrorException, ResourceNotFoundException {
+        UpdateTableRequest request = AlternatorDBApiVersion2Mapper.MapV2UpdateTableRequestToV1(v2Request);
+        UpdateTableResult result = updateTable(request);
+        return AlternatorDBApiVersion2Mapper.MapV1UpdateTableResultToV2(result);
 	}
 
 	public synchronized PutItemResult putItem(PutItemRequest request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
@@ -418,6 +525,16 @@ class AlternatorDBHandler {
 		return result;
 	}
 
+	public synchronized com.amazonaws.services.dynamodbv2.model.PutItemResult putItemV2(com.amazonaws.services.dynamodbv2.model.PutItemRequest v2Request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
+        PutItemRequest request = AlternatorDBApiVersion2Mapper.MapV2PutItemRequestToV1(v2Request);
+        try {
+            PutItemResult result = putItem(request);
+            return AlternatorDBApiVersion2Mapper.MapV1PutItemResultToV2(result, v2Request.getTableName());
+        } catch (ConditionalCheckFailedException ex) {
+            throw new com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException(ex.getMessage());
+        }
+	}
+
 	public synchronized GetItemResult getItem(GetItemRequest request) throws InternalServerErrorException, ResourceNotFoundException {
 		// Validate data coming in
 		GetItemRequestValidator validator = new GetItemRequestValidator();
@@ -465,6 +582,13 @@ class AlternatorDBHandler {
 			}
 		}
 		return result;
+	}
+
+	public com.amazonaws.services.dynamodbv2.model.GetItemResult getItemV2(com.amazonaws.services.dynamodbv2.model.GetItemRequest v2Request) throws InternalServerErrorException, ResourceNotFoundException {
+        Table table = this.tables.get(v2Request.getTableName());
+        GetItemRequest request = AlternatorDBApiVersion2Mapper.MapV2GetItemRequestToV1(v2Request, table);
+        GetItemResult result = getItem(request);
+        return AlternatorDBApiVersion2Mapper.MapV1GetItemResultToV2(result, v2Request.getTableName());
 	}
 
 	public synchronized DeleteItemResult deleteItem(DeleteItemRequest request) {
@@ -526,6 +650,13 @@ class AlternatorDBHandler {
 		return result;
 	}
 
+	public com.amazonaws.services.dynamodbv2.model.DeleteItemResult deleteItemV2(com.amazonaws.services.dynamodbv2.model.DeleteItemRequest v2Request) {
+        Table table = this.tables.get(v2Request.getTableName());
+        DeleteItemRequest request = AlternatorDBApiVersion2Mapper.MapV2DeleteItemRequestToV1(v2Request, table);
+        DeleteItemResult result = deleteItem(request);
+        return AlternatorDBApiVersion2Mapper.MapV1DeleteItemResultToV2(result, v2Request.getTableName());
+	}
+
 	public synchronized BatchGetItemResult batchGetItem(BatchGetItemRequest request) {
 		BatchGetItemResult batchGetItemResult = new BatchGetItemResult();
 		Map<String, BatchResponse> response = new HashMap<String, BatchResponse>();
@@ -562,6 +693,12 @@ class AlternatorDBHandler {
 		return batchGetItemResult;
 	}
 
+	public com.amazonaws.services.dynamodbv2.model.BatchGetItemResult batchGetItemV2(com.amazonaws.services.dynamodbv2.model.BatchGetItemRequest v2Request) {
+        BatchGetItemRequest request = AlternatorDBApiVersion2Mapper.MapV2BatchGetItemRequestToV1(v2Request, this.tables);
+        BatchGetItemResult result = batchGetItem(request);
+        return AlternatorDBApiVersion2Mapper.MapV1BatchGetItemResultToV2(result, this.tables);
+	}
+
 	public synchronized BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
 		BatchWriteItemResult batchWriteItemResult = new BatchWriteItemResult();
 		HashMap<String, BatchWriteResponse> responses = new HashMap<String, BatchWriteResponse>();
@@ -583,10 +720,48 @@ class AlternatorDBHandler {
 			}
 			batchWriteResponse.setConsumedCapacityUnits(1.0);
 			responses.put(tableName, batchWriteResponse);
-			batchWriteItemResult.setResponses(responses);
-			batchWriteItemResult.getResponses().put(tableName, batchWriteResponse);
-            batchWriteItemResult.setUnprocessedItems(new HashMap<String, List<WriteRequest>>());
 		}
+        batchWriteItemResult.setResponses(responses);
+        batchWriteItemResult.setUnprocessedItems(new HashMap<String, List<WriteRequest>>());
+		return batchWriteItemResult;
+	}
+
+	public com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult batchWriteItemV2(com.amazonaws.services.dynamodbv2.model.BatchWriteItemRequest v2Request) {
+		com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult batchWriteItemResult =
+                new com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult();
+        List<com.amazonaws.services.dynamodbv2.model.ConsumedCapacity> v2Capacities =
+                new ArrayList<com.amazonaws.services.dynamodbv2.model.ConsumedCapacity>();
+		for (String tableName : v2Request.getRequestItems().keySet()) {
+			List<com.amazonaws.services.dynamodbv2.model.WriteRequest> writeRequests = v2Request.getRequestItems().get(tableName);
+			for (com.amazonaws.services.dynamodbv2.model.WriteRequest writeRequest : writeRequests) {
+				com.amazonaws.services.dynamodbv2.model.PutRequest putRequest = writeRequest.getPutRequest();
+				if (putRequest != null) {
+                    com.amazonaws.services.dynamodbv2.model.PutItemRequest putItemRequest =
+                        new com.amazonaws.services.dynamodbv2.model.PutItemRequest()
+                            .withTableName(tableName)
+                            .withItem(putRequest.getItem())
+                            ;
+					putItemV2(putItemRequest);
+				}
+				com.amazonaws.services.dynamodbv2.model.DeleteRequest deleteRequest = writeRequest.getDeleteRequest();
+				if (deleteRequest != null) {
+                    com.amazonaws.services.dynamodbv2.model.DeleteItemRequest deleteItemRequest =
+                        new com.amazonaws.services.dynamodbv2.model.DeleteItemRequest()
+                            .withKey(deleteRequest.getKey())
+                            ;
+                    deleteItemV2(deleteItemRequest);
+				}
+			}
+            v2Capacities.add(
+                new com.amazonaws.services.dynamodbv2.model.ConsumedCapacity()
+                    .withTableName(tableName)
+                    .withCapacityUnits(1.0)
+                    );
+		}
+        batchWriteItemResult.setUnprocessedItems(
+            new HashMap<String, List<com.amazonaws.services.dynamodbv2.model.WriteRequest>>()
+            );
+        batchWriteItemResult.setConsumedCapacity(v2Capacities);
 		return batchWriteItemResult;
 	}
 
@@ -737,6 +912,13 @@ class AlternatorDBHandler {
 		return result;
 	}
 
+	public com.amazonaws.services.dynamodbv2.model.ScanResult scanV2(com.amazonaws.services.dynamodbv2.model.ScanRequest v2Request) {
+        Table table = this.tables.get(v2Request.getTableName());
+        ScanRequest request = AlternatorDBApiVersion2Mapper.MapV2ScanRequestToV1(v2Request, table);
+        ScanResult result = scan(request);
+        return AlternatorDBApiVersion2Mapper.MapV1ScanResultToV2(result, table);
+	}
+
 	public synchronized QueryResult query(QueryRequest request) {
 		// Validate data coming in
 		QueryRequestValidator validator = new QueryRequestValidator();
@@ -786,6 +968,13 @@ class AlternatorDBHandler {
 		queryResult.setLastEvaluatedKey(null);  // new Key(request.getHashKeyValue()));
 
 		return queryResult;
+	}
+
+	public com.amazonaws.services.dynamodbv2.model.QueryResult queryV2(com.amazonaws.services.dynamodbv2.model.QueryRequest v2Request) {
+        Table table = this.tables.get(v2Request.getTableName());
+        QueryRequest request = AlternatorDBApiVersion2Mapper.MapV2QueryRequestToV1(v2Request, table);
+        QueryResult result = query(request);
+        return AlternatorDBApiVersion2Mapper.MapV1QueryResultToV2(result, table);
 	}
 
 	public String getKeyValue(AttributeValue value) {
@@ -868,7 +1057,7 @@ class AlternatorDBHandler {
 				throw new ConditionalCheckFailedException("The value conditional could is not equal");
 			}
 		} else {
-			if (isExpectedItem(item, request.getExpected())){			
+			if (isExpectedItem(item, request.getExpected())){
 				Set<String> sKeyz = new HashSet<String>(item.keySet());
 				sKeyz.addAll(attributesToUpdate.keySet());
 				for (String sKey : sKeyz) {
@@ -881,7 +1070,7 @@ class AlternatorDBHandler {
 							if (attributesToUpdate.get(sKey).getValue() != null) {
 								deleteAttributeValue(item, sKey, attributesToUpdate.get(sKey));
 							} else {
-								item.remove(sKey);								
+								item.remove(sKey);
 							}
 							attributesToUpdate.remove(sKey);
 						} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.ADD.name())) {
@@ -893,13 +1082,20 @@ class AlternatorDBHandler {
 						}
 					}
 				}
-				
+
 			}else{
 				throw new ConditionalCheckFailedException("The value conditional could is not equal");
 			}
 			result.setAttributes(item);
 		}
 		return result;
+	}
+
+	public com.amazonaws.services.dynamodbv2.model.UpdateItemResult updateItemV2(com.amazonaws.services.dynamodbv2.model.UpdateItemRequest v2Request) {
+        Table table = this.tables.get(v2Request.getTableName());
+        UpdateItemRequest request = AlternatorDBApiVersion2Mapper.MapV2UpdateItemRequestToV1(v2Request, table);
+        UpdateItemResult result = updateItem(request);
+        return AlternatorDBApiVersion2Mapper.MapV1UpdateItemResultToV2(result, v2Request.getTableName());
 	}
 
 	public Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
@@ -943,9 +1139,9 @@ class AlternatorDBHandler {
 		}
 		return true;
 	}
-	
+
 	private void addAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueUpdate){
-		
+
 		AttributeValue value = item.get(attributename);
 		if (value==null){
 			//new field
@@ -977,11 +1173,11 @@ class AlternatorDBHandler {
 			}
 		}
 	}
-	
+
 	private void deleteAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueToDelete){
 		AttributeValue existingValue = item.get(attributename);
 		if (existingValue == null){
-			return; //do nothing. need to confirm with live dynamodb behaviour. 
+			return; //do nothing. need to confirm with live dynamodb behaviour.
 		}
 		if (existingValue.getSS() != null) {
 			if (valueToDelete.getValue().getSS() == null) {

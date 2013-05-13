@@ -56,13 +56,15 @@ class AlternatorDBController {
 			}
 			HttpHeaders responseHeaders = new HttpHeaders();
 			responseHeaders.add("Content-Type", "application/json; charset=utf-8");
-			return new ResponseEntity<String>(handler.handle(request), responseHeaders, HttpStatus.OK);
+            String jsonResult = handler.handle(request);
+			return new ResponseEntity<String>(jsonResult, responseHeaders, HttpStatus.OK);
 		} catch (AmazonServiceException e) {
 			int statusCode = 400;
 			if (e instanceof InternalServerErrorException) {
 				statusCode = 500;
 			}
-			return new ResponseEntity<String>(new AmazonServiceExceptionMarshaller().marshall(e), new HttpHeaders(), HttpStatus.valueOf(statusCode));
+			ResponseEntity responseEntity = new ResponseEntity<String>(new AmazonServiceExceptionMarshaller().marshall(e), new HttpHeaders(), HttpStatus.valueOf(statusCode));
+            return responseEntity;
 		}
 	}
 
