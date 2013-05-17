@@ -34,7 +34,11 @@ To get started, you need a 2 things: AlternatorDB (the service) and AlternatorDB
 
 As a very simple example, you could do something like this in a test class:
 
-	public class AlternatorTest {
+       import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;	
+       import com.michelboudreau.alternator.AlternatorDB;
+       import com.michelboudreau.alternator.AlternatorDBClient;
+
+       public class AlternatorTest {
 
 		private AlternatorDBClient client;
 		private DynamoDBMapper mapper;
@@ -62,7 +66,7 @@ The AlternatorDB service defaults to port 9090, but can be changed in the constr
 
 Of course, it's not always possible to just create the client, mapper and service within the test.  If you're using the mapper and client in other parts of the system, you need a way to test that piece of code as well while replacing the client with the new one.  If you're injecting the client within your code, be sure to inject the interface `AmazonDynamoDB` and not the implementation `AmazonDynamoDBClient` to leave the client interchangeable.  You then simply need to use the test context, here's ours:
 
-#### testContext.xml
+#### Testing applicationContext.xml
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		   xmlns:context="http://www.springframework.org/schema/context"
@@ -79,6 +83,121 @@ Of course, it's not always possible to just create the client, mapper and servic
 	</beans>
 
 Then you only need to create the AlternatorDB service in your test and you're ready to test out your code.  Hope this helps out.  Please feel free to contribute or suggest ways to make the project better.
+
+## Dual API Version Support
+
+Amazon created a new specification for the DynamoDB API that is _not_ backward compatible with the earlier version.
+The earlier version of the API is still supported but is _deprecated_.
+
+The Alternator emulator allows both versions of the DynamoDB API.
+
+**Note** however that only the features that were already available thru the original API version are supported.  
+When processing against the newer API protocol, Alternator simply maps the request objects to the original foramt and calls the pre-existing logic.
+It then maps the result to the new API protocol format.
+Any exceptions are also remapped from the **dynamodb** namespace to the **dynamodbv2** namespace.
+
+### Java API Documentation
+
+The original API was available for Java via the 1.3.33 version of the **com.amazonaws aws-java-sdk** maven package.
+It is still supported by the 1.4.2 version of the Maven package.
+
+The Java Doc pages for both API versions reside here:
+
+**<http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html>**
+
+Focus on the **Package com.amazonaws.services.dynamodb** package namespace tree for the original API methods.
+
+Focus on the **Package com.amazonaws.services.dynamodbv2** package namespace tree for the new API methods.
+
+### Node.js API Documentation
+
+The overall documentation for the Node.js AWS-SDK resides here:
+
+**<http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/frames.html>**
+
+The section for **DynamoDB** has two sub-sections.
+
+The original API documentation is at <http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB_20111205.html>
+
+The new API documentation is at <http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB_20120810.html>
+
+The Node.js NPM package for the AWS-SDK client support either API version can be obtained with this entry in your **package.json**
+
+    "dependencies": {
+        "aws-sdk": "1.0.0"
+    },
+
+By default this client will use the newer '2012-08-10' API protocol, corresponding to the **com.amazonaws.services.dynamodbv2** namespaces.
+You can revert to the earlier '2011-12-05' API protocol by using an optional parameter in the constructor:
+
+    var dynamodb = new AWS.DynamoDB({apiVersion: '2011-12-05'});
+
+The earlier **0.9.-pre.#** versions of the NPM package always assume the original '2011-12-05' API protocol.
+
+    "dependencies": {
+        "aws-sdk": "0.9.2-pre.3"
+
+    },
+
+#### Revised Unit Test Example
+
+You can test Java code that uses the revised API protocol by importing from the **v2** package namespaces:
+
+       import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;	
+       import com.michelboudreau.alternator.AlternatorDB;
+       import com.michelboudreau.alternatorv2.AlternatorDBClientV2;
+
+       public class AlternatorTest {
+
+		private AlternatorDBClientV2 client;
+		private DynamoDBMapper mapper;
+		private AlternatorDB db;
+
+		@Before
+		public void setUp() throws Exception {
+			this.client = new AlternatorDBClientV2();
+			this.mapper = new DynamoDBMapper(this.client);
+			this.db = new AlternatorDB().start();
+		}
+
+		@After
+		public void tearDown() throws Exception {
+			this.db.stop();
+		}
+
+		@Test
+		public void test() {
+			// Add test here that uses the mapper or the client
+		}
+	}
+
+#### Revised Testing applicationContext.xml
+
+For unit tests using the new "v2" client, here is the **applicationContext.xml** file:
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans"
+           xmlns:context="http://www.springframework.org/schema/context"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:beans="http://www.springframework.org/schema/beans"
+           xsi:schemaLocation="http://www.springframework.org/schema/context
+                http://www.springframework.org/schema/context/spring-context-3.1.xsd
+                http://www.springframework.org/schema/beans
+                http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+      <!-- Turn on post-processing (Exception translation, etc) -->
+      <context:annotation-config/>
+
+      <bean id="dynamoDBClient" class="com.michelboudreau.alternator.AlternatorDBClient"/>
+      <bean id="dynamoDBMapper" class="com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper">
+        <constructor-arg index="0" ref="dynamoDBClient"/>
+      </bean>
+
+      <bean id="dynamoDBClientV2" class="com.michelboudreau.alternatorv2.AlternatorDBClientV2"/>
+      <bean id="dynamoDBMapperV2" class="com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper">
+        <constructor-arg index="0" ref="dynamoDBClientV2"/>
+      </bean>
+    </beans>
+
 
 ## Building and Running Alternator as a Standalone Executable JAR File
 
@@ -115,13 +234,13 @@ To start the Alternator emulator process, use the following commands in a comman
 
     Windows:
     
-      set ALTERNATOR_VERSION=0.3.6-SNAPSHOT
+      set ALTERNATOR_VERSION=0.5.1-SNAPSHOT
       set ALTERNATOR_HOME=%USERPROFILE%\.m2\repository\com\michelboudreau\alternator\%ALTERNATOR_VERSION%
       java -jar "%ALTERNATOR_HOME%\alternator-%ALTERNATOR_VERSION%-jar-with-dependencies.jar" Alternator.db
       
     Linux or MacOSX:
     
-      ALTERNATOR_VERSION=0.3.6-SNAPSHOT
+      ALTERNATOR_VERSION=0.5.1-SNAPSHOT
       ALTERNATOR_HOME=~/.m2/repository/com/michelboudreau/alternator/${ALTERNATOR_VERSION}
       java -jar "${ALTERNATOR_HOME}/alternator-${ALTERNATOR_VERSION}-jar-with-dependencies.jar" Alternator.db
 
