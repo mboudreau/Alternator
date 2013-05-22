@@ -883,6 +883,40 @@ public class AlternatorDBHandler {
 								}
 							}
 						}
+                        else if (cond.getComparisonOperator().equals("BETWEEN")) {
+                            if (cond.getAttributeValueList().size() == 2) {
+								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+									String comp0 = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+									String comp1 = (getAttributeValueType(cond.getAttributeValueList().get(1)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(1).getS() : cond.getAttributeValueList().get(1).getN();
+                                    if ((value.compareTo(comp0) >= 0) && (value.compareTo(comp1) <= 0)) {
+                                        items.add(item);
+                                    }
+                                }
+                            }
+                        }
+                        else if (cond.getComparisonOperator().equals("BEGINS_WITH")) {
+                            if (cond.getAttributeValueList().size() == 1) {
+								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                    if (value.startsWith(comp)) {
+                                        items.add(item);
+                                    }
+                                }
+                            }
+                        }
+                        else if (cond.getComparisonOperator().equals("CONTAINS")) {
+                            if (cond.getAttributeValueList().size() == 1) {
+								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
+									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
+									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
+                                    if (value.contains(comp)) {
+                                        items.add(item);
+                                    }
+                                }
+                            }
+                        }
 						if (cond.getComparisonOperator().equals("IN")) {
 							for(AttributeValue value : cond.getAttributeValueList()){
 								if(item.get(k).equals(value)){

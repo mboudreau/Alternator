@@ -301,7 +301,7 @@ public class AlternatorDBApiVersion2Mapper
             for (String key : v2Filter.keySet()) {
                 com.amazonaws.services.dynamodbv2.model.Condition v2Condition = v2Filter.get(key);
                 Condition v1Condition = MapV2ConditionToV1(v2Condition);
-                v2Filter.put(key, v2Condition);
+                v1Filter.put(key, v1Condition);
             }
         }
         return v1Filter;
