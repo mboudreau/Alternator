@@ -944,10 +944,12 @@ public class AlternatorDBHandler {
         ItemRangeGroup rangeGroup = table.getItemRangeGroup(hashKeyValue);
         if (rangeGroup != null) {
 			for (Map<String, AttributeValue> item : rangeGroup.getItems(rangeKeyElement, request.getRangeKeyCondition())) {
-				if (request.getScanIndexForward() == null || request.getScanIndexForward() == false) {
-					list.add(0, getItemWithAttributesToGet(item, attributesToGet));
-				} else {
+				if (request.getScanIndexForward() == null || request.getScanIndexForward() == true) {
+                    // The default value is true (forward).
+                    // If ScanIndexForward is not specified, the results are returned in ascending order.
 					list.add(getItemWithAttributesToGet(item, attributesToGet));
+				} else {
+					list.add(0, getItemWithAttributesToGet(item, attributesToGet));
 				}
             }
         }
