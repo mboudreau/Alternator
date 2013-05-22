@@ -191,7 +191,8 @@ public class AlternatorScanTest extends AlternatorTest {
         ScanRequest request = getBasicReq();
         Condition rangeKeyCondition = new Condition();
         List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
-        attributeValueList.add(new AttributeValue().withN("55"));
+        String comparisonValue = "77";
+        attributeValueList.add(new AttributeValue().withN(comparisonValue));
         rangeKeyCondition.setAttributeValueList(attributeValueList);
         rangeKeyCondition.setComparisonOperator(ComparisonOperator.GE);
         Map<String, Condition> conditionMap = new HashMap<String, Condition>();
@@ -200,10 +201,11 @@ public class AlternatorScanTest extends AlternatorTest {
         ScanResult result = getClient().scan(request);
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
-//        Assert.assertEquals(result.getItems().size(),0);
-//        for (Map<String, AttributeValue> item : result.getItems()) {
-//            Assert.assertTrue(new Integer(item.get("range").getN()) >= new Integer(new AttributeValue().withN("55").getN()));
-//        }
+        Assert.assertEquals(20, result.getItems().size());
+        for (Map<String, AttributeValue> item : result.getItems()) {
+            String testValue = item.get("range").getN();
+            Assert.assertTrue(testValue, testValue.compareTo(comparisonValue) >= 0);
+        }
     }
 
 
@@ -336,7 +338,7 @@ public class AlternatorScanTest extends AlternatorTest {
         }
     }
     ////////////////////////OK LINE////////////////////////////
-    
+
 //
 //    // TODO: Exception!
 //    @Test
