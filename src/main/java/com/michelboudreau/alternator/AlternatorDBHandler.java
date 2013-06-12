@@ -1,5 +1,23 @@
 package com.michelboudreau.alternator;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.codehaus.jackson.annotate.JsonAutoDetect;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodb.model.AttributeAction;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
@@ -92,21 +110,6 @@ import com.michelboudreau.alternator.validators.ScanRequestValidator;
 import com.michelboudreau.alternator.validators.UpdateItemRequestValidator;
 import com.michelboudreau.alternator.validators.UpdateTableRequestValidator;
 import com.michelboudreau.alternatorv2.AlternatorDBApiVersion2Mapper;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonMethod;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AlternatorDBHandler {
     public final String API_VERSION_20111205 = "DynamoDB_20111205";
@@ -1130,8 +1133,12 @@ public class AlternatorDBHandler {
 	public com.amazonaws.services.dynamodbv2.model.UpdateItemResult updateItemV2(com.amazonaws.services.dynamodbv2.model.UpdateItemRequest v2Request) {
         Table table = this.tables.get(v2Request.getTableName());
         UpdateItemRequest request = AlternatorDBApiVersion2Mapper.MapV2UpdateItemRequestToV1(v2Request, table);
-        UpdateItemResult result = updateItem(request);
-        return AlternatorDBApiVersion2Mapper.MapV1UpdateItemResultToV2(result, v2Request.getTableName());
+		try {
+			UpdateItemResult result = updateItem(request);
+			return AlternatorDBApiVersion2Mapper.MapV1UpdateItemResultToV2(result, v2Request.getTableName());
+		} catch (ConditionalCheckFailedException ccfev1) {
+			throw new com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException(ccfev1.getMessage());
+		}
 	}
 
 	public Map<String, AttributeValue> getItemWithAttributesToGet(Map<String, AttributeValue> item, List<String> attributesToGet) {
