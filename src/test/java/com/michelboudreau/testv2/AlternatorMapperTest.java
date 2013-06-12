@@ -1,16 +1,10 @@
 package com.michelboudreau.testv2;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
-import com.amazonaws.services.dynamodbv2.model.Condition;
-import com.amazonaws.services.dynamodbv2.model.ResourceInUseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,6 +12,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
+import com.amazonaws.services.dynamodbv2.model.ResourceInUseException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations =
@@ -201,8 +203,7 @@ public class AlternatorMapperTest extends AlternatorTest
 
         Map<String, Condition> emptyRangeConditions = new HashMap<String, Condition>();
 
-        DynamoDBQueryExpression query =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashKey> query = new DynamoDBQueryExpression<TestClassWithHashKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyConditions(emptyRangeConditions)
                 ;
@@ -228,8 +229,7 @@ public class AlternatorMapperTest extends AlternatorTest
 
         Map<String, Condition> emptyRangeConditions = new HashMap<String, Condition>();
 
-        DynamoDBQueryExpression query =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashKey> query = new DynamoDBQueryExpression<TestClassWithHashKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyConditions(emptyRangeConditions)
                 ;
@@ -275,8 +275,7 @@ public class AlternatorMapperTest extends AlternatorTest
 		rangeKeyCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
 		rangeKeyCondition.setAttributeValueList(rangeValues);
 
-        DynamoDBQueryExpression query =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashRangeKey> query = new DynamoDBQueryExpression<TestClassWithHashRangeKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyCondition("rangeCode", rangeKeyCondition)
                 ;
@@ -314,8 +313,7 @@ public class AlternatorMapperTest extends AlternatorTest
                 .withComparisonOperator(ComparisonOperator.NOT_NULL)
                 ;
 
-        DynamoDBQueryExpression query =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashRangeKey> query = new DynamoDBQueryExpression<TestClassWithHashRangeKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyCondition("rangeCode", rangeKeyCondition)
                 ;
@@ -341,8 +339,7 @@ public class AlternatorMapperTest extends AlternatorTest
         TestClassWithHashRangeKey hashKeyTemplate = new TestClassWithHashRangeKey();
         hashKeyTemplate.setHashCode(hashCode);
 
-        DynamoDBQueryExpression query =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashRangeKey> query = new DynamoDBQueryExpression<TestClassWithHashRangeKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyCondition("rangeCode", rangeKeyCondition)
                 ;
@@ -418,15 +415,14 @@ public class AlternatorMapperTest extends AlternatorTest
 
         Map<String, Condition> emptyRangeConditions = new HashMap<String, Condition>();
 
-        DynamoDBQueryExpression query =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashRangeKey> query = new DynamoDBQueryExpression<TestClassWithHashRangeKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyConditions(emptyRangeConditions)
                 .withScanIndexForward(false)
                 .withLimit(1)
                 ;
 
-		TestClassWithHashRangeKey res = (TestClassWithHashRangeKey) mapper.query(TestClassWithHashRangeKey.class, query).get(0);
+		TestClassWithHashRangeKey res = mapper.query(TestClassWithHashRangeKey.class, query).get(0);
 		Assert.assertEquals("second", res.getStringData());
 	}
 
@@ -447,20 +443,17 @@ public class AlternatorMapperTest extends AlternatorTest
 
         Map<String, Condition> emptyRangeConditions = new HashMap<String, Condition>();
 
-        DynamoDBQueryExpression query1 =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashRangeKey> query1 = new DynamoDBQueryExpression<TestClassWithHashRangeKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyConditions(emptyRangeConditions)
                 .withLimit(1)
                 ;
-        DynamoDBQueryExpression query3 =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashRangeKey> query3 = new DynamoDBQueryExpression<TestClassWithHashRangeKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyConditions(emptyRangeConditions)
                 .withLimit(3)
                 ;
-        DynamoDBQueryExpression query20 =
-            new DynamoDBQueryExpression()
+		DynamoDBQueryExpression<TestClassWithHashRangeKey> query20 = new DynamoDBQueryExpression<TestClassWithHashRangeKey>()
                 .withHashKeyValues(hashKeyTemplate)
                 .withRangeKeyConditions(emptyRangeConditions)
                 .withLimit(20)
