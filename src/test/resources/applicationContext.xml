@@ -14,4 +14,9 @@
 	<bean id="dynamoDBMapper" class="com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper">
 		<constructor-arg index="0" ref="dynamoDBClient"/>
 	</bean>
+
+	<bean id="dynamoDBClientV2" class="com.michelboudreau.alternatorv2.AlternatorDBClientV2"/>
+	<bean id="dynamoDBMapperV2" class="com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper">
+		<constructor-arg index="0" ref="dynamoDBClientV2"/>
+	</bean>
 </beans>
