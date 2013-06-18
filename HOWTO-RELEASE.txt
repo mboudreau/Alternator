@@ -3,6 +3,7 @@ mvn release:prepare
 -- Change version of pom back 1, remove "SNAPSHOT"
 mvn release:perform
 -- Change version of pom up 1, add "SNAPSHOT"
+-- Change version of README to latest
 git commit
 -- Push Tag version on github
 git push origin master --tags
