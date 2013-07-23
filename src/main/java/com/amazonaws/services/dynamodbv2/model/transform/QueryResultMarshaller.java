@@ -21,6 +21,13 @@ public class QueryResultMarshaller implements Marshaller<String, QueryResult> {
 			JSONWriter jsonWriter = new JSONWriter(stringWriter);
 			jsonWriter.object();
 
+            if (queryResult.getConsumedCapacity() != null) {
+                jsonWriter.key("ConsumedCapacity").object();
+                jsonWriter.key("TableName").value(queryResult.getConsumedCapacity().getTableName());
+                jsonWriter.key("CapacityUnits").value(queryResult.getConsumedCapacity().getCapacityUnits());
+                jsonWriter.endObject();
+            }
+
 			if (queryResult.getCount() != null) {
 				jsonWriter.key("Count").value(queryResult.getCount());
 			}
@@ -65,13 +72,6 @@ public class QueryResultMarshaller implements Marshaller<String, QueryResult> {
                     jsonWriter.endObject();
                 }
                 jsonWriter.endObject();
-			}
-
-			if (queryResult.getConsumedCapacity() != null) {
-				jsonWriter.key("ConsumedCapacity").object();
-				jsonWriter.key("TableName").value(queryResult.getConsumedCapacity().getTableName());
-				jsonWriter.key("CapacityUnits").value(queryResult.getConsumedCapacity().getCapacityUnits());
-				jsonWriter.endObject();
 			}
 
             jsonWriter.endObject();
