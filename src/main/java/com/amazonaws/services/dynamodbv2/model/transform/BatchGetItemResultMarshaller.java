@@ -33,12 +33,11 @@ public class BatchGetItemResultMarshaller implements Marshaller<String, BatchGet
 				for (String tableKey : responses.keySet()) {
 
                     //Begin each table object
-					jsonWriter.key(tableKey).object();
+					jsonWriter.key(tableKey).array();
                     List<Map<String, AttributeValue>> items = responses.get(tableKey);
 					if (items != null) {
 
                         //Begin array items (a series of items)
-						jsonWriter.key("Items").array();
 						for (Map<String, AttributeValue> item : items) {
 
                             //Begin each objects constituting array items.No keys in these objects
@@ -64,12 +63,9 @@ public class BatchGetItemResultMarshaller implements Marshaller<String, BatchGet
 							jsonWriter.endObject();
 						}
                         //End array items (a series of items)
-						jsonWriter.endArray();
-
-						jsonWriter.key("ConsumedCapacityUnits").value(1);
 					}
-                    //End each table object
-					jsonWriter.endObject();
+                    //End each table array
+                    jsonWriter.endArray();
 				}
 
 			}

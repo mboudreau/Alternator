@@ -701,6 +701,7 @@ public class AlternatorDBApiVersion2Mapper
                     .withTableName(tableName)
                     .withCapacityUnits(v1Response.getConsumedCapacityUnits())
                     );
+            v2Responses.put(tableName, v2Items);
         }
 
         Map<String, com.amazonaws.services.dynamodbv2.model.KeysAndAttributes> v2UnprocessedKeys = null;
