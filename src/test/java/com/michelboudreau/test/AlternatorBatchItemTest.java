@@ -1,21 +1,17 @@
 package com.michelboudreau.test;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.PropertiesCredentials;
-import com.amazonaws.services.dynamodb.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodb.model.*;
-import junit.framework.Assert;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -88,7 +84,7 @@ public class AlternatorBatchItemTest extends AlternatorTest {
 
         batchGetItemRequest.withRequestItems(requestItems);
 		BatchGetItemResult result  = getClient().batchGetItem(batchGetItemRequest);
-
+        Assert.assertNotNull("UnprocessedKeys should be empty rather than null.", result.getUnprocessedKeys());
 	}
 
     @Test

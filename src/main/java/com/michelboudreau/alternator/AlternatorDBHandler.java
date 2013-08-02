@@ -693,6 +693,7 @@ public class AlternatorDBHandler {
 				batchGetItemResult.getResponses().put(tableName, batchResponse);
 			}
 		}
+        batchGetItemResult.setUnprocessedKeys(new HashMap<String, KeysAndAttributes>());
 		return batchGetItemResult;
 	}
 
@@ -730,6 +731,7 @@ public class AlternatorDBHandler {
 	}
 
 	public com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult batchWriteItemV2(com.amazonaws.services.dynamodbv2.model.BatchWriteItemRequest v2Request) {
+     try {
 		com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult batchWriteItemResult =
                 new com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult();
         List<com.amazonaws.services.dynamodbv2.model.ConsumedCapacity> v2Capacities =
@@ -750,6 +752,7 @@ public class AlternatorDBHandler {
 				if (deleteRequest != null) {
                     com.amazonaws.services.dynamodbv2.model.DeleteItemRequest deleteItemRequest =
                         new com.amazonaws.services.dynamodbv2.model.DeleteItemRequest()
+                            .withTableName(tableName)
                             .withKey(deleteRequest.getKey())
                             ;
                     deleteItemV2(deleteItemRequest);
@@ -766,6 +769,9 @@ public class AlternatorDBHandler {
             );
         batchWriteItemResult.setConsumedCapacity(v2Capacities);
 		return batchWriteItemResult;
+      } catch (ResourceNotFoundException rnfe) {
+			throw new com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException(rnfe.getMessage());
+      }
 	}
 
 	public synchronized ScanResult scan(ScanRequest request) {

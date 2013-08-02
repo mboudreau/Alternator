@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,6 +89,7 @@ public class AlternatorBatchItemTest extends AlternatorTest {
 
         batchGetItemRequest.withRequestItems(requestItems);
 		BatchGetItemResult result  = getClient().batchGetItem(batchGetItemRequest);
+        junit.framework.Assert.assertNotNull("UnprocessedKeys should be empty rather than null.", result.getUnprocessedKeys());
 	}
 
     @Test
@@ -136,15 +138,6 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         forumItem6.put("range", new AttributeValue().withS("ff"));
         forumList.add(new WriteRequest().withPutRequest(new PutRequest().withItem(forumItem6)));
 
-        //Test case: Delete Request
-//        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(new Key(new AttributeValue("7")))));
-//        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(new Key(new AttributeValue("1")))));
-//        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(new Key(new AttributeValue("4")))));
-//        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(new Key(new AttributeValue("5")))));
-
-        //Test case: Duplicated delete request
-//        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(new Key(new AttributeValue("7")))));
-
         //Test on Table 2
         Map<String, AttributeValue> forumItemT2 = new HashMap<String, AttributeValue>();
         forumItemT2.put(hashKeyName2, new AttributeValue().withN("1"));
@@ -171,6 +164,117 @@ public class AlternatorBatchItemTest extends AlternatorTest {
             System.out.println("Unprocessed Put and Delete requests: \n" + result.getUnprocessedItems());
             requestItems = result.getUnprocessedItems();
         } while (result.getUnprocessedItems().size() > 0);
+    }
+
+    @Test
+    public void batchWriteItemWithDeletionsTest() throws Exception{
+        this.vanillaBatchWriteItemTest();
+
+        BatchWriteItemRequest batchWriteItemRequest = new BatchWriteItemRequest();
+        BatchWriteItemResult result;
+
+        // Create a map for the requests in the batch
+        Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
+
+        // Test: delete some items from database
+        List<WriteRequest> forumList = new ArrayList<WriteRequest>();
+
+        //Test case: Delete Requests
+        Map<String, AttributeValue> forumKey3c =
+            createItemKey(
+                hashKeyName1, new AttributeValue().withN("3"),
+                "range", new AttributeValue().withS("c"));
+
+        Map<String, AttributeValue> forumKey5e =
+            createItemKey(
+                hashKeyName1, new AttributeValue().withN("5"),
+                "range", new AttributeValue().withS("e"));
+
+        Map<String, AttributeValue> forumKey6f =
+            createItemKey(
+                hashKeyName1, new AttributeValue().withN("6"),
+                "range", new AttributeValue().withS("f"));
+
+        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(forumKey3c)));
+        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(forumKey5e)));
+        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(forumKey6f)));
+
+        //Test on Table 2
+        List<WriteRequest> forumListT2 = new ArrayList<WriteRequest>();
+        Map<String, AttributeValue> forumKeyT2 =
+            createItemKey(
+                hashKeyName2, new AttributeValue().withN("1"),
+                "range", new AttributeValue().withS("a"));
+        forumListT2.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(forumKeyT2)));
+
+        requestItems.put(tableName1, forumList);
+        requestItems.put(tableName2, forumListT2);
+        do {
+            System.out.println("Making the request.");
+
+            batchWriteItemRequest.withRequestItems(requestItems);
+            result = getClient().batchWriteItem(batchWriteItemRequest);
+
+            // Print consumed capacity units
+            for(ConsumedCapacity entry : result.getConsumedCapacity()) {
+                String tableName1 = entry.getTableName();
+                Double consumedCapacityUnits = entry.getCapacityUnits();
+                System.out.println("Consumed capacity units for table " + tableName1 + ": " + consumedCapacityUnits);
+            }
+
+            // Check for unprocessed keys which could happen if you exceed provisioned throughput
+            System.out.println("Unprocessed Put and Delete requests: \n" + result.getUnprocessedItems());
+            requestItems = result.getUnprocessedItems();
+        } while (result.getUnprocessedItems().size() > 0);
+    }
+
+    @Test
+    public void batchWriteItemWithDuplicateDeletionTest() throws Exception{
+        this.vanillaBatchWriteItemTest();
+
+        BatchWriteItemRequest batchWriteItemRequest = new BatchWriteItemRequest();
+        BatchWriteItemResult result;
+
+        // Create a map for the requests in the batch
+        Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
+
+        // Test: delete some items from database
+        List<WriteRequest> forumList = new ArrayList<WriteRequest>();
+
+        //Test case: Delete Requests
+        Map<String, AttributeValue> forumKey5e =
+            createItemKey(
+                hashKeyName1, new AttributeValue().withN("5"),
+                "range", new AttributeValue().withS("e"));
+
+        Map<String, AttributeValue> forumKey6f =
+            createItemKey(
+                hashKeyName1, new AttributeValue().withN("6"),
+                "range", new AttributeValue().withS("f"));
+
+        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(forumKey5e)));
+        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(forumKey6f)));
+
+        //Test case: Duplicated delete request
+        forumList.add(new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(forumKey5e)));
+
+        requestItems.put(tableName1, forumList);
+        System.out.println("Making the request.");
+
+        batchWriteItemRequest.withRequestItems(requestItems);
+
+        String exceptionMessage = null;
+        try {
+            result = getClient().batchWriteItem(batchWriteItemRequest);
+        } catch (ResourceNotFoundException ex) {
+            exceptionMessage = ex.getMessage();
+        }
+        // Question: Is this the actual behavior of DynamoDB?
+        Assert.assertNotNull("Expected an exception.", exceptionMessage);
+        Assert.assertEquals("Incorrect exception message.",
+                "The item with hash key '5' doesn't exist in table '" + tableName1 + "'",
+                exceptionMessage);
+    }
 
     /*
     @Test
@@ -179,7 +283,4 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         Assert.assertNotNull(result);
     }
     */
-
-
-    }
 }
