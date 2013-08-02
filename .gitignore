@@ -7,3 +7,4 @@ target
 .classpath
 alternator*.db
 Alternator*.db
+nb-configuration.xml

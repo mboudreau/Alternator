@@ -5,9 +5,9 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.BatchGetItemResult;
 import com.amazonaws.services.dynamodb.model.BatchResponse;
+import com.amazonaws.services.dynamodb.model.KeysAndAttributes;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
-
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +77,25 @@ public class BatchGetItemResultMarshaller implements Marshaller<String, BatchGet
 			}
             //End response object
 			jsonWriter.endObject();
+
+            //Begin unprocessedKeys
+			jsonWriter.key("UnprocessedKeys").object();
+            Map<String, KeysAndAttributes> unprocessedKeys = batchGetItemResult.getUnprocessedKeys();
+            if (unprocessedKeys != null) {
+                for (String tableKey : unprocessedKeys.keySet()) {
+                    //begin table
+                    jsonWriter.key(tableKey).array();
+
+                    // NOTE: We are just emulating an empty set of unprocessed keys.
+
+                    //end table
+                    jsonWriter.endArray();
+                }
+            }
+
+            //End unprocessedKeys
+			jsonWriter.endObject();
+
             //End whole object containing both response and unprocessed keys!
 			jsonWriter.endObject();
 
