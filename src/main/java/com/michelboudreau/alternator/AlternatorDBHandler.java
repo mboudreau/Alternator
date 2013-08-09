@@ -1107,9 +1107,15 @@ public class AlternatorDBHandler {
 			} else if (value.getS() != null) {
 				throw new ConditionalCheckFailedException("It's not possible to ADD on an attribute with a String type for the attribute (" + attributename + ")");
 			} else if (value.getN() != null) {
-				Double i = new Double(value.getN());
-				i = i + new Double(valueUpdate.getValue().getN());
-				value.setN(i + "");
+                try {
+                    Long l = Long.valueOf(value.getN());
+                    l = l + Long.valueOf(valueUpdate.getValue().getN());
+                    value.setN(l + "");
+                } catch (NumberFormatException e) {
+                    Double i = new Double(value.getN());
+                    i = i + new Double(valueUpdate.getValue().getN());
+                    value.setN(i + "");
+                }
 			}
 		}
 	}
