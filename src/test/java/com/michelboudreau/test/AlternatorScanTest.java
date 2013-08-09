@@ -1,11 +1,6 @@
 package com.michelboudreau.test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
+import com.amazonaws.services.dynamodb.model.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,17 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.amazonaws.services.dynamodb.model.AttributeValue;
-import com.amazonaws.services.dynamodb.model.ComparisonOperator;
-import com.amazonaws.services.dynamodb.model.Condition;
-import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
-import com.amazonaws.services.dynamodb.model.KeySchema;
-import com.amazonaws.services.dynamodb.model.KeySchemaElement;
-import com.amazonaws.services.dynamodb.model.PutItemRequest;
-import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
-import com.amazonaws.services.dynamodb.model.ScalarAttributeType;
-import com.amazonaws.services.dynamodb.model.ScanRequest;
-import com.amazonaws.services.dynamodb.model.ScanResult;
+import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -342,6 +327,42 @@ public class AlternatorScanTest extends AlternatorTest {
             Assert.assertTrue(item.get("range").getN().contains("4"));
         }
     }
+
+    @Test
+    public void scanWithScanFilterMultipleConditionsTest() throws Exception {
+        ScanRequest request = getBasicReq();
+        final Map<String, Condition> conditionMap = new HashMap<String, Condition>();
+
+        //First condition
+        Condition rangeKeyCondition = new Condition();
+        List<AttributeValue> attributeValueList = new ArrayList<AttributeValue>();
+        attributeValueList.add(new AttributeValue().withN("4"));
+        rangeKeyCondition.setAttributeValueList(attributeValueList);
+        rangeKeyCondition.setComparisonOperator(ComparisonOperator.EQ);
+        conditionMap.put("range", rangeKeyCondition);
+
+        //Second condition
+        //Note: this is purely for testing; in real applications, conditions would probably use different attributes
+        rangeKeyCondition = new Condition();
+        attributeValueList = new ArrayList<AttributeValue>();
+        attributeValueList.add(new AttributeValue().withN("4"));
+        rangeKeyCondition.setAttributeValueList(attributeValueList);
+        rangeKeyCondition.setComparisonOperator(ComparisonOperator.EQ);
+        conditionMap.put("second", rangeKeyCondition);
+
+        request.setScanFilter(conditionMap);
+
+        ScanResult result = getClient().scan(request);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getItems());
+        //Should be no duplicates
+        Assert.assertEquals(10, result.getItems().size());
+        for (Map<String,AttributeValue> item : result.getItems()) {
+            Assert.assertEquals("4", item.get("range").getN());
+            Assert.assertEquals("4", item.get("second").getN());
+        }
+    }
+
     ////////////////////////OK LINE////////////////////////////
 
 //
@@ -453,6 +474,7 @@ public class AlternatorScanTest extends AlternatorTest {
         map.put("id", hash);
         if (range != null) {
             map.put("range", range);
+            map.put("second", range);
         }
         map.put("date",createStringAttribute());
         map.put("testfield",createStringAttribute());
