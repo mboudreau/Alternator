@@ -686,6 +686,36 @@ public class AlternatorDBHandler {
       }
 	}
 
+    private boolean isComparableInScan(AttributeValue value, AttributeValue comp) {
+        if (comp == null) return false;
+        final AttributeValueType compType = getAttributeValueType(comp);
+        final AttributeValueType valueType = getAttributeValueType(value);
+        return (compType.equals(AttributeValueType.N) || compType.equals(AttributeValueType.S)) && compType.equals(valueType);
+    }
+
+    private int compareForScan(AttributeValue value, AttributeValue comp) {
+        //Get type
+        final AttributeValueType valueType = getAttributeValueType(value);
+        if (valueType.equals(AttributeValueType.S)) return value.getS().compareTo(comp.getS());
+
+        if (valueType.equals(AttributeValueType.N)) {
+            try {
+                return new Long(value.getN()).compareTo(new Long(comp.getN()));
+            } catch (NumberFormatException e) {
+                return new Double(value.getN()).compareTo(new Double(comp.getN()));
+            }
+        }
+
+        throw new IllegalArgumentException("Can only compare String and Number types, got " + valueType);
+    }
+
+    private String getAttributeValueAsString(AttributeValue value) {
+        final AttributeValueType valueType = getAttributeValueType(value);
+        if (valueType.equals(AttributeValueType.N)) return value.getN();
+        if (valueType.equals(AttributeValueType.S)) return value.getS();
+        throw new IllegalArgumentException("Can only return values for Number and String, got " + valueType);
+    }
+
 	public synchronized ScanResult scan(ScanRequest request) {
 		ScanResult result = new ScanResult();
 		List<Error> errors = new ScanRequestValidator().validate(request);
@@ -704,116 +734,67 @@ public class AlternatorDBHandler {
 				for (String k : request.getScanFilter().keySet()) {
                     //Set this to true if one of conditions matches
                     boolean conditionMatches = false;
-					if (item.get(k) != null) {
-						Condition cond = request.getScanFilter().get(k);
-						if (cond.getComparisonOperator() == null) {
+                    final AttributeValue attribute = item.get(k);
+					if (attribute != null) {
+						final Condition cond = request.getScanFilter().get(k);
+                        final AttributeValue comp = cond.getAttributeValueList().isEmpty() ? null : cond.getAttributeValueList().get(0);
+                        final int condSize = cond.getAttributeValueList().size();
+
+                        if (cond.getComparisonOperator() == null) {
 							throw new ResourceNotFoundException("There must be a comparisonOperator");
 						}
-						if (cond.getComparisonOperator().equals("EQ")) {
-							if (cond.getAttributeValueList().size() == 1) {
-								conditionMatches = item.get(k).equals(cond.getAttributeValueList().get(0));
-							} else {
-                                conditionMatches = item.get(k).equals(cond.getAttributeValueList());
+
+                        if (cond.getComparisonOperator().equals("EQ")) {
+							if (condSize == 1 && isComparableInScan(attribute, comp)) {
+								conditionMatches = compareForScan(attribute, comp) == 0;
 							}
-						}
+						} else
 						if (cond.getComparisonOperator().equals("LE")) {
-							if (cond.getAttributeValueList().size() == 1) {
-								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                    conditionMatches = value.compareTo(comp) >= 0;
-								} else {
-									//TODO to do
-									//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-								}
-
-							} else {
-								//TODO to do
-                                conditionMatches = item.get(k).equals(cond.getAttributeValueList());
-							}
-						}
+							if (condSize == 1 && isComparableInScan(attribute, comp)) {
+                                conditionMatches = compareForScan(attribute, comp) <= 0;
+						    }
+						} else
 						if (cond.getComparisonOperator().equals("LT")) {
-							if (cond.getAttributeValueList().size() == 1) {
-								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                    conditionMatches = value.compareTo(comp) < 0;
-								} else {
-									//TODO to do
-									//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-								}
-
-							} else {
-								//TODO to do
-                                conditionMatches = item.get(k).equals(cond.getAttributeValueList());
+							if (condSize == 1 && isComparableInScan(attribute, comp)) {
+                                conditionMatches = compareForScan(attribute, comp) < 0;
 							}
-						}
+						} else
 						if (cond.getComparisonOperator().equals("GE")) {
-							if (cond.getAttributeValueList().size() == 1) {
-								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                    conditionMatches = value.compareTo(comp) >= 0;
-								} else {
-									//TODO to do
-									//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-								}
-
-							} else {
-								//TODO to do
-                                conditionMatches = item.get(k).equals(cond.getAttributeValueList());
-							}
-						}
+							if (condSize == 1 && isComparableInScan(attribute, comp)) {
+                                conditionMatches = compareForScan(attribute, comp) >= 0;
+                            }
+						} else
 						if (cond.getComparisonOperator().equals("GT")) {
-							if (cond.getAttributeValueList().size() == 1) {
-								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-									if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) {
-										String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-										String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                        conditionMatches = value.compareTo(comp) > 0;
-									} else {
-										String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-										String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                        conditionMatches = Integer.parseInt(value) > Integer.parseInt(comp);
-									}
-								} else {
-									//TODO to do
-									//List<String> value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.SS))? item.get(k).getSS() : item.get(k).getNS();
-								}
-
-							} else {
-								//TODO to do
-                                conditionMatches = item.get(k).equals(cond.getAttributeValueList());
+							if (condSize == 1 && isComparableInScan(attribute, comp)) {
+                                conditionMatches = compareForScan(attribute, comp) > 0;
 							}
-						}
-                        else if (cond.getComparisonOperator().equals("BETWEEN")) {
-                            if (cond.getAttributeValueList().size() == 2) {
-								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-									String comp0 = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-									String comp1 = (getAttributeValueType(cond.getAttributeValueList().get(1)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(1).getS() : cond.getAttributeValueList().get(1).getN();
-                                    conditionMatches = value.compareTo(comp0) >= 0 && value.compareTo(comp1) <= 0;
+						} else
+                        if (cond.getComparisonOperator().equals("BETWEEN")) {
+                            if (condSize == 2) {
+                                final AttributeValue comp2 = cond.getAttributeValueList().get(1);
+                                if (isComparableInScan(attribute, comp) && isComparableInScan(attribute, comp2)) {
+                                    conditionMatches = compareForScan(attribute, comp) >= 0 && compareForScan(attribute, comp2) <= 0;
                                 }
                             }
-                        }
-                        else if (cond.getComparisonOperator().equals("BEGINS_WITH")) {
-                            if (cond.getAttributeValueList().size() == 1) {
+                        } else
+                        if (cond.getComparisonOperator().equals("BEGINS_WITH")) {
+                            //TODO: Should we fail on AttributeValueType other than S (as per AWS DynamoDB docs)?
+                            //TODO: Investigate how actual DynamoDB works
+                            if (condSize == 1 && getAttributeValueType(attribute).equals(AttributeValueType.S) &&
+                                    getAttributeValueType(comp).equals(AttributeValueType.S)) {
+                                conditionMatches = attribute.getS().startsWith(comp.getS());
+                            }
+                        } else
+                        if (cond.getComparisonOperator().equals("CONTAINS")) {
+                            if (condSize == 1) {
 								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                    conditionMatches = value.startsWith(comp);
+									String value = getAttributeValueAsString(attribute);
+									String subs = getAttributeValueAsString(comp);
+                                    conditionMatches = value.contains(subs);
                                 }
                             }
-                        }
-                        else if (cond.getComparisonOperator().equals("CONTAINS")) {
-                            if (cond.getAttributeValueList().size() == 1) {
-								if (getAttributeValueType(item.get(k)).equals(AttributeValueType.S) || getAttributeValueType(item.get(k)).equals(AttributeValueType.N)) {
-									String value = (getAttributeValueType(item.get(k)).equals(AttributeValueType.S)) ? item.get(k).getS() : item.get(k).getN();
-									String comp = (getAttributeValueType(cond.getAttributeValueList().get(0)).equals(AttributeValueType.S)) ? cond.getAttributeValueList().get(0).getS() : cond.getAttributeValueList().get(0).getN();
-                                    conditionMatches = value.contains(comp);
-                                }
-                            }
-                        }
+                            //TODO: Check for sets!!!
+                        } else
 						if (cond.getComparisonOperator().equals("IN")) {
 							for(AttributeValue value : cond.getAttributeValueList()){
 								if (item.get(k).equals(value)){
