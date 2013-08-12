@@ -1,8 +1,8 @@
 package com.michelboudreau.testv2;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.model.*;
+import com.michelboudreau.alternatorv2.AlternatorDBInProcessClientV2;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,16 +11,12 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.model.AttributeAction;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate;
-import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
-import com.amazonaws.services.dynamodbv2.model.ExpectedAttributeValue;
-import com.amazonaws.services.dynamodbv2.model.QueryRequest;
-import com.amazonaws.services.dynamodbv2.model.QueryResult;
-import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
-import com.michelboudreau.alternatorv2.AlternatorDBInProcessClientV2;
+import java.util.HashMap;
+import java.util.Map;
+
+import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -84,8 +80,8 @@ public class AlternatorUpdateTest extends AlternatorTest {
         Assert.assertNotSame(result.getItems().size(), 0);
 
         Map<String, AttributeValue> row = result.getItems().get(0);
-        Assert.assertEquals(row.get("id"), hashKey);
-        Assert.assertEquals(row.get("count").getN(), "100");
+        assertEquals(row.get("id"), hashKey);
+        assertEquals(row.get("count").getN(), "100");
     }
 
     @Test
@@ -121,7 +117,7 @@ public class AlternatorUpdateTest extends AlternatorTest {
         Assert.assertNotSame(result.getItems().size(), 0);
         Map<String, AttributeValue> row = result.getItems().get(0);
 
-        Assert.assertEquals(row.get("id"), hashKey);
+        assertEquals(row.get("id"), hashKey);
         Assert.assertArrayEquals(row.get("count").getNS().toArray(), new String[]{"100", "102"});
     }
 
@@ -162,8 +158,8 @@ public class AlternatorUpdateTest extends AlternatorTest {
         Assert.assertNotSame(result.getItems().size(), 0);
 
         Map<String, AttributeValue> row = result.getItems().get(0);
-        Assert.assertEquals(row.get("id"), hashKey);
-        Assert.assertEquals(row.get("count").getN(), "102");
+        assertEquals(row.get("id"), hashKey);
+        assertEquals(row.get("count").getN(), "102");
     }
 
     @Test
@@ -204,9 +200,9 @@ public class AlternatorUpdateTest extends AlternatorTest {
         Assert.assertNotSame(result.getItems().size(), 0);
 
         Map<String, AttributeValue> row = result.getItems().get(0);
-        Assert.assertEquals(row.get("id"), hashKey);
-        Assert.assertEquals(row.get("count").getN(), "102");
-        Assert.assertEquals(row.get("ids").getS(), "[er, er]");
+        assertEquals(row.get("id"), hashKey);
+        assertEquals(row.get("count").getN(), "102");
+        assertEquals(row.get("ids").getS(), "[er, er]");
     }
 
     @Test
@@ -247,9 +243,9 @@ public class AlternatorUpdateTest extends AlternatorTest {
         Assert.assertNotSame(result.getItems().size(), 0);
 
         Map<String, AttributeValue> row = result.getItems().get(0);
-        Assert.assertEquals(row.get("id"), hashKey);
-        Assert.assertEquals(row.get("count").getN(), "102");
-        Assert.assertEquals(row.get("ids").getS(), "[er, er]");
+        assertEquals(row.get("id"), hashKey);
+        assertEquals(row.get("count").getN(), "102");
+        assertEquals(row.get("ids").getS(), "[er, er]");
     }
 
     @Test
@@ -325,8 +321,47 @@ public class AlternatorUpdateTest extends AlternatorTest {
         Assert.assertNotSame(result.getItems().size(), 0);
 
         Map<String, AttributeValue> row = result.getItems().get(0);
-        Assert.assertEquals(row.get("id"), hashKey);
-        Assert.assertEquals(row.get("count").getN(), "102");
+        assertEquals(row.get("id"), hashKey);
+        assertEquals(row.get("count").getN(), "102");
         Assert.assertNull(row.get("ids"));
+    }
+
+    //The below is important when mapping number values to integer fields with DynamoDBMapper
+    @Test
+    public void integerFieldsShouldRemainIntegerOnAdd() throws Exception {
+        createGenericTable(tableName);
+
+        Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
+        item.put("id", new AttributeValue().withS("1"));
+        item.put("value", new AttributeValue().withN("1"));
+
+        PutItemRequest req = new PutItemRequest().withTableName(tableName).withItem(item);
+        getClient().putItem(req);
+
+        //Prepare update
+        AttributeValue hashKey = new AttributeValue().withS("1");
+        Map<String, AttributeValue> key = new HashMap<String, AttributeValue>();
+        key.put("id", hashKey);
+
+        HashMap<String, AttributeValueUpdate> dynValues = new HashMap<String, AttributeValueUpdate> ();
+        dynValues.put("value", new AttributeValueUpdate(new AttributeValue().withN("1"), AttributeAction.ADD));
+        UpdateItemRequest update = new UpdateItemRequest(tableName, key, dynValues);
+        getClient().updateItem(update);
+
+        inProcessClient.save(PERSISTENCE_PATH);
+        createNewInProcessClient().restore(PERSISTENCE_PATH);
+
+        QueryRequest request = new QueryRequest()
+                .withTableName(tableName)
+                .withKeyConditions(createHashKeyCondition("id", hashKey));
+        QueryResult result = getClient().query(request);
+
+        assertNotNull(result.getItems());
+        assertTrue(!result.getItems().isEmpty());
+
+        Map<String, AttributeValue> row = result.getItems().get(0);
+
+        assertEquals(hashKey, row.get("id"));
+        assertEquals("2", row.get("value").getN());
     }
 }
