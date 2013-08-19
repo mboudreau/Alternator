@@ -419,10 +419,7 @@ public class AlternatorDBHandler {
 					throw new ConditionalCheckFailedException("The exist conditional could not be met.");
 				}
 				if (value.getValue() != null) {
-					// check to see if value conditional is equal
-					if (
-							(value.getValue().getN() != null && !item.get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !item.get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !item.get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !item.get(key).equals(value.getValue().getSS()))
-							) {
+                    if (!compareAttributeValues(value.getValue(), item.get(key))) {
 						throw new ConditionalCheckFailedException("The value conditional could is not equal");
 					}
 				}
@@ -439,6 +436,20 @@ public class AlternatorDBHandler {
 
 		return result;
 	}
+
+    private boolean compareAttributeValues(AttributeValue a, AttributeValue b) {
+        if (a.getB() != null && a.getB().equals(b.getB())) {
+            return true;
+        } else if (a.getN() != null && a.getN().equals(b.getN())) {
+            return true;
+        } else if (a.getS() != null && a.getS().equals(b.getS())) {
+            return true;
+        } else if (a.getSS() != null && a.getSS().equals(b.getSS())) {
+            return true;
+        }
+
+        return false;
+    }
 
 	public synchronized com.amazonaws.services.dynamodbv2.model.PutItemResult putItemV2(com.amazonaws.services.dynamodbv2.model.PutItemRequest v2Request) throws InternalServerErrorException, ResourceNotFoundException, ConditionalCheckFailedException {
         PutItemRequest request = AlternatorDBApiVersion2Mapper.MapV2PutItemRequestToV1(v2Request);
@@ -546,9 +557,7 @@ public class AlternatorDBHandler {
 				}
 				if (value.getValue() != null) {
 					// check to see if value conditional is equal
-					if (
-							(value.getValue().getN() != null && !item.get(key).equals(value.getValue().getN())) || (value.getValue().getS() != null && !item.get(key).equals(value.getValue().getS())) || (value.getValue().getNS() != null && !item.get(key).equals(value.getValue().getNS())) || (value.getValue().getSS() != null && !item.get(key).equals(value.getValue().getSS()))
-							) {
+					if (!compareAttributeValues(value.getValue(), item.get(key))) {
 						throw new ConditionalCheckFailedException("The value conditional could is not equal");
 					}
 				}
