@@ -94,7 +94,7 @@ The earlier version of the API is still supported but is _deprecated_.
 The Alternator emulator allows both versions of the DynamoDB API.
 
 **Note** however that only the features that were already available thru the original API version are supported.  
-When processing against the newer API protocol, Alternator simply maps the request objects to the original foramt and calls the pre-existing logic.
+When processing against the newer API protocol, Alternator simply maps the request objects to the original format and calls the pre-existing logic.
 It then maps the result to the new API protocol format.
 Any exceptions are also remapped from the **dynamodb** namespace to the **dynamodbv2** namespace.
 
@@ -205,9 +205,6 @@ For unit tests using the new "v2" client, here is the **applicationContext.xml**
 
 An optional Maven profile named **"standalone"** includes all third-party dependencies into a self-contained executable JAR file. This allows the Alternator emulator to run in its own process. This is particularly useful when developing DynamoDB client applications in technologies other than Java.
 
-**_Important Caveat:_**
-Currently the Alternator emulator is **_not_** thread-safe for insertions. The internal memory structures are not protected by synchronization locks.  Your own application should serialize its insert operations so they occur one at a time.
-
 ### Building the Executable JAR File
 
 The standalone executable JAR file is _excluded_ from the default Maven profile **install** target since the file is about 16 MB due to inclusion of the required 3rd-party dependency libraries.  To obtain a copy of this JAR file, clone the Alternator GitHub repository to your local workstation and run the following Maven command:
@@ -230,23 +227,32 @@ as well as in your local Maven repository in this folder tree:
 Note that none of the files in this folder need to be deployed to a server.
 These files are intended for local use on a developer workstation.
 
-### Starting and Stopping the Executable JAR File
+### Starting the Executable JAR File
 
 To start the Alternator emulator process, use the following commands in a command prompt or terminal window:
 
     Windows:
     
-      set ALTERNATOR_VERSION=0.5.1-SNAPSHOT
+      set ALTERNATOR_VERSION=0.6.5-SNAPSHOT
       set ALTERNATOR_HOME=%USERPROFILE%\.m2\repository\com\michelboudreau\alternator\%ALTERNATOR_VERSION%
       java -jar "%ALTERNATOR_HOME%\alternator-%ALTERNATOR_VERSION%-jar-with-dependencies.jar" Alternator.db
       
     Linux or MacOSX:
     
-      ALTERNATOR_VERSION=0.5.1-SNAPSHOT
+      ALTERNATOR_VERSION=0.6.5-SNAPSHOT
       ALTERNATOR_HOME=~/.m2/repository/com/michelboudreau/alternator/${ALTERNATOR_VERSION}
       java -jar "${ALTERNATOR_HOME}/alternator-${ALTERNATOR_VERSION}-jar-with-dependencies.jar" Alternator.db
 
 These command sequences are available in a **.bat** (for Windows) and **.sh** (Linux or MacOSX) script in the **scripts** folder beneath the root of this Git repository.
+
+### Running Alternator as a Standalone Java Process Using Maven
+
+A Maven command provides another option for starting Alternator in its own Java process.
+From the root folder of your local clone of the Git repository, enter this Maven command:
+
+    mvn exec:java
+
+### Working with Alternator as a Standalone Process
       
 Note the following message that appears after the program initializes:
 
@@ -263,6 +269,7 @@ If you elect to save the data to **Alternator.db**, you can examine the JSON tex
 The next time the emulator is started using the executable JAR file it will reload the saved data into memory.
 
 To start an emulator session with an empty database, simply delete the **Alternator.db** file (or rename it out of the way).  You can also save copies of the **Alternator.db** file for use in repeatable integration testing for your application.
+
 
 ### Accessing the Alternator Process from non-Java Applications
 
