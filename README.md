@@ -5,6 +5,8 @@ Alternator - A DynamoDB Mock Server
 
 THIS IS A WORK IN PROGRESS - BETA VERSION - SOME THINGS ARE NOT 100%
 
+FOR QUESTIONS ON ALTERNATOR, PLEASE POST QUESTIONS ON [STACKOVERFLOW](http://stackoverflow.com/questions/tagged/alternator).
+
 While working on a startup called Tivity, my co-worker, [Thomas](https://github.com/tnbredillet), and I found that testing simple functions with DynamoDB was a pain because it would take time to create testing tables and tear them back down.  This would slow down our BDD approach to this project.  Another nuisance was the cost that would incur when using DynamoDB from our local webapp or that we would hit our throughput limit and cause an error.  Of course, this also means that you couldn't code things on the road because you needed an internet connect for Amazon Web Services.
 
 To fix this, we've created a local data-store used for testing and development purposes by replicating DynamoDB's functionality.  Our goal is to simplify the development and testing of DynamoDB specific functionality.
