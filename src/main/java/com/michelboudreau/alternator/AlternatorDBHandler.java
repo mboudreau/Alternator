@@ -410,21 +410,7 @@ public class AlternatorDBHandler {
 		Map<String, AttributeValue> item = table.getItem(hashKeyValue, rangeKeyValue);
 
 		// Check conditional put
-		if (request.getExpected() != null) {
-			for (Map.Entry<String, ExpectedAttributeValue> entry : request.getExpected().entrySet()) {
-				String key = entry.getKey();
-				ExpectedAttributeValue value = entry.getValue();
-				value.setExists(value.getValue() != null);
-				if ((value.getExists() && item == null) || (!value.getExists() && item != null)) {
-					throw new ConditionalCheckFailedException("The exist conditional could not be met.");
-				}
-				if (value.getValue() != null) {
-                    if (!compareAttributeValues(value.getValue(), item.get(key))) {
-						throw new ConditionalCheckFailedException("The value conditional could is not equal");
-					}
-				}
-			}
-		}
+		validateExpected(request.getExpected(), item);
 
 		PutItemResult result = new PutItemResult().withConsumedCapacityUnits(1D);
 		if (item != null && request.getReturnValues() != null && ReturnValue.fromValue(request.getReturnValues()) == ReturnValue.ALL_OLD) {
@@ -547,22 +533,7 @@ public class AlternatorDBHandler {
 		}
 
 		// Check conditional put
-		if (request.getExpected() != null) {
-			for (Map.Entry<String, ExpectedAttributeValue> entry : request.getExpected().entrySet()) {
-				String key = entry.getKey();
-				ExpectedAttributeValue value = entry.getValue();
-				value.setExists(value.getValue() != null);
-				if ((value.getExists() && item == null) || (!value.getExists() && item != null)) {
-					throw new ConditionalCheckFailedException("The exist conditional could not be met.");
-				}
-				if (value.getValue() != null) {
-					// check to see if value conditional is equal
-					if (!compareAttributeValues(value.getValue(), item.get(key))) {
-						throw new ConditionalCheckFailedException("The value conditional could is not equal");
-					}
-				}
-			}
-		}
+		validateExpected(request.getExpected(), item);
 
 		DeleteItemResult result = new DeleteItemResult().withConsumedCapacityUnits(1D);
 		if (item != null && request.getReturnValues() != null && ReturnValue.fromValue(request.getReturnValues()) == ReturnValue.ALL_OLD) {
@@ -965,52 +936,47 @@ public class AlternatorDBHandler {
         String hashKeyValue = getKeyValue(key.getHashKeyElement());
         String rangeKeyValue = getKeyValue(key.getRangeKeyElement());
         Map<String, AttributeValue> item = this.tables.get(tableName).getItem(hashKeyValue, rangeKeyValue);
+       
+		// Check conditional put
+        validateExpected(request.getExpected(), item);
+        
 		if (item == null) {
-			if (request.getExpected()==null || request.getExpected().isEmpty()){
-				item = new HashMap<String, AttributeValue>();
-				item.put(this.tables.get(tableName).getHashKeyName(), key.getHashKeyElement());
-				if (key.getRangeKeyElement() != null) {
-					item.put(this.tables.get(tableName).getRangeKeyName(), key.getRangeKeyElement());
-				}
-				for (String sKey : attributesToUpdate.keySet()) {
-					if (attributesToUpdate.get(sKey).getValue() != null) {
-						item.put(sKey, attributesToUpdate.get(sKey).getValue());
-					}
-				}
-				this.tables.get(tableName).putItem(item);
-				result.setAttributes(item);
-			}else{
-				throw new ConditionalCheckFailedException("The value conditional could is not equal");
+			item = new HashMap<String, AttributeValue>();
+			item.put(this.tables.get(tableName).getHashKeyName(), key.getHashKeyElement());
+			if (key.getRangeKeyElement() != null) {
+				item.put(this.tables.get(tableName).getRangeKeyName(), key.getRangeKeyElement());
 			}
+			for (String sKey : attributesToUpdate.keySet()) {
+				if (attributesToUpdate.get(sKey).getValue() != null) {
+					item.put(sKey, attributesToUpdate.get(sKey).getValue());
+				}
+			}
+			this.tables.get(tableName).putItem(item);
+			result.setAttributes(item);
 		} else {
-			if (isExpectedItem(item, request.getExpected())){
-				Set<String> sKeyz = new HashSet<String>(item.keySet());
-				sKeyz.addAll(attributesToUpdate.keySet());
-				for (String sKey : sKeyz) {
-					if (attributesToUpdate.containsKey(sKey)) {
-						if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.PUT.name())) {
+			Set<String> sKeyz = new HashSet<String>(item.keySet());
+			sKeyz.addAll(attributesToUpdate.keySet());
+			for (String sKey : sKeyz) {
+				if (attributesToUpdate.containsKey(sKey)) {
+					if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.PUT.name())) {
+						item.remove(sKey);
+						item.put(sKey, attributesToUpdate.get(sKey).getValue());
+						attributesToUpdate.remove(sKey);
+					} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.DELETE.name())) {
+						if (attributesToUpdate.get(sKey).getValue() != null) {
+							deleteAttributeValue(item, sKey, attributesToUpdate.get(sKey));
+						} else {
 							item.remove(sKey);
-							item.put(sKey, attributesToUpdate.get(sKey).getValue());
-							attributesToUpdate.remove(sKey);
-						} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.DELETE.name())) {
-							if (attributesToUpdate.get(sKey).getValue() != null) {
-								deleteAttributeValue(item, sKey, attributesToUpdate.get(sKey));
-							} else {
-								item.remove(sKey);
-							}
-							attributesToUpdate.remove(sKey);
-						} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.ADD.name())) {
-							if (attributesToUpdate.get(sKey).getValue() != null) {
-								addAttributeValue(item, sKey, attributesToUpdate.get(sKey));
-							} else {
-								throw new ResourceNotFoundException("the provided update item with attribute (" + sKey + ") doesn't have an AttributeValue to perform the ADD");
-							}
+						}
+						attributesToUpdate.remove(sKey);
+					} else if (attributesToUpdate.get(sKey).getAction().equalsIgnoreCase(AttributeAction.ADD.name())) {
+						if (attributesToUpdate.get(sKey).getValue() != null) {
+							addAttributeValue(item, sKey, attributesToUpdate.get(sKey));
+						} else {
+							throw new ResourceNotFoundException("the provided update item with attribute (" + sKey + ") doesn't have an AttributeValue to perform the ADD");
 						}
 					}
 				}
-
-			}else{
-				throw new ConditionalCheckFailedException("The value conditional could is not equal");
 			}
 			result.setAttributes(item);
 		}
@@ -1050,24 +1016,6 @@ public class AlternatorDBHandler {
 			copy.add(getItemWithAttributesToGet(item, attributesToGet));
 		}
 		return copy;
-	}
-
-	private boolean isExpectedItem(Map<String, AttributeValue> item, Map<String, ExpectedAttributeValue> expected){
-		if (expected==null || expected.isEmpty()){
-			return true;
-		}
-		for (String expectedFieldName: expected.keySet()){
-			ExpectedAttributeValue expectedValue = expected.get(expectedFieldName);
-			AttributeValue currentValue = item.get(expectedFieldName);
-			if (currentValue==null) {
-				//field is missing
-				return false;
-			}
-			if (!expectedValue.getValue().equals(currentValue)){
-				return false;
-			}
-		}
-		return true;
 	}
 
 	private void addAttributeValue(Map<String, AttributeValue> item, String attributename, AttributeValueUpdate valueUpdate){
@@ -1139,6 +1087,25 @@ public class AlternatorDBHandler {
 			item.remove(attributename);
 		} else if (existingValue.getN()!=null && existingValue.getN().equals(valueToDelete.getValue().getN())) {
 			item.remove(attributename);
+		}
+	}
+	
+	private void validateExpected(Map<String, ExpectedAttributeValue> expected, Map<String, AttributeValue> item) {
+		if (expected != null) {
+			for (Map.Entry<String, ExpectedAttributeValue> entry : expected.entrySet()) {
+				String key = entry.getKey();
+				ExpectedAttributeValue value = entry.getValue();
+				value.setExists(value.getValue() != null);
+				if ((value.getExists() && item == null) || (!value.getExists() && item != null)) {
+					throw new ConditionalCheckFailedException("The exist conditional could not be met.");
+				}
+				if (value.getValue() != null) {
+					// check to see if value conditional is equal
+					if (!compareAttributeValues(value.getValue(), item.get(key))) {
+						throw new ConditionalCheckFailedException("The value conditional could is not equal");
+					}
+				}
+			}
 		}
 	}
 }
