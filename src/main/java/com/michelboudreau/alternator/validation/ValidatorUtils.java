@@ -104,7 +104,7 @@ public class ValidatorUtils {
 		return errors;
 	}
 
-	public static <T> List<Error> rejectIfSizeOutOfBounds(T property, int min, int max) {
+	public static <T> List<Error> rejectIfSizeOutOfBounds(T property, double min, double max) {
 		List<Error> errors = new ArrayList<Error>();
 		if(property == null) {
 			errors.add(new Error("The property is null"));
