@@ -5,10 +5,10 @@ import com.amazonaws.services.dynamodbv2.model.Condition;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.ListUnmarshaller;
+import com.amazonaws.transform.MapUnmarshaller;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
-import com.amazonaws.transform.MapUnmarshaller;
-import org.codehaus.jackson.JsonToken;
+import com.fasterxml.jackson.core.JsonToken;
 
 public class QueryRequestJsonUnmarshaller implements Unmarshaller<QueryRequest, JsonUnmarshallerContext> {
 

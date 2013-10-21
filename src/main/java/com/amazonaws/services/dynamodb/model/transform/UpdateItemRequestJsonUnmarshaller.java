@@ -1,10 +1,14 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.*;
-import com.amazonaws.transform.*;
-import org.codehaus.jackson.JsonToken;
+import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
+import com.amazonaws.services.dynamodb.model.ExpectedAttributeValue;
+import com.amazonaws.services.dynamodb.model.UpdateItemRequest;
+import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.MapUnmarshaller;
+import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
+import com.amazonaws.transform.Unmarshaller;
+import com.fasterxml.jackson.core.JsonToken;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class UpdateItemRequestJsonUnmarshaller implements Unmarshaller<UpdateItemRequest, JsonUnmarshallerContext> {

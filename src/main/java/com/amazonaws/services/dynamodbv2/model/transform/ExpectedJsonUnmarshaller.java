@@ -5,9 +5,10 @@ import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
+import com.fasterxml.jackson.core.JsonToken;
+
 import java.util.HashMap;
 import java.util.Map;
-import org.codehaus.jackson.JsonToken;
 
 
 public class ExpectedJsonUnmarshaller implements Unmarshaller<Map<String, ExpectedAttributeValue>, JsonUnmarshallerContext> {

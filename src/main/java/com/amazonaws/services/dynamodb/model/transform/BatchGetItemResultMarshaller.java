@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodb.model.BatchResponse;
 import com.amazonaws.services.dynamodb.model.KeysAndAttributes;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
+
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;

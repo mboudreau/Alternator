@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.PutItemResult;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
+
 import org.springframework.util.StringUtils;
 
 import java.io.StringWriter;

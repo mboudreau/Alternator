@@ -2,8 +2,12 @@ package com.amazonaws.services.dynamodbv2.model.transform;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
-import com.amazonaws.transform.*;
-import org.codehaus.jackson.JsonToken;
+import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.ListUnmarshaller;
+import com.amazonaws.transform.MapUnmarshaller;
+import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
+import com.amazonaws.transform.Unmarshaller;
+import com.fasterxml.jackson.core.JsonToken;
 
 public class GetItemRequestJsonUnmarshaller implements Unmarshaller<GetItemRequest, JsonUnmarshallerContext> {
 

@@ -4,14 +4,15 @@ import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.Condition;
 import com.amazonaws.services.dynamodb.model.KeySchemaElement;
 import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.michelboudreau.alternator.enums.AttributeValueType;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class ItemRangeGroup {
 

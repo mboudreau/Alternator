@@ -20,16 +20,19 @@ import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.michelboudreau.alternator.AlternatorDB;
 import com.michelboudreau.alternatorv2.AlternatorDBClientV2;
 import com.michelboudreau.alternatorv2.AlternatorDBInProcessClientV2;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.inject.Inject;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.util.Assert;
 
 public class AlternatorTest {
     /**

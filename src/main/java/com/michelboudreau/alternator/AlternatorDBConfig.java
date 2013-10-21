@@ -1,6 +1,7 @@
 package com.michelboudreau.alternator;
 
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -7,7 +7,7 @@ import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.MapUnmarshaller;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
-import org.codehaus.jackson.JsonToken;
+import com.fasterxml.jackson.core.JsonToken;
 
 public class DeleteItemRequestJsonUnmarshaller implements Unmarshaller<DeleteItemRequest, JsonUnmarshallerContext> {
 

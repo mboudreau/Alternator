@@ -2,7 +2,13 @@ package com.amazonaws.services.dynamodb.model.transform;
 
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.BatchWriteItemResult;
+import com.amazonaws.services.dynamodb.model.BatchWriteResponse;
+import com.amazonaws.services.dynamodb.model.DeleteRequest;
+import com.amazonaws.services.dynamodb.model.Key;
+import com.amazonaws.services.dynamodb.model.PutRequest;
+import com.amazonaws.services.dynamodb.model.WriteRequest;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
 

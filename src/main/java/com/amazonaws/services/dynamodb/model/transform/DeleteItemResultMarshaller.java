@@ -4,9 +4,9 @@ package com.amazonaws.services.dynamodb.model.transform;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.DeleteItemResult;
-import com.amazonaws.services.dynamodb.model.PutItemResult;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
+
 import org.springframework.util.StringUtils;
 
 import java.io.StringWriter;

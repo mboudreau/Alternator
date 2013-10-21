@@ -1,7 +1,7 @@
 package com.michelboudreau.alternator.validators;
 
-import com.amazonaws.services.dynamodb.model.KeysAndAttributes;
 import com.amazonaws.services.dynamodb.model.Key;
+import com.amazonaws.services.dynamodb.model.KeysAndAttributes;
 import com.michelboudreau.alternator.validation.Validator;
 import com.michelboudreau.alternator.validation.ValidatorUtils;
 

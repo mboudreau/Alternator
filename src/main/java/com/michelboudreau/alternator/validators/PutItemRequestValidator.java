@@ -1,7 +1,6 @@
 package com.michelboudreau.alternator.validators;
 
 import com.amazonaws.services.dynamodb.model.PutItemRequest;
-import com.amazonaws.services.dynamodb.model.ReturnValue;
 import com.michelboudreau.alternator.validation.Validator;
 import com.michelboudreau.alternator.validation.ValidatorUtils;
 

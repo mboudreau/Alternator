@@ -1,15 +1,5 @@
 package com.michelboudreau.test;
 
-import java.util.Date;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodb.model.DeleteTableResult;
@@ -21,6 +11,16 @@ import com.amazonaws.services.dynamodb.model.ListTablesResult;
 import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodb.model.TableDescription;
 import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})

@@ -1,12 +1,10 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.*;
 import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
-import com.amazonaws.transform.MapUnmarshaller;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
-import org.codehaus.jackson.JsonToken;
+import com.fasterxml.jackson.core.JsonToken;
 
 public class UpdateTableRequestJsonUnmarshaller implements Unmarshaller<UpdateTableRequest, JsonUnmarshallerContext> {
 

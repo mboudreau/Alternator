@@ -1,9 +1,14 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
 import com.amazonaws.services.dynamodb.model.BatchWriteItemRequest;
-import com.amazonaws.transform.*;
-import org.codehaus.jackson.JsonToken;
-import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.WriteRequest;
+import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.ListUnmarshaller;
+import com.amazonaws.transform.MapUnmarshaller;
+import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
+import com.amazonaws.transform.Unmarshaller;
+import com.fasterxml.jackson.core.JsonToken;
+
 import java.util.List;
 
 public class BatchWriteItemRequestJsonUnmarshaller implements Unmarshaller<BatchWriteItemRequest, JsonUnmarshallerContext> {

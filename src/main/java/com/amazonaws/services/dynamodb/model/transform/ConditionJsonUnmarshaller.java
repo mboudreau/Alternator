@@ -1,13 +1,12 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import org.codehaus.jackson.JsonToken;
-
 import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.Condition;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.ListUnmarshaller;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
+import com.fasterxml.jackson.core.JsonToken;
 
 
 public class ConditionJsonUnmarshaller implements Unmarshaller<Condition, JsonUnmarshallerContext> {

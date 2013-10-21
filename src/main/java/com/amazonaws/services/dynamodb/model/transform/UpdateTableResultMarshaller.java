@@ -2,7 +2,11 @@ package com.amazonaws.services.dynamodb.model.transform;
 
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.ProvisionedThroughputDescription;
+import com.amazonaws.services.dynamodb.model.TableDescription;
+import com.amazonaws.services.dynamodb.model.UpdateTableResult;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
 
