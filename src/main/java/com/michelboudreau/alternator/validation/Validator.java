@@ -1,6 +1,5 @@
 package com.michelboudreau.alternator.validation;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

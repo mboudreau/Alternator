@@ -1,16 +1,5 @@
 package com.michelboudreau.test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.util.Assert;
-
 import com.amazonaws.services.dynamodb.AmazonDynamoDB;
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodb.model.AttributeValue;
@@ -27,6 +16,17 @@ import com.amazonaws.services.dynamodb.model.TableDescription;
 import com.michelboudreau.alternator.AlternatorDB;
 import com.michelboudreau.alternator.AlternatorDBClient;
 import com.michelboudreau.alternator.AlternatorDBInProcessClient;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.util.Assert;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 public class AlternatorTest {
     /**

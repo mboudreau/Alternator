@@ -37,6 +37,7 @@ import com.amazonaws.services.dynamodb.model.UpdateItemResult;
 import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
 import com.amazonaws.services.dynamodb.model.UpdateTableResult;
 import com.michelboudreau.alternator.models.Table;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

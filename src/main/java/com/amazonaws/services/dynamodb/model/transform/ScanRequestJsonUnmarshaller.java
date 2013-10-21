@@ -1,9 +1,13 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
-import com.amazonaws.services.dynamodb.model.ScanRequest;
-import com.amazonaws.transform.*;
-import org.codehaus.jackson.JsonToken;
 import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.ScanRequest;
+import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.ListUnmarshaller;
+import com.amazonaws.transform.MapUnmarshaller;
+import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
+import com.amazonaws.transform.Unmarshaller;
+import com.fasterxml.jackson.core.JsonToken;
 
 
 public class ScanRequestJsonUnmarshaller implements Unmarshaller<ScanRequest, JsonUnmarshallerContext> {

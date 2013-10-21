@@ -1,9 +1,10 @@
 package com.amazonaws.services.dynamodbv2.model.transform;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.dynamodbv2.model.*;
+import com.amazonaws.services.dynamodbv2.model.UpdateItemResult;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
+
 import java.io.StringWriter;
 
 public class UpdateItemResultMarshaller implements Marshaller<String, UpdateItemResult> {

@@ -1,7 +1,6 @@
 package com.michelboudreau.alternator.validators;
 
 import com.amazonaws.services.dynamodb.model.AttributeValue;
-import com.amazonaws.services.dynamodb.model.ComparisonOperator;
 import com.amazonaws.services.dynamodb.model.Condition;
 import com.michelboudreau.alternator.validation.Validator;
 import com.michelboudreau.alternator.validation.ValidatorUtils;

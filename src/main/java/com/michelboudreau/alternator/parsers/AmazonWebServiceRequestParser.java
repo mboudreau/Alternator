@@ -3,15 +3,18 @@ package com.michelboudreau.alternator.parsers;
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.Unmarshaller;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.michelboudreau.alternator.enums.RequestType;
-import java.io.BufferedReader;
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class AmazonWebServiceRequestParser {
 	private final Logger logger = LoggerFactory.getLogger(AmazonWebServiceRequestParser.class);

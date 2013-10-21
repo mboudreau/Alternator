@@ -1,10 +1,5 @@
 package com.michelboudreau.alternator;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.handlers.AsyncHandler;
@@ -35,6 +30,11 @@ import com.amazonaws.services.dynamodb.model.UpdateItemRequest;
 import com.amazonaws.services.dynamodb.model.UpdateItemResult;
 import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
 import com.amazonaws.services.dynamodb.model.UpdateTableResult;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class AlternatorDBAsyncClient extends AlternatorDBClient implements AmazonDynamoDBAsync {
 	@Override

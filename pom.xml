@@ -22,7 +22,7 @@
 		<spring.framework.version>3.1.2.RELEASE</spring.framework.version>
 		<spring.security.version>3.1.0.M1</spring.security.version>
 		<slf4j.version>1.7.0</slf4j.version>
-		<aws.version>1.4.2</aws.version>
+		<aws.version>1.6.0</aws.version>
 		<jetty.version>7.6.3.v20120416</jetty.version>
 	</properties>
 
@@ -217,16 +217,6 @@
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 			<version>1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-			<version>1.9.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>

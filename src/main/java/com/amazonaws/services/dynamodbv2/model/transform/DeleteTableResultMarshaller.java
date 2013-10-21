@@ -1,9 +1,13 @@
 package com.amazonaws.services.dynamodbv2.model.transform;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.dynamodbv2.model.*;
+import com.amazonaws.services.dynamodbv2.model.DeleteTableResult;
+import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputDescription;
+import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
+
 import java.io.StringWriter;
 import java.util.List;
 

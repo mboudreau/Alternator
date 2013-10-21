@@ -2,7 +2,8 @@ package com.amazonaws.services.dynamodb.model.transform;
 
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.GetItemResult;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.StringUtils;
 import com.amazonaws.util.json.JSONWriter;

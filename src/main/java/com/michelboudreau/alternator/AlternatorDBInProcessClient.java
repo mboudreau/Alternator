@@ -1,8 +1,5 @@
 package com.michelboudreau.alternator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.AmazonWebServiceClient;
@@ -36,6 +33,9 @@ import com.amazonaws.services.dynamodb.model.UpdateItemRequest;
 import com.amazonaws.services.dynamodb.model.UpdateItemResult;
 import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
 import com.amazonaws.services.dynamodb.model.UpdateTableResult;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class AlternatorDBInProcessClient extends AmazonWebServiceClient implements AmazonDynamoDB {
 	private static final Log log = LogFactory.getLog(AlternatorDBInProcessClient.class);

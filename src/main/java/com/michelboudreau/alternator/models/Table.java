@@ -1,6 +1,12 @@
 package com.michelboudreau.alternator.models;
 
-import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodb.model.ProvisionedThroughputDescription;
+import com.amazonaws.services.dynamodb.model.TableDescription;
+import com.amazonaws.services.dynamodb.model.TableStatus;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;

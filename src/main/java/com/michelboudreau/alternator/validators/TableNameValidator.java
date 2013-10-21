@@ -3,8 +3,6 @@ package com.michelboudreau.alternator.validators;
 import com.michelboudreau.alternator.validation.Validator;
 import com.michelboudreau.alternator.validation.ValidatorUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TableNameValidator extends Validator {

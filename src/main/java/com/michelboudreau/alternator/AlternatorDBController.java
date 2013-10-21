@@ -1,11 +1,8 @@
 package com.michelboudreau.alternator;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.dynamodb.model.InternalServerErrorException;
+import com.amazonaws.services.dynamodb.model.transform.AmazonServiceExceptionMarshaller;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,9 +11,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.dynamodb.model.InternalServerErrorException;
-import com.amazonaws.services.dynamodb.model.transform.AmazonServiceExceptionMarshaller;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping(value = "/", produces = "application/x-amz-json-1.0")

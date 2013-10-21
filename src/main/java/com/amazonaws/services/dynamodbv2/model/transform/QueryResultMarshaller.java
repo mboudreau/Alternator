@@ -5,9 +5,11 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import com.amazonaws.transform.Marshaller;
 import com.amazonaws.util.json.JSONWriter;
+
+import org.springframework.util.StringUtils;
+
 import java.io.StringWriter;
 import java.util.Map;
-import org.springframework.util.StringUtils;
 
 public class QueryResultMarshaller implements Marshaller<String, QueryResult> {
 

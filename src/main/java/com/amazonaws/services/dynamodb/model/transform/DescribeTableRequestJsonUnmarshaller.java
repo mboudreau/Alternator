@@ -1,12 +1,15 @@
 package com.amazonaws.services.dynamodb.model.transform;
 
+import static com.fasterxml.jackson.core.JsonToken.END_ARRAY;
+import static com.fasterxml.jackson.core.JsonToken.END_OBJECT;
+import static com.fasterxml.jackson.core.JsonToken.FIELD_NAME;
+import static com.fasterxml.jackson.core.JsonToken.START_OBJECT;
+
 import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
-import org.codehaus.jackson.JsonToken;
-
-import static org.codehaus.jackson.JsonToken.*;
+import com.fasterxml.jackson.core.JsonToken;
 
 public class DescribeTableRequestJsonUnmarshaller implements Unmarshaller<DescribeTableRequest, JsonUnmarshallerContext> {
 

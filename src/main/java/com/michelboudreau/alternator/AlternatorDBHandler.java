@@ -1,27 +1,116 @@
 package com.michelboudreau.alternator;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.dynamodb.model.*;
-import com.amazonaws.services.dynamodb.model.transform.*;
+import com.amazonaws.services.dynamodb.model.AttributeAction;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
+import com.amazonaws.services.dynamodb.model.BatchGetItemRequest;
+import com.amazonaws.services.dynamodb.model.BatchGetItemResult;
+import com.amazonaws.services.dynamodb.model.BatchResponse;
+import com.amazonaws.services.dynamodb.model.BatchWriteItemRequest;
+import com.amazonaws.services.dynamodb.model.BatchWriteItemResult;
+import com.amazonaws.services.dynamodb.model.BatchWriteResponse;
+import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.ConditionalCheckFailedException;
+import com.amazonaws.services.dynamodb.model.CreateTableRequest;
+import com.amazonaws.services.dynamodb.model.CreateTableResult;
+import com.amazonaws.services.dynamodb.model.DeleteItemRequest;
+import com.amazonaws.services.dynamodb.model.DeleteItemResult;
+import com.amazonaws.services.dynamodb.model.DeleteRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableResult;
+import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
+import com.amazonaws.services.dynamodb.model.DescribeTableResult;
+import com.amazonaws.services.dynamodb.model.ExpectedAttributeValue;
+import com.amazonaws.services.dynamodb.model.GetItemRequest;
+import com.amazonaws.services.dynamodb.model.GetItemResult;
+import com.amazonaws.services.dynamodb.model.InternalServerErrorException;
+import com.amazonaws.services.dynamodb.model.Key;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.KeysAndAttributes;
+import com.amazonaws.services.dynamodb.model.LimitExceededException;
+import com.amazonaws.services.dynamodb.model.ListTablesRequest;
+import com.amazonaws.services.dynamodb.model.ListTablesResult;
+import com.amazonaws.services.dynamodb.model.PutItemRequest;
+import com.amazonaws.services.dynamodb.model.PutItemResult;
+import com.amazonaws.services.dynamodb.model.PutRequest;
+import com.amazonaws.services.dynamodb.model.QueryRequest;
+import com.amazonaws.services.dynamodb.model.QueryResult;
+import com.amazonaws.services.dynamodb.model.ResourceInUseException;
+import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
+import com.amazonaws.services.dynamodb.model.ReturnValue;
+import com.amazonaws.services.dynamodb.model.ScanRequest;
+import com.amazonaws.services.dynamodb.model.ScanResult;
+import com.amazonaws.services.dynamodb.model.TableStatus;
+import com.amazonaws.services.dynamodb.model.UpdateItemRequest;
+import com.amazonaws.services.dynamodb.model.UpdateItemResult;
+import com.amazonaws.services.dynamodb.model.UpdateTableRequest;
+import com.amazonaws.services.dynamodb.model.UpdateTableResult;
+import com.amazonaws.services.dynamodb.model.WriteRequest;
+import com.amazonaws.services.dynamodb.model.transform.BatchGetItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.BatchGetItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.BatchWriteItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.BatchWriteItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.CreateTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.CreateTableResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DeleteItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DeleteItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DeleteTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DeleteTableResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DescribeTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.DescribeTableResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.GetItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.GetItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.ListTablesRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.ListTablesResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.PutItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.PutItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.QueryRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.QueryResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.ScanRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.ScanResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.UpdateItemRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.UpdateItemResultMarshaller;
+import com.amazonaws.services.dynamodb.model.transform.UpdateTableRequestJsonUnmarshaller;
+import com.amazonaws.services.dynamodb.model.transform.UpdateTableResultMarshaller;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.michelboudreau.alternator.enums.AttributeValueType;
 import com.michelboudreau.alternator.enums.RequestType;
 import com.michelboudreau.alternator.models.ItemRangeGroup;
 import com.michelboudreau.alternator.models.Limits;
 import com.michelboudreau.alternator.models.Table;
 import com.michelboudreau.alternator.parsers.AmazonWebServiceRequestParser;
-import com.michelboudreau.alternator.validators.*;
+import com.michelboudreau.alternator.validators.CreateTableRequestValidator;
+import com.michelboudreau.alternator.validators.DeleteItemRequestValidator;
+import com.michelboudreau.alternator.validators.DeleteTableRequestValidator;
+import com.michelboudreau.alternator.validators.DescribeTableRequestValidator;
+import com.michelboudreau.alternator.validators.GetItemRequestValidator;
+import com.michelboudreau.alternator.validators.ListTablesRequestValidator;
+import com.michelboudreau.alternator.validators.PutItemRequestValidator;
+import com.michelboudreau.alternator.validators.QueryRequestValidator;
+import com.michelboudreau.alternator.validators.ScanRequestValidator;
+import com.michelboudreau.alternator.validators.UpdateItemRequestValidator;
+import com.michelboudreau.alternator.validators.UpdateTableRequestValidator;
 import com.michelboudreau.alternatorv2.AlternatorDBApiVersion2Mapper;
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonMethod;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class AlternatorDBHandler {
     public final String API_VERSION_20111205 = "DynamoDB_20111205";
@@ -66,13 +155,13 @@ public class AlternatorDBHandler {
 	// Not sure about this.  If correct and only need one, only create one instance
 	public ObjectMapper createObjectMapper() {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.setVisibility(JsonMethod.FIELD, JsonAutoDetect.Visibility.ANY)
-				.setVisibility(JsonMethod.CREATOR, JsonAutoDetect.Visibility.ANY)
-				.setVisibility(JsonMethod.SETTER, JsonAutoDetect.Visibility.NONE)
-				.setVisibility(JsonMethod.GETTER, JsonAutoDetect.Visibility.NONE)
-				.setVisibility(JsonMethod.IS_GETTER, JsonAutoDetect.Visibility.NONE);
+		mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+				.setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY)
+				.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
+				.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
+				.setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE);
 
-		mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
+		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
 		return mapper;
 	}

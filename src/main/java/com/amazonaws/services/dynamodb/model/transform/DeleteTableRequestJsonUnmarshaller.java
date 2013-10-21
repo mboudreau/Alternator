@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.SimpleTypeJsonUnmarshallers;
 import com.amazonaws.transform.Unmarshaller;
-import org.codehaus.jackson.JsonToken;
+import com.fasterxml.jackson.core.JsonToken;
 
 public class DeleteTableRequestJsonUnmarshaller implements Unmarshaller<DeleteTableRequest, JsonUnmarshallerContext> {
 

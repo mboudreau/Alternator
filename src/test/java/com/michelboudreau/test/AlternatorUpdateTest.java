@@ -1,8 +1,25 @@
 package com.michelboudreau.test;
 
+import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.amazonaws.services.dynamodb.AmazonDynamoDB;
-import com.amazonaws.services.dynamodb.model.*;
+import com.amazonaws.services.dynamodb.model.AttributeAction;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.AttributeValueUpdate;
+import com.amazonaws.services.dynamodb.model.ConditionalCheckFailedException;
+import com.amazonaws.services.dynamodb.model.ExpectedAttributeValue;
+import com.amazonaws.services.dynamodb.model.Key;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodb.model.PutItemRequest;
+import com.amazonaws.services.dynamodb.model.QueryRequest;
+import com.amazonaws.services.dynamodb.model.QueryResult;
+import com.amazonaws.services.dynamodb.model.ScalarAttributeType;
+import com.amazonaws.services.dynamodb.model.UpdateItemRequest;
 import com.michelboudreau.alternator.AlternatorDBInProcessClient;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,10 +30,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static junit.framework.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})

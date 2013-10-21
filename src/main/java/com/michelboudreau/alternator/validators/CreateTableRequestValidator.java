@@ -4,7 +4,6 @@ import com.amazonaws.services.dynamodb.model.CreateTableRequest;
 import com.michelboudreau.alternator.validation.Validator;
 import com.michelboudreau.alternator.validation.ValidatorUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CreateTableRequestValidator extends Validator {
