@@ -18,6 +18,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -285,9 +286,8 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         }
         // Question: Is this the actual behavior of DynamoDB?
         Assert.assertNotNull("Expected an exception.", exceptionMessage);
-        Assert.assertEquals("Incorrect exception message.",
-                "The item with hash key '5' doesn't exist in table '" + tableName1 + "'",
-                exceptionMessage);
+        Assert.assertThat("Incorrect exception message.", exceptionMessage,
+                JUnitMatchers.containsString("The item with hash key '5' doesn't exist in table '" + tableName1 + "'"));
     }
 
     /*
