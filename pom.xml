@@ -10,7 +10,7 @@
 
 	<groupId>com.michelboudreau</groupId>
 	<artifactId>alternator</artifactId>
-	<version>0.9.5-SNAPSHOT</version>
+	<version>0.7.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Alternator</name>
@@ -20,8 +20,9 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.framework.version>3.2.4.RELEASE</spring.framework.version>
+		<spring.security.version>3.1.0.M1</spring.security.version>
 		<slf4j.version>1.7.0</slf4j.version>
-		<aws.version>1.4.2</aws.version>
+		<aws.version>1.6.4</aws.version>
 		<jetty.version>8.1.12.v20130726</jetty.version>
 	</properties>
 
@@ -160,9 +161,9 @@
 
 		<!-- Javax -->
 		<dependency>
-			<groupId>org.eclipse.jetty.orbit</groupId>
-			<artifactId>javax.servlet</artifactId>
-			<version>3.0.0.v201112011016</version>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-servlet_3.0_spec</artifactId>
+			<version>1.0</version>
 		</dependency>
 
 		<!-- Test -->
