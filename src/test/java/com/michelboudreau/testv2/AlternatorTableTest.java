@@ -11,7 +11,7 @@ import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.amazonaws.services.dynamodbv2.model.UpdateTableRequest;
-
+import java.util.Date;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,8 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:/applicationContext.xml"})
@@ -256,16 +254,12 @@ public class AlternatorTableTest extends AlternatorTest {
 		}
 	}
 
-	@Test
+	@Test(expected = AmazonServiceException.class)
 	public void updateTableWithoutThroughput() {
 		String name = createTableName();
 		createTable(name);
 		UpdateTableRequest req = new UpdateTableRequest().withTableName(name);
-		try {
-			getClient().updateTable(req).getTableDescription();
-			Assert.assertTrue(false);// Should have thrown an exception
-		} catch (AmazonServiceException ase) {
-		}
+        getClient().updateTable(req).getTableDescription();
 	}
 
 	@Test
