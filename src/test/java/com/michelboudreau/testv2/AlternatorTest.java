@@ -27,9 +27,12 @@ import org.junit.Test;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -391,5 +394,13 @@ public class AlternatorTest {
         keyConditions.put(hashKeyName, hashKeyCondition);
 
         return keyConditions;
+    }
+
+    protected <T> Set<T> set(T... a) {
+        Set<T> set = new HashSet<T>(a.length);
+
+        set.addAll(Arrays.asList(a));
+
+        return set;
     }
 }

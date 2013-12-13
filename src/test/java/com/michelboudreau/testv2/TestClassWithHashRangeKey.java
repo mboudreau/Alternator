@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import java.util.Set;
 
 @DynamoDBTable(tableName = "mapper.TestClassWithRangeHashKey")
 public class TestClassWithHashRangeKey
@@ -17,6 +18,8 @@ public class TestClassWithHashRangeKey
     private String rangeCode;
     private String stringData;
     private int intData;
+    private Set<String> stringSetData;
+    private Set<Integer> numberSetData;
 
     @DynamoDBHashKey(attributeName = "hashCode")
     public final String getHashCode()
@@ -60,5 +63,23 @@ public class TestClassWithHashRangeKey
     public void setIntData(int intData)
     {
         this.intData = intData;
+    }
+
+    @DynamoDBAttribute(attributeName = "stringSetData")
+    public Set<String> getStringSetData() {
+        return stringSetData;
+    }
+
+    public void setStringSetData(Set<String> stringSetData) {
+        this.stringSetData = stringSetData;
+    }
+
+    @DynamoDBAttribute(attributeName = "numberSetData")
+    public Set<Integer> getNumberSetData() {
+        return numberSetData;
+    }
+
+    public void setNumberSetData(Set<Integer> numberSetData) {
+        this.numberSetData = numberSetData;
     }
 }
