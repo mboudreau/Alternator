@@ -3,9 +3,9 @@
 
 	<!-- Need Sonatype Parent to Deploy -->
 	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
+		<groupId>com.omnifone.parent</groupId>
+		<artifactId>engineering-parent</artifactId>
+		<version>1.0.3</version>
 	</parent>
 
 	<groupId>com.michelboudreau</groupId>
@@ -53,9 +53,9 @@
 	</licenses>
 
 	<scm>
-		<url>git@github.com:mboudreau/Alternator.git</url>
-		<connection>scm:git:git@github.com:mboudreau/Alternator.git</connection>
-		<developerConnection>scm:git:git@github.com:mboudreau/Alternator.git</developerConnection>
+		<url>git@github.com:James-Richardson/Alternator.git</url>
+		<connection>scm:git:git@github.com:James-Richardson/Alternator.git</connection>
+		<developerConnection>scm:git:git@github.com:James-Richardson/Alternator.git</developerConnection>
     <tag>alternator-0.5.0</tag>
   </scm>
 
