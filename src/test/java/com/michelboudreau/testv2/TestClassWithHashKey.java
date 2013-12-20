@@ -7,6 +7,7 @@ package com.michelboudreau.testv2;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import java.util.Set;
 
 @DynamoDBTable(tableName = "mapper.TestClassWithHashKey")
 public class TestClassWithHashKey
@@ -15,6 +16,8 @@ public class TestClassWithHashKey
     private String code;
     private String stringData;
     private int intData;
+    private Set<String> stringSetData;
+    private Set<Integer> numberSetData;
 
     @DynamoDBHashKey(attributeName = "code")
     public final String getCode()
@@ -47,5 +50,23 @@ public class TestClassWithHashKey
     public void setIntData(int intData)
     {
         this.intData = intData;
+    }
+
+    @DynamoDBAttribute(attributeName = "stringSetData")
+    public Set<String> getStringSetData() {
+        return stringSetData;
+    }
+
+    public void setStringSetData(Set<String> stringSetData) {
+        this.stringSetData = stringSetData;
+    }
+
+    @DynamoDBAttribute(attributeName = "numberSetData")
+    public Set<Integer> getNumberSetData() {
+        return numberSetData;
+    }
+
+    public void setNumberSetData(Set<Integer> numberSetData) {
+        this.numberSetData = numberSetData;
     }
 }

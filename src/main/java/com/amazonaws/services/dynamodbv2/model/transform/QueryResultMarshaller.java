@@ -46,9 +46,9 @@ public class QueryResultMarshaller implements Marshaller<String, QueryResult> {
 						} else if (val.getS() != null) {
 							jsonWriter.key("S").value(val.getS());
 						} else if (val.getNS() != null) {
-							jsonWriter.key("NS").value(StringUtils.collectionToCommaDelimitedString(val.getNS()));
+							jsonWriter.key("NS").value(val.getNS());
 						} else if (val.getSS() != null) {
-							jsonWriter.key("SS").value(StringUtils.collectionToCommaDelimitedString(val.getSS()));
+							jsonWriter.key("SS").value(val.getSS());
 						}
 						jsonWriter.endObject();
 					}
@@ -67,9 +67,9 @@ public class QueryResultMarshaller implements Marshaller<String, QueryResult> {
                     } else if (keyAttrValue.getS() != null) {
                         jsonWriter.key("S").value(keyAttrValue.getS());
                     } else if (keyAttrValue.getNS() != null) {
-                        jsonWriter.key("NS").value(StringUtils.collectionToCommaDelimitedString(keyAttrValue.getNS()));
+                        jsonWriter.key("NS").value(keyAttrValue.getNS());
                     } else if (keyAttrValue.getSS() != null) {
-                        jsonWriter.key("SS").value(StringUtils.collectionToCommaDelimitedString(keyAttrValue.getSS()));
+                        jsonWriter.key("SS").value(keyAttrValue.getSS());
                     }
                     jsonWriter.endObject();
                 }

@@ -68,6 +68,8 @@ public class AlternatorMapperTest extends AlternatorTest
         value.setCode("hash1");
         value.setStringData("string1");
         value.setIntData(1);
+        value.setStringSetData(set("stringSetVal1", "stringSetVal2"));
+        value.setNumberSetData(set(1, 2));
         mapper.save(value);
     }
 
@@ -84,12 +86,16 @@ public class AlternatorMapperTest extends AlternatorTest
         value2a.setCode("hash2");
         value2a.setStringData("string2a");
         value2a.setIntData(21);
+        value2a.setStringSetData(set("stringSetVal2a1", "stringSetVal2a2"));
+        value2a.setNumberSetData(set(3, 4));
         mapper.save(value2a);
 
         TestClassWithHashKey value2b = new TestClassWithHashKey();
         value2b.setCode("hash2");
         value2b.setStringData("string2b");
         value2b.setIntData(22);
+        value2b.setStringSetData(set("stringSetVal2b1", "stringSetVal2b2"));
+        value2b.setNumberSetData(set(5, 6));
         mapper.save(value2b);
     }
 
@@ -103,6 +109,8 @@ public class AlternatorMapperTest extends AlternatorTest
         value.setRangeCode("range1");
         value.setStringData("string1");
         value.setIntData(1);
+        value.setStringSetData(set("stringSetVal1", "stringSetVal2"));
+        value.setNumberSetData(set(1, 2));
         mapper.save(value);
     }
 
@@ -120,6 +128,8 @@ public class AlternatorMapperTest extends AlternatorTest
         value2a.setRangeCode("range2");
         value2a.setStringData("string2a");
         value2a.setIntData(21);
+        value2a.setStringSetData(set("stringSetVal2a1", "stringSetVal2a2"));
+        value2a.setNumberSetData(set(3, 4));
         mapper.save(value2a);
 
         TestClassWithHashRangeKey value2b = new TestClassWithHashRangeKey();
@@ -127,6 +137,8 @@ public class AlternatorMapperTest extends AlternatorTest
         value2b.setRangeCode("range2");
         value2b.setStringData("string2b");
         value2b.setIntData(22);
+        value2b.setStringSetData(set("stringSetVal2b1", "stringSetVal2b2"));
+        value2b.setNumberSetData(set(5, 6));
         mapper.save(value2b);
     }
 
@@ -141,6 +153,8 @@ public class AlternatorMapperTest extends AlternatorTest
         Assert.assertEquals("Wrong code.", code, value.getCode());
         Assert.assertEquals("Wrong stringData.", "string1", value.getStringData());
         Assert.assertEquals("Wrong intData.", 1, value.getIntData());
+        Assert.assertEquals("Wrong stringSetData.", set("stringSetVal1", "stringSetVal2"), value.getStringSetData());
+        Assert.assertEquals("Wrong numberSetData.", set(1, 2), value.getNumberSetData());
     }
 
     @Test
@@ -164,6 +178,8 @@ public class AlternatorMapperTest extends AlternatorTest
         value2c.setRangeCode("range2c");
         value2c.setStringData("string2c");
         value2c.setIntData(23);
+        value2c.setStringSetData(set("stringSetVal2c1", "stringSetVal2c2"));
+        value2c.setNumberSetData(set(7, 8));
         mapper.save(value2c);
 
         String hashCode = "hash2";
@@ -174,6 +190,8 @@ public class AlternatorMapperTest extends AlternatorTest
         Assert.assertEquals("Wrong rangeCode.", rangeCode, value.getRangeCode());
         Assert.assertEquals("Wrong stringData.", "string2b", value.getStringData());
         Assert.assertEquals("Wrong intData.", 22, value.getIntData());
+        Assert.assertEquals("Wrong stringSetData.", set("stringSetVal2b1", "stringSetVal2b2"), value.getStringSetData());
+        Assert.assertEquals("Wrong numberSetData.", set(5, 6), value.getNumberSetData());
     }
 
     @Test
@@ -217,6 +235,8 @@ public class AlternatorMapperTest extends AlternatorTest
         Assert.assertEquals("Wrong code.", code, value.getCode());
         Assert.assertEquals("Wrong stringData.", "string1", value.getStringData());
         Assert.assertEquals("Wrong intData.", 1, value.getIntData());
+        Assert.assertEquals("Wrong stringSetData.", set("stringSetVal1", "stringSetVal2"), value.getStringSetData());
+        Assert.assertEquals("Wrong numberSetData.", set(1, 2), value.getNumberSetData());
 	}
 
 	@Test
@@ -248,6 +268,8 @@ public class AlternatorMapperTest extends AlternatorTest
         value2c.setRangeCode("range2c");
         value2c.setStringData("string2c");
         value2c.setIntData(23);
+        value2c.setStringSetData(set("stringSetVal2c1", "stringSetVal2c2"));
+        value2c.setNumberSetData(set(7, 8));
         mapper.save(value2c);
 
         TestClassWithHashRangeKey value2d = new TestClassWithHashRangeKey();
@@ -255,6 +277,8 @@ public class AlternatorMapperTest extends AlternatorTest
         value2d.setRangeCode("range2d");
         value2d.setStringData("string2d");
         value2d.setIntData(24);
+        value2d.setStringSetData(set("stringSetVal2d1", "stringSetVal2d2"));
+        value2d.setNumberSetData(set(9, 10));
         mapper.save(value2d);
 
         TestClassWithHashRangeKey value2e = new TestClassWithHashRangeKey();
@@ -262,6 +286,8 @@ public class AlternatorMapperTest extends AlternatorTest
         value2e.setRangeCode("range2e");
         value2e.setStringData("string2e");
         value2e.setIntData(25);
+        value2e.setStringSetData(set("stringSetVal2e1", "stringSetVal2e2"));
+        value2e.setNumberSetData(set(11, 12));
         mapper.save(value2e);
 
         String hashCode = "hash2";
@@ -291,12 +317,16 @@ public class AlternatorMapperTest extends AlternatorTest
         Assert.assertEquals("Wrong rangeCode.", "range2c", value.getRangeCode());
         Assert.assertEquals("Wrong stringData.", "string2c", value.getStringData());
         Assert.assertEquals("Wrong intData.", 23, value.getIntData());
+        Assert.assertEquals("Wrong stringSetData.", set("stringSetVal2c1", "stringSetVal2c2"), value.getStringSetData());
+        Assert.assertEquals("Wrong numberSetData.", set(7, 8), value.getNumberSetData());
 
         value = valueList.get(1);
         Assert.assertEquals("Wrong hashCode.", hashCode, value.getHashCode());
         Assert.assertEquals("Wrong rangeCode.", "range2d", value.getRangeCode());
         Assert.assertEquals("Wrong stringData.", "string2d", value.getStringData());
         Assert.assertEquals("Wrong intData.", 24, value.getIntData());
+        Assert.assertEquals("Wrong stringSetData.", set("stringSetVal2d1", "stringSetVal2d2"), value.getStringSetData());
+        Assert.assertEquals("Wrong numberSetData.", set(9, 10), value.getNumberSetData());
 	}
 
 	@Test
@@ -361,6 +391,8 @@ public class AlternatorMapperTest extends AlternatorTest
         Assert.assertEquals("Wrong code.", code, value.getCode());
         Assert.assertEquals("Wrong stringData.", "string1", value.getStringData());
         Assert.assertEquals("Wrong intData.", 1, value.getIntData());
+        Assert.assertEquals("Wrong stringSetData.", set("stringSetVal1", "stringSetVal2"), value.getStringSetData());
+        Assert.assertEquals("Wrong numberSetData.", set(1, 2), value.getNumberSetData());
 
         mapper.delete(value);
 
@@ -382,6 +414,8 @@ public class AlternatorMapperTest extends AlternatorTest
         Assert.assertEquals("Wrong rangeCode.", rangeCode, value.getRangeCode());
         Assert.assertEquals("Wrong stringData.", "string2b", value.getStringData());
         Assert.assertEquals("Wrong intData.", 22, value.getIntData());
+        Assert.assertEquals("Wrong stringSetData.", set("stringSetVal2b1", "stringSetVal2b2"), value.getStringSetData());
+        Assert.assertEquals("Wrong numberSetData.", set(5, 6), value.getNumberSetData());
 
         mapper.delete(value);
 
