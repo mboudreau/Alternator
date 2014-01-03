@@ -7,6 +7,7 @@ import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.AmazonWebServiceResponse;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Request;
+import com.amazonaws.Response;
 import com.amazonaws.ResponseMetadata;
 import com.amazonaws.handlers.HandlerChainFactory;
 import com.amazonaws.http.ExecutionContext;
@@ -14,10 +15,14 @@ import com.amazonaws.http.HttpResponseHandler;
 import com.amazonaws.http.JsonErrorResponseHandler;
 import com.amazonaws.http.JsonResponseHandler;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate;
 import com.amazonaws.services.dynamodbv2.model.BatchGetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.BatchGetItemResult;
 import com.amazonaws.services.dynamodbv2.model.BatchWriteItemRequest;
 import com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult;
+import com.amazonaws.services.dynamodbv2.model.Condition;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.CreateTableResult;
 import com.amazonaws.services.dynamodbv2.model.DeleteItemRequest;
@@ -28,8 +33,11 @@ import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
+import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
+import com.amazonaws.services.dynamodbv2.model.KeysAndAttributes;
 import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import com.amazonaws.services.dynamodbv2.model.PutItemResult;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
@@ -40,6 +48,7 @@ import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemResult;
 import com.amazonaws.services.dynamodbv2.model.UpdateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.UpdateTableResult;
+import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 import com.amazonaws.services.dynamodbv2.model.transform.BatchGetItemRequestMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.BatchGetItemResultJsonUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.BatchWriteItemRequestMarshaller;
@@ -109,11 +118,10 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 		setEndpoint("http://localhost:9090/");
 
 		HandlerChainFactory chainFactory = new HandlerChainFactory();
-		requestHandlers.addAll(chainFactory.newRequestHandlerChain("/com/amazonaws/services/dynamodb/request.handlers"));
-
+		requestHandler2s.addAll(chainFactory.newRequestHandlerChain("/com/amazonaws/services/dynamodb/request.handlers"));
 
 		clientConfiguration = new ClientConfiguration(clientConfiguration);
-		if (clientConfiguration.getMaxErrorRetry() == ClientConfiguration.DEFAULT_MAX_RETRIES) {
+		if (clientConfiguration.getRetryPolicy() == ClientConfiguration.DEFAULT_RETRY_POLICY) {
 			log.debug("Overriding default max error retry value to: " + 10);
 			clientConfiguration.setMaxErrorRetry(10);
 		}
@@ -151,7 +159,14 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 		JsonResponseHandler<BatchWriteItemResult> responseHandler = new JsonResponseHandler<BatchWriteItemResult>(unmarshaller);
 
 		return invoke(request, responseHandler);
-}
+    }
+
+    @Override
+        public BatchWriteItemResult batchWriteItem(java.util.Map<String,java.util.List<WriteRequest>> requestItems)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("batchWriteItem using Map is not implemented in Alternator.");
+        }
 
     @Override
 	public UpdateItemResult updateItem(UpdateItemRequest updateItemRequest)
@@ -165,6 +180,20 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 	}
 
     @Override
+        public UpdateItemResult updateItem(String tableName, java.util.Map<String, AttributeValue> key, java.util.Map<String, AttributeValueUpdate> attributeUpdates, String returnValues)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("updateItem using String, Map, Map, and String is not implemented in Alternator.");
+        }
+
+    @Override
+        public UpdateItemResult updateItem(String tableName, java.util.Map<String,AttributeValue> key, java.util.Map<String,AttributeValueUpdate> attributeUpdates)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("updateItem using String, Map, and Map is not implemented in Alternator.");
+        }
+
+    @Override
 	public PutItemResult putItem(PutItemRequest putItemRequest)
 			throws AmazonServiceException, AmazonClientException {
 		Request<PutItemRequest> request = new PutItemRequestMarshaller().marshall(putItemRequest);
@@ -174,6 +203,20 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 
 		return invoke(request, responseHandler);
 	}
+
+    @Override
+        public PutItemResult putItem(String tableName, java.util.Map<String,AttributeValue> item, String returnValues)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("putItem using String, Map, and String is not implemented in Alternator.");
+        }
+
+    @Override
+        public PutItemResult putItem(String tableName, java.util.Map<String,AttributeValue> item)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("putItem using String and Map is not implemented in Alternator.");
+        }
 
     @Override
 	public DescribeTableResult describeTable(DescribeTableRequest describeTableRequest)
@@ -187,6 +230,13 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 	}
 
     @Override
+        public DescribeTableResult describeTable(String tableName)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("describeTable using String is not implemented in Alternator.");
+        }
+
+    @Override
 	public ScanResult scan(ScanRequest scanRequest)
 			throws AmazonServiceException, AmazonClientException {
 		Request<ScanRequest> request = new ScanRequestMarshaller().marshall(scanRequest);
@@ -196,6 +246,27 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 
 		return invoke(request, responseHandler);
 	}
+
+    @Override
+        public ScanResult scan(String tableName, java.util.List<String> attributesToGet, java.util.Map<String,Condition> scanFilter)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("scan using String, List, and Map is not implemented in Alternator.");
+        }
+
+    @Override
+        public ScanResult scan(String tableName, java.util.Map<String,Condition> scanFilter)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("scan using String and Map is not implemented in Alternator.");
+        }
+
+    @Override
+        public ScanResult scan(String tableName, java.util.List<String> attributesToGet)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("scan using String and List is not implemented in Alternator.");
+        }
 
     @Override
 	public CreateTableResult createTable(CreateTableRequest createTableRequest)
@@ -209,6 +280,13 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 	}
 
     @Override
+        public CreateTableResult createTable(java.util.List<AttributeDefinition> attributeDefinitions, String tableName, java.util.List<KeySchemaElement> keySchema, ProvisionedThroughput provisionedThroughput)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("createTable using List, String, List, and ProvisionedThroughput is not implemented in Alternator.");
+        }
+
+    @Override
 	public UpdateTableResult updateTable(UpdateTableRequest updateTableRequest)
 			throws AmazonServiceException, AmazonClientException {
 		Request<UpdateTableRequest> request = new UpdateTableRequestMarshaller().marshall(updateTableRequest);
@@ -218,6 +296,13 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 
 		return invoke(request, responseHandler);
 	}
+
+    @Override
+        public UpdateTableResult updateTable(String tableName, ProvisionedThroughput provisionedThroughput)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("updateTable using String and ProvisionedThroughput is not implemented in Alternator.");
+        }
 
     @Override
 	public DeleteTableResult deleteTable(DeleteTableRequest deleteTableRequest)
@@ -231,6 +316,13 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 	}
 
     @Override
+        public DeleteTableResult deleteTable(String tableName)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("deleteTable using String is not implemented in Alternator.");
+        }
+
+    @Override
 	public DeleteItemResult deleteItem(DeleteItemRequest deleteItemRequest)
 			throws AmazonServiceException, AmazonClientException {
 		Request<DeleteItemRequest> request = new DeleteItemRequestMarshaller().marshall(deleteItemRequest);
@@ -240,6 +332,20 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 
 		return invoke(request, responseHandler);
 	}
+
+    @Override
+        public DeleteItemResult deleteItem(String tableName, java.util.Map<String,AttributeValue> key, String returnValues)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("deleteTable using String, Map, and String is not implemented in Alternator.");
+        }
+
+    @Override
+        public DeleteItemResult deleteItem(String tableName, java.util.Map<String,AttributeValue> key)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("deleteItem using String and Map is not implemented in Alternator.");
+        }
 
     @Override
 	public GetItemResult getItem(GetItemRequest getItemRequest)
@@ -253,6 +359,20 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 	}
 
     @Override
+        public GetItemResult getItem(String tableName, java.util.Map<String,AttributeValue> key, Boolean consistentRead)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("getItem using String, Map, and Boolean is not implemented in Alternator.");
+        }
+
+    @Override
+        public GetItemResult getItem(String tableName, java.util.Map<String,AttributeValue> key)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("getItem using String and Map is not implemented in Alternator.");
+        }
+
+    @Override
 	public BatchGetItemResult batchGetItem(BatchGetItemRequest batchGetItemRequest)
 			throws AmazonServiceException, AmazonClientException {
 		Request<BatchGetItemRequest> request = new BatchGetItemRequestMarshaller().marshall(batchGetItemRequest);
@@ -264,14 +384,49 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 	}
 
     @Override
+        public BatchGetItemResult batchGetItem(java.util.Map<String, KeysAndAttributes> requestItems)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("batchGetItem using Map is not implemented in Alternator.");
+        }
+
+    @Override
+        public BatchGetItemResult batchGetItem(java.util.Map<String, KeysAndAttributes> requestItems, String returnConsumedCapacity)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("batchGetItem using Map and String is not implemented in Alternator.");
+        }
+
+    @Override
 	public ListTablesResult listTables() throws AmazonServiceException, AmazonClientException {
 		return listTables(new ListTablesRequest());
 	}
 
-	@Override
+    @Override
 	public void setEndpoint(String endpoint) throws IllegalArgumentException {
-		super.setEndpoint(endpoint);
+		super.setEndpoint(endpoint, "dynamodb", null);
 	}
+
+    @Override
+        public ListTablesResult listTables(Integer limit)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("listTables using Integer is not implemented in Alternator.");
+        }
+
+    @Override
+        public ListTablesResult listTables(String exclusiveStartTableName, Integer limit)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("listTables using String and Integer is not implemented in Alternator.");
+        }
+
+    @Override
+        public ListTablesResult listTables(String exclusiveStartTableName)
+                 throws AmazonServiceException, AmazonClientException {
+
+                 throw new AmazonClientException("listTables using String is not implemented in Alternator.");
+        }
 
     @Override
 	public ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) {
@@ -283,10 +438,11 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 
 		AmazonWebServiceRequest originalRequest = request.getOriginalRequest();
 
-		ExecutionContext executionContext = createExecutionContext();
-		executionContext.setCustomBackoffStrategy(com.amazonaws.internal.DynamoDBBackoffStrategy.DEFAULT);
+		ExecutionContext executionContext = createExecutionContext(request);
+//		executionContext.setCustomBackoffStrategy(com.amazonaws.internal.DynamoDBBackoffStrategy.DEFAULT);
 		JsonErrorResponseHandler errorResponseHandler = new JsonErrorResponseHandler(exceptionUnmarshallers);
 
-		return (X) client.execute(request, responseHandler, errorResponseHandler, executionContext);
+		Response<X> result = client.execute(request, responseHandler, errorResponseHandler, executionContext);
+                return result.getAwsResponse();
 	}
 }
