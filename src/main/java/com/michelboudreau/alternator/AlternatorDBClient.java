@@ -7,6 +7,7 @@ import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.AmazonWebServiceResponse;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Request;
+import com.amazonaws.Response;
 import com.amazonaws.ResponseMetadata;
 import com.amazonaws.handlers.HandlerChainFactory;
 import com.amazonaws.http.ExecutionContext;
@@ -108,13 +109,11 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		exceptionUnmarshallers.add(new JsonErrorUnmarshaller());
 		setEndpoint("http://localhost:9090/");
 
-
 		HandlerChainFactory chainFactory = new HandlerChainFactory();
-		requestHandlers.addAll(chainFactory.newRequestHandlerChain("/com/amazonaws/services/dynamodb/request.handlers"));
-
+		requestHandler2s.addAll(chainFactory.newRequestHandlerChain("/com/amazonaws/services/dynamodb/request.handlers"));
 
 		clientConfiguration = new ClientConfiguration(clientConfiguration);
-		if (clientConfiguration.getMaxErrorRetry() == ClientConfiguration.DEFAULT_MAX_RETRIES) {
+		if (clientConfiguration.getRetryPolicy() == ClientConfiguration.DEFAULT_RETRY_POLICY) {
 			log.debug("Overriding default max error retry value to: " + 10);
 			clientConfiguration.setMaxErrorRetry(10);
 		}
@@ -128,7 +127,8 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 		Unmarshaller<ListTablesResult, JsonUnmarshallerContext> unmarshaller = new ListTablesResultJsonUnmarshaller();
 		JsonResponseHandler<ListTablesResult> responseHandler = new JsonResponseHandler<ListTablesResult>(unmarshaller);
 
-		return invoke(request, responseHandler);
+		ListTablesResult result = invoke(request, responseHandler);
+                return result;
 	}
 
 	public QueryResult query(QueryRequest queryRequest)
@@ -257,7 +257,7 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 
 	@Override
 	public void setEndpoint(String endpoint) throws IllegalArgumentException {
-		super.setEndpoint(endpoint);
+		super.setEndpoint(endpoint, "dynamodb", null);
 	}
 
 	public ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) {
@@ -269,10 +269,11 @@ public class AlternatorDBClient extends AmazonWebServiceClient implements Amazon
 
 		AmazonWebServiceRequest originalRequest = request.getOriginalRequest();
 
-		ExecutionContext executionContext = createExecutionContext();
-		executionContext.setCustomBackoffStrategy(com.amazonaws.internal.DynamoDBBackoffStrategy.DEFAULT);
+		ExecutionContext executionContext = createExecutionContext(request);
+//		executionContext.setCustomBackoffStrategy(com.amazonaws.internal.DynamoDBBackoffStrategy.DEFAULT);
 		JsonErrorResponseHandler errorResponseHandler = new JsonErrorResponseHandler(exceptionUnmarshallers);
 
-		return (X) client.execute(request, responseHandler, errorResponseHandler, executionContext);
+		Response<X> result = client.execute(request, responseHandler, errorResponseHandler, executionContext);
+                return result.getAwsResponse();
 	}
 }
