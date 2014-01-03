@@ -15,9 +15,9 @@ You can now add the dependency into your maven project with:
 
 	<dependencies>
 		<dependency>
-			<groupId>com.michelboudreau</groupId>
+			<groupId>com.michelboureau</groupId>
 			<artifactId>alternator</artifactId>
-			<version>0.7.1 <!-- subject to change, check sonatype repo --></version>
+			<version>0.8.0 <!-- subject to change, check sonatype repo --></version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
