@@ -10,7 +10,7 @@
 
 	<groupId>com.michelboudreau</groupId>
 	<artifactId>alternator</artifactId>
-	<version>0.8.1-SNAPSHOT</version>
+	<version>0.9.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Alternator</name>
@@ -22,7 +22,7 @@
 		<spring.framework.version>3.2.4.RELEASE</spring.framework.version>
 		<spring.security.version>3.1.0.M1</spring.security.version>
 		<slf4j.version>1.7.0</slf4j.version>
-		<aws.version>1.6.11</aws.version>
+		<aws.version>1.7.13</aws.version>
 		<jetty.version>8.1.12.v20130726</jetty.version>
 	</properties>
 

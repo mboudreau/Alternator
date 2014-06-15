@@ -84,7 +84,8 @@ import com.amazonaws.services.dynamodbv2.model.transform.UpdateTableResultJsonUn
 import com.amazonaws.transform.JsonErrorUnmarshaller;
 import com.amazonaws.transform.JsonUnmarshallerContext;
 import com.amazonaws.transform.Unmarshaller;
-import com.amazonaws.util.json.JSONObject;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,7 +95,7 @@ import java.util.List;
 
 public class AlternatorDBClientV2 extends AmazonWebServiceClient implements AmazonDynamoDB {
 	private static final Log log = LogFactory.getLog(AlternatorDBClientV2.class);
-	protected List<Unmarshaller<AmazonServiceException, JSONObject>> exceptionUnmarshallers;
+	protected List<JsonErrorUnmarshaller> exceptionUnmarshallers;
 
 	public AlternatorDBClientV2() {
 		this(new ClientConfiguration());
@@ -106,7 +107,7 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 	}
 
 	private void init() {
-		exceptionUnmarshallers = new ArrayList<Unmarshaller<AmazonServiceException, JSONObject>>();
+		exceptionUnmarshallers = new ArrayList<JsonErrorUnmarshaller>();
 		exceptionUnmarshallers.add(new LimitExceededExceptionUnmarshaller());
 		exceptionUnmarshallers.add(new InternalServerErrorExceptionUnmarshaller());
 		exceptionUnmarshallers.add(new ProvisionedThroughputExceededExceptionUnmarshaller());
@@ -121,6 +122,7 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 		requestHandler2s.addAll(chainFactory.newRequestHandlerChain("/com/amazonaws/services/dynamodb/request.handlers"));
 
 		clientConfiguration = new ClientConfiguration(clientConfiguration);
+                clientConfiguration.setSignerOverride("NoOpSignerType");
 		if (clientConfiguration.getRetryPolicy() == ClientConfiguration.DEFAULT_RETRY_POLICY) {
 			log.debug("Overriding default max error retry value to: " + 10);
 			clientConfiguration.setMaxErrorRetry(10);
@@ -404,8 +406,26 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 
     @Override
 	public void setEndpoint(String endpoint) throws IllegalArgumentException {
-		super.setEndpoint(endpoint, "dynamodb", null);
+            URI endpointUri;
+            try {
+                endpointUri = new URI(endpoint);
+            } catch (URISyntaxException ex) {
+                throw new IllegalArgumentException(String.format("Invalid endpoint: %s", endpoint), ex);
+            }
+            synchronized (this) {
+                this.endpoint = endpointUri;
+            }
 	}
+        
+        /**
+         * Internal method for implementing {@link #getServiceName()}. Method is
+         * protected by intent so peculiar subclass that don't follow the class
+         * naming convention can choose to return whatever service name as needed.
+         */
+    @Override
+        protected String getServiceNameIntern() {
+            return "dynamo";
+        }
 
     @Override
         public ListTablesResult listTables(Integer limit)
