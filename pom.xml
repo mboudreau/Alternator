@@ -23,7 +23,7 @@
 		<spring.security.version>3.1.0.M1</spring.security.version>
 		<slf4j.version>1.7.0</slf4j.version>
 		<aws.version>1.7.13</aws.version>
-		<jetty.version>8.1.12.v20130726</jetty.version>
+		<jetty.version>9.2.0.v20140526</jetty.version>
 	</properties>
 
 	<developers>
@@ -207,8 +207,13 @@
 
 		<!-- Jetty -->
 		<dependency>
-			<groupId>org.eclipse.jetty.aggregate</groupId>
-			<artifactId>jetty-all-server</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
 			<version>${jetty.version}</version>
 		</dependency>
 

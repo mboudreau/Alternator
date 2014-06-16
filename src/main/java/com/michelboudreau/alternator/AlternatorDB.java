@@ -1,7 +1,6 @@
 package com.michelboudreau.alternator;
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
@@ -39,11 +38,7 @@ public class AlternatorDB {
 		}
 
 		// Create server
-		this.server = new Server();
-		SelectChannelConnector connector = new SelectChannelConnector();
-		connector.setHost("localhost");
-		connector.setPort(port);
-		this.server.addConnector(connector);
+		this.server = new Server(port);
 
 		// Create context
 		this.context = new ServletContextHandler(this.server, "/", ServletContextHandler.SESSIONS);
