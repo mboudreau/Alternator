@@ -1,9 +1,11 @@
 Alternator - A DynamoDB Mock Server
 ==========
 
+**Special Thanks to [Rick Rutt](https://github.com/rrutt) who continually contributes to this project and keeps it going.**
+
 ( Works with V1 and V2 of DynamoDB )
 
-THIS IS A WORK IN PROGRESS - BETA VERSION - SOME THINGS ARE NOT 100%
+THIS IS A WORK IN PROGRESS - BETA VERSION - SOME THINGS ARE NOT 100% - YOU MIGHT WANT TO TRY [AMAZON'S OWN SOLUTION](http://aws.typepad.com/aws/2013/09/dynamodb-local-for-desktop-development.html) (not as easy to setup)
 
 FOR QUESTIONS ON ALTERNATOR, PLEASE POST ON [STACKOVERFLOW](http://stackoverflow.com/questions/tagged/alternator).
 
