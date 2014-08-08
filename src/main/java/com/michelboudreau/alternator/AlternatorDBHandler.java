@@ -681,7 +681,8 @@ public class AlternatorDBHandler {
 	public com.amazonaws.services.dynamodbv2.model.BatchGetItemResult batchGetItemV2(com.amazonaws.services.dynamodbv2.model.BatchGetItemRequest v2Request) {
         BatchGetItemRequest request = AlternatorDBApiVersion2Mapper.MapV2BatchGetItemRequestToV1(v2Request, this.tables);
         BatchGetItemResult result = batchGetItem(request);
-        return AlternatorDBApiVersion2Mapper.MapV1BatchGetItemResultToV2(result, this.tables);
+        final Set<String> requestedTables = v2Request.getRequestItems().keySet();
+        return AlternatorDBApiVersion2Mapper.MapV1BatchGetItemResultToV2(result, this.tables, requestedTables);
 	}
 
 	public synchronized BatchWriteItemResult batchWriteItem(BatchWriteItemRequest request) {
