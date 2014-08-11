@@ -39,9 +39,11 @@ import com.amazonaws.services.dynamodb.model.UpdateTableResult;
 import com.michelboudreau.alternator.models.Table;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class AlternatorDBApiVersion2Mapper
 {
@@ -682,26 +684,31 @@ public class AlternatorDBApiVersion2Mapper
 
     public static com.amazonaws.services.dynamodbv2.model.BatchGetItemResult MapV1BatchGetItemResultToV2(
             BatchGetItemResult result,
-            Map<String, Table> tables) {
+            Map<String, Table> tables,
+            Set<String> requestedTables) {
 
         Map<String, List<Map<String, com.amazonaws.services.dynamodbv2.model.AttributeValue>>> v2Responses =
                 new HashMap<String, List<Map<String, com.amazonaws.services.dynamodbv2.model.AttributeValue>>>();
         List<com.amazonaws.services.dynamodbv2.model.ConsumedCapacity> v2Capacities =
                 new ArrayList<com.amazonaws.services.dynamodbv2.model.ConsumedCapacity>();
-        for (String tableName : result.getResponses().keySet()) {
-            BatchResponse v1Response = result.getResponses().get(tableName);
-
+        final Map<String, BatchResponse> responses =
+                result.getResponses() != null? result.getResponses() : Collections.<String, BatchResponse>emptyMap();
+        for (String tableName : requestedTables) {
             List<Map<String, com.amazonaws.services.dynamodbv2.model.AttributeValue>> v2Items =
                     new ArrayList<Map<String, com.amazonaws.services.dynamodbv2.model.AttributeValue>>();
-            for (Map<String, AttributeValue> v1Item : v1Response.getItems()) {
-                v2Items.add(MapV1ItemToV2(v1Item));
-            }
 
-            v2Capacities.add(
-                new com.amazonaws.services.dynamodbv2.model.ConsumedCapacity()
-                    .withTableName(tableName)
-                    .withCapacityUnits(v1Response.getConsumedCapacityUnits())
-                    );
+            BatchResponse v1Response = responses.get(tableName);
+            if (v1Response != null) {
+                for (Map<String, AttributeValue> v1Item : v1Response.getItems()) {
+                    v2Items.add(MapV1ItemToV2(v1Item));
+                }
+
+                v2Capacities.add(
+                        new com.amazonaws.services.dynamodbv2.model.ConsumedCapacity()
+                                .withTableName(tableName)
+                                .withCapacityUnits(v1Response.getConsumedCapacityUnits())
+                );
+            }
             v2Responses.put(tableName, v2Items);
         }
 
