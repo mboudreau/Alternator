@@ -23,20 +23,8 @@ You can now add the dependency into your maven project with:
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<id>sonatype-nexus</id>
-			<url>https://oss.sonatype.org/content/groups/public</url>
-		</repository>
-	</repositories>
 
-To get started, you need a 2 things: AlternatorDB (the service) and AlternatorDBClient (The client that calls the service).  You can use DynamoDBMapper as long as the AlternatorDBClient is specified within it.  The AlternatorDBClient is needed to circumvent the authentication process to AWS.
+To get started, you need 2 things: AlternatorDB (the service) and AlternatorDBClient (The client that calls the service).  You can use DynamoDBMapper as long as the AlternatorDBClient is specified within it.  The AlternatorDBClient is needed to circumvent the authentication process to AWS.
 
 As a very simple example, you could do something like this in a test class:
 
@@ -97,7 +85,7 @@ The earlier version of the API is still supported but is _deprecated_.
 
 The Alternator emulator allows both versions of the DynamoDB API.
 
-**Note** however that only the features that were already available thru the original API version are supported.  
+**Note** However that only the features that were already available thru the original API version are supported.  
 When processing against the newer API protocol, Alternator simply maps the request objects to the original format and calls the pre-existing logic.
 It then maps the result to the new API protocol format.
 Any exceptions are also remapped from the **dynamodb** namespace to the **dynamodbv2** namespace.
@@ -142,7 +130,6 @@ The earlier **0.9.-pre.#** versions of the NPM package always assume the origina
 
     "dependencies": {
         "aws-sdk": "0.9.2-pre.3"
-
     },
 
 #### Revised Unit Test Example
