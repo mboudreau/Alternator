@@ -17,7 +17,7 @@ public class GetItemRequestJsonUnmarshaller implements Unmarshaller<GetItemReque
         int originalDepth = context.getCurrentDepth();
         int targetDepth = originalDepth + 1;
         boolean inArray = false;
-        JsonToken token = context.currentToken;
+        JsonToken token = context.getCurrentToken();
         if (token == null) token = context.nextToken();
 
         while (true) {

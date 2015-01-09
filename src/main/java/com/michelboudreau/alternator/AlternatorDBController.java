@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Controller
-@RequestMapping(value = "/", produces = "application/x-amz-json-1.0")
+@RequestMapping(value = "/")
 class AlternatorDBController {
 
     private ServletContext servletContext;
@@ -46,7 +46,7 @@ class AlternatorDBController {
         }
     }
 
-	@RequestMapping(method = RequestMethod.POST, consumes = "application/x-amz-json-1.0")
+	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<String> alternatorDBController(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			try {

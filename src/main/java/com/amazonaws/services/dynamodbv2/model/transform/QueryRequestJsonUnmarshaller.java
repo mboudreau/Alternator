@@ -18,7 +18,7 @@ public class QueryRequestJsonUnmarshaller implements Unmarshaller<QueryRequest, 
         int originalDepth = context.getCurrentDepth();
         int targetDepth = originalDepth + 1;
 
-        JsonToken token = context.currentToken;
+        JsonToken token = context.getCurrentToken();
         if (token == null) token = context.nextToken();
 
         while (true) {

@@ -8,3 +8,5 @@ target
 alternator*.db
 Alternator*.db
 nb-configuration.xml
+nbactions.xml
+*.log

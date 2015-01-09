@@ -2,6 +2,7 @@ package com.michelboudreau.alternator.parsers;
 
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.transform.JsonUnmarshallerContext;
+import com.amazonaws.transform.JsonUnmarshallerContextImpl;
 import com.amazonaws.transform.Unmarshaller;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -65,7 +66,7 @@ public class AmazonWebServiceRequestParser {
 			try {
 				JsonParser jsonParser = jsonFactory.createJsonParser(json);
 				try {
-					JsonUnmarshallerContext unmarshallerContext = new JsonUnmarshallerContext(jsonParser);
+					JsonUnmarshallerContext unmarshallerContext = new JsonUnmarshallerContextImpl (jsonParser);
 					T result = unmarshaller.unmarshall(unmarshallerContext);
 					return result;
 				} finally {
