@@ -1,3 +1,6 @@
+#  These are the steps needed to release Alternator to sonatype, this is to be done only by me (mboudreau) since I'm the only one with the sonatype credentials.
+#  DO NOT RUN THIS - YOU WON'T BE ABLE TO RELEASE
+
 mvn release:clean
 mvn release:prepare
 -- Change version of pom back 1, remove "SNAPSHOT"
