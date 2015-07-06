@@ -121,14 +121,18 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 		HandlerChainFactory chainFactory = new HandlerChainFactory();
 		requestHandler2s.addAll(chainFactory.newRequestHandlerChain("/com/amazonaws/services/dynamodb/request.handlers"));
 
-		clientConfiguration = new ClientConfiguration(clientConfiguration);
-                clientConfiguration.setSignerOverride("NoOpSignerType");
-		if (clientConfiguration.getRetryPolicy() == ClientConfiguration.DEFAULT_RETRY_POLICY) {
+		ClientConfiguration customClientConfiguration = new ClientConfiguration(clientConfiguration);
+                customClientConfiguration.setSignerOverride("NoOpSignerType");
+		if (customClientConfiguration.getRetryPolicy() == ClientConfiguration.DEFAULT_RETRY_POLICY) {
 			log.debug("Overriding default max error retry value to: " + 10);
-			clientConfiguration.setMaxErrorRetry(10);
+			customClientConfiguration.setMaxErrorRetry(10);
 		}
-		setConfiguration(clientConfiguration);
+		setCustomConfiguration(customClientConfiguration);
 	}
+
+        private void setCustomConfiguration(ClientConfiguration customClientConfiguration) {
+            this.clientConfiguration = customClientConfiguration;
+        }
 
     @Override
 	public ListTablesResult listTables(ListTablesRequest listTablesRequest)
@@ -416,7 +420,7 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
                 this.endpoint = endpointUri;
             }
 	}
-        
+
         /**
          * Internal method for implementing {@link #getServiceName()}. Method is
          * protected by intent so peculiar subclass that don't follow the class

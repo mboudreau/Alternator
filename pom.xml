@@ -18,8 +18,9 @@
 	<url>https://github.com/mboudreau/Alternator/</url>
 
 	<properties>
+		<additionalparam>-Xdoclint:none</additionalparam>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<aws.version>1.9.13</aws.version>
+		<aws.version>1.10.2</aws.version>
 		<jetty.version>9.2.0.v20140526</jetty.version>
 		<slf4j.version>1.7.0</slf4j.version>
 		<spring.framework.version>3.0.7.RELEASE</spring.framework.version>
