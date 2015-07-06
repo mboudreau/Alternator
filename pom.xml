@@ -18,6 +18,7 @@
 	<url>https://github.com/mboudreau/Alternator/</url>
 
 	<properties>
+		<additionalparam>-Xdoclint:none</additionalparam>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<aws.version>1.9.13</aws.version>
 		<jetty.version>9.2.0.v20140526</jetty.version>
