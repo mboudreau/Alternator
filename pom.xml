@@ -18,6 +18,8 @@
 	<url>https://github.com/mboudreau/Alternator/</url>
 
 	<properties>
+		<!-- http://stackoverflow.com/questions/18734211/cannot-overwrite-pom-maven-surefire-plugin-from-command-line -->
+		<skipUnitTests>true</skipUnitTests>
 		<additionalparam>-Xdoclint:none</additionalparam>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<aws.version>1.10.5.1</aws.version>
@@ -119,7 +121,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.13</version>
 				<configuration>
-					<skipTests>true</skipTests>
+					<skipTests>${skipUnitTests}</skipTests>
 					<includes>
 						<include>**/*TestSuite.java</include>
 					</includes>

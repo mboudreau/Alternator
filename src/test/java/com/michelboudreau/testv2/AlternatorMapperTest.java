@@ -1,5 +1,6 @@
 package com.michelboudreau.testv2;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
@@ -76,11 +77,17 @@ public class AlternatorMapperTest extends AlternatorTest
     @Test
     public void putItemWithHashKeyOverwriteItem()
     {
-		try {
+        try {
             createTable(hashTableName, createStringAttributeDefinition("code"));
-		} catch (ResourceInUseException riue) {
-			// The table is already created, do nothing
-		}
+        } catch (ResourceInUseException riue) {
+            System.out.printf("Caught expected exception: %s = %s",
+                    riue.getClass().getSimpleName(), riue.getMessage());
+        } catch (AmazonServiceException ase) {
+            System.out.printf("Caught expected exception: %s = %s",
+                    ase.getClass().getSimpleName(), ase.getMessage());
+            Assert.assertEquals("Wrong Error Code in AmazonServiceException.",
+                    "ResourceInUseException", ase.getErrorCode());
+        }
 
         TestClassWithHashKey value2a = new TestClassWithHashKey();
         value2a.setCode("hash2");
@@ -117,11 +124,17 @@ public class AlternatorMapperTest extends AlternatorTest
     @Test
     public void putItemWithHashKeyAndRangeKeyOverwriteItem()
     {
-		try {
+        try {
             createTable(hashRangeTableName, createStringAttributeDefinition("hashCode"), createStringAttributeDefinition("rangeCode"));
-		} catch (ResourceInUseException riue) {
-			// The table is already created
-		}
+        } catch (ResourceInUseException riue) {
+            System.out.printf("Caught expected exception: %s = %s",
+                    riue.getClass().getSimpleName(), riue.getMessage());
+        } catch (AmazonServiceException ase) {
+            System.out.printf("Caught expected exception: %s = %s",
+                    ase.getClass().getSimpleName(), ase.getMessage());
+            Assert.assertEquals("Wrong Error Code in AmazonServiceException.",
+                    "ResourceInUseException", ase.getErrorCode());
+        }
 
         TestClassWithHashRangeKey value2a = new TestClassWithHashRangeKey();
         value2a.setHashCode("hash2");

@@ -1,5 +1,6 @@
 package com.michelboudreau.testv2;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
@@ -52,7 +53,13 @@ public class AlternatorScanTest extends AlternatorTest {
 		try {
 			getClient().deleteTable(del);
 		} catch (ResourceNotFoundException rnfe) {
-
+                        System.out.printf("Caught expected exception: %s = %s",
+                                rnfe.getClass().getSimpleName(), rnfe.getMessage());
+		} catch (AmazonServiceException ase) {
+                        System.out.printf("Caught expected exception: %s = %s",
+                                ase.getClass().getSimpleName(), ase.getMessage());
+                        Assert.assertEquals("Wrong Error Code in AmazonServiceException.",
+                                "ResourceNotFoundException", ase.getErrorCode());
 		}
     }
 
