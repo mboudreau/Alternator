@@ -326,6 +326,13 @@ public class AlternatorItemTest extends AlternatorTest {
 			client.putItem(new PutItemRequest(tableName, item).withExpected(expectedMap));
 			Assert.assertTrue(false);// Should have thrown a ConditionalCheckFailedException
 		} catch (ConditionalCheckFailedException ccfe) {
+                        System.out.printf("Caught expected exception: %s = %s",
+                                ccfe.getClass().getSimpleName(), ccfe.getMessage());
+		} catch (AmazonServiceException ase) {
+                        System.out.printf("Caught expected exception: %s = %s",
+                                ase.getClass().getSimpleName(), ase.getMessage());
+                        Assert.assertEquals("Wrong Error Code in AmazonServiceException.",
+                                "ConditionalCheckFailedException", ase.getErrorCode());
 		}
 	}
 

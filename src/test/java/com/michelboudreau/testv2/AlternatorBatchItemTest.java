@@ -1,5 +1,6 @@
 package com.michelboudreau.testv2;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.BatchGetItemRequest;
@@ -282,8 +283,17 @@ public class AlternatorBatchItemTest extends AlternatorTest {
         try {
             result = getClient().batchWriteItem(batchWriteItemRequest);
         } catch (ResourceNotFoundException ex) {
+            System.out.printf("Caught expected exception: %s = %s",
+                    ex.getClass().getSimpleName(), ex.getMessage());
             exceptionMessage = ex.getMessage();
+        } catch (AmazonServiceException ase) {
+            System.out.printf("Caught expected exception: %s = %s",
+                    ase.getClass().getSimpleName(), ase.getMessage());
+            Assert.assertEquals("Wrong Error Code in AmazonServiceException.",
+                    "ResourceNotFoundException", ase.getErrorCode());
+            exceptionMessage = ase.getMessage();
         }
+
         // Question: Is this the actual behavior of DynamoDB?
         Assert.assertNotNull("Expected an exception.", exceptionMessage);
         Assert.assertThat("Incorrect exception message.", exceptionMessage,
