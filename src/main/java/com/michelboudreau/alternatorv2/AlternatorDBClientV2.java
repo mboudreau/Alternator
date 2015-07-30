@@ -53,7 +53,6 @@ import com.amazonaws.services.dynamodbv2.model.transform.BatchGetItemRequestMars
 import com.amazonaws.services.dynamodbv2.model.transform.BatchGetItemResultJsonUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.BatchWriteItemRequestMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.BatchWriteItemResultJsonUnmarshaller;
-import com.amazonaws.services.dynamodbv2.model.transform.ConditionalCheckFailedExceptionUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.CreateTableRequestMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.CreateTableResultJsonUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.DeleteItemRequestMarshaller;
@@ -64,17 +63,12 @@ import com.amazonaws.services.dynamodbv2.model.transform.DescribeTableRequestMar
 import com.amazonaws.services.dynamodbv2.model.transform.DescribeTableResultJsonUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.GetItemRequestMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.GetItemResultJsonUnmarshaller;
-import com.amazonaws.services.dynamodbv2.model.transform.InternalServerErrorExceptionUnmarshaller;
-import com.amazonaws.services.dynamodbv2.model.transform.LimitExceededExceptionUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.ListTablesRequestMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.ListTablesResultJsonUnmarshaller;
-import com.amazonaws.services.dynamodbv2.model.transform.ProvisionedThroughputExceededExceptionUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.PutItemRequestMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.PutItemResultJsonUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.QueryRequestMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.QueryResultJsonUnmarshaller;
-import com.amazonaws.services.dynamodbv2.model.transform.ResourceInUseExceptionUnmarshaller;
-import com.amazonaws.services.dynamodbv2.model.transform.ResourceNotFoundExceptionUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.ScanRequestMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.ScanResultJsonUnmarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.UpdateItemRequestMarshaller;
@@ -108,12 +102,6 @@ public class AlternatorDBClientV2 extends AmazonWebServiceClient implements Amaz
 
 	private void init() {
 		exceptionUnmarshallers = new ArrayList<JsonErrorUnmarshaller>();
-		exceptionUnmarshallers.add(new LimitExceededExceptionUnmarshaller());
-		exceptionUnmarshallers.add(new InternalServerErrorExceptionUnmarshaller());
-		exceptionUnmarshallers.add(new ProvisionedThroughputExceededExceptionUnmarshaller());
-		exceptionUnmarshallers.add(new ResourceInUseExceptionUnmarshaller());
-		exceptionUnmarshallers.add(new ConditionalCheckFailedExceptionUnmarshaller());
-		exceptionUnmarshallers.add(new ResourceNotFoundExceptionUnmarshaller());
 
 		exceptionUnmarshallers.add(new JsonErrorUnmarshaller());
 		setEndpoint("http://localhost:9090/");
