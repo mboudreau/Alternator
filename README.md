@@ -80,7 +80,7 @@ Then you only need to create the AlternatorDB service in your test and you're re
 
 ### Running Alternator's own JUnit tests
 
-_This note applies to any developer working on a _clone_ of the Alternator GitHub project source code._
+_This note applies to any developer working on a clone of the Alternator GitHub project source code._
 
 The Maven **pom.xml** for Alternator declares the following property with default of _true_:
 
