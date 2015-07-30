@@ -78,6 +78,26 @@ Of course, it's not always possible to just create the client, mapper and servic
 
 Then you only need to create the AlternatorDB service in your test and you're ready to test out your code.  Hope this helps out.  Please feel free to contribute or suggest ways to make the project better.
 
+### Running Alternator's own JUnit tests
+
+_This note applies to any developer working on a _clone_ of the Alternator GitHub project source code._
+
+The Maven **pom.xml** for Alternator declares the following property with default of _true_:
+
+    <skipUnitTests>true</skipUnitTests>
+
+It then references it in the entry for **maven-surefire-plugin**
+
+    <skipTests>${skipUnitTests}</skipTests>
+
+This means the following Maven command will skip tests by default, speeding up a local compile and install cycle for your local **.m2** repository:
+
+    mvn clean install
+
+To actually run the JUnit tests, use this Maven command:
+
+    mvn verify -DskipUnitTests=false
+
 ## Dual API Version Support
 
 Amazon created a new specification for the DynamoDB API that is _not_ backward compatible with the earlier version.
