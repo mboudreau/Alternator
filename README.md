@@ -19,7 +19,7 @@ You can now add the dependency into your maven project with:
 		<dependency>
 			<groupId>com.michelboudreau</groupId>
 			<artifactId>alternator</artifactId>
-			<version>0.11.0 <!-- subject to change, check sonatype repo --></version>
+			<version>0.12.0 <!-- subject to change, check sonatype repo --></version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -78,25 +78,9 @@ Of course, it's not always possible to just create the client, mapper and servic
 
 Then you only need to create the AlternatorDB service in your test and you're ready to test out your code.  Hope this helps out.  Please feel free to contribute or suggest ways to make the project better.
 
-### Running Alternator's own JUnit tests
+## Contributing
 
-_This note applies to any developer working on a clone of the Alternator GitHub project source code._
-
-The Maven **pom.xml** for Alternator declares the following property with default of _true_:
-
-    <skipUnitTests>true</skipUnitTests>
-
-It then references it in the entry for **maven-surefire-plugin**
-
-    <skipTests>${skipUnitTests}</skipTests>
-
-This means the following Maven command will skip tests by default, speeding up a local compile and install cycle for your local **.m2** repository:
-
-    mvn clean install
-
-To actually run the JUnit tests, use this Maven command:
-
-    mvn verify -DskipUnitTests=false
+Anyone is able to contribute to this project and is encouraged to do so.  For maven to be able to compile and run the unit tests however, you'll need to install maven2 (version 3 doesn't work) as well as Oracle's Java (not OpenJDK or any other open java projects).  After these are installed, you should be able to easily build the project.
 
 ## Dual API Version Support
 
