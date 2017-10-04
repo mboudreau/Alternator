@@ -1,3 +1,6 @@
+# DEPRECATED & ABANDONED
+This project has been abandoned in favor of Amazon's own DynamoDB testing solution, [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html), where you can run DynamoDB on your local computer to imitate the real deal for testing purposes.  If you're using Docker (you really should), then I [recommend using this docker image](https://hub.docker.com/r/cnadiminti/dynamodb-local/) in your docker-compose file to easily initiate the DB locally as part of your stack creation.
+
 Alternator - A DynamoDB Mock Server
 ==========
 
@@ -6,8 +9,6 @@ Alternator - A DynamoDB Mock Server
 ( Works with V1 and V2 of DynamoDB )
 
 THIS IS A WORK IN PROGRESS - BETA VERSION - SOME THINGS ARE NOT 100% - YOU MIGHT WANT TO TRY [AMAZON'S OWN SOLUTION](http://aws.typepad.com/aws/2013/09/dynamodb-local-for-desktop-development.html) (not as easy to setup)
-
-FOR QUESTIONS ON ALTERNATOR, PLEASE POST ON [STACKOVERFLOW](http://stackoverflow.com/questions/tagged/alternator).
 
 While working on a startup called Tivity, my co-worker, [Thomas](https://github.com/tnbredillet), and I found that testing simple functions with DynamoDB was a pain because it would take time to create testing tables and tear them back down.  This would slow down our BDD approach to this project.  Another nuisance was the cost that would incur when using DynamoDB from our local webapp or that we would hit our throughput limit and cause an error.  Of course, this also means that you couldn't code things on the road because you needed an internet connect for Amazon Web Services.
 
