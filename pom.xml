@@ -25,7 +25,7 @@
 		<aws.version>1.10.5.1</aws.version>
 		<jetty.version>9.2.0.v20140526</jetty.version>
 		<slf4j.version>1.7.0</slf4j.version>
-		<spring.framework.version>3.0.7.RELEASE</spring.framework.version>
+		<spring.framework.version>5.2.20.RELEASE</spring.framework.version>
 	</properties>
 
 	<developers>
